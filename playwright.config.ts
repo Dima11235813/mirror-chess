@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: 'e2e',
@@ -10,12 +10,11 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    // Add more if you want: firefox, webkit
   ],
   webServer: {
     command: 'npm run preview',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000
-  }
-});
+    timeout: 30_000,
+  },
+})

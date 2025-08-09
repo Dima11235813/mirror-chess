@@ -28,15 +28,17 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
         const moveToHere = legal.find(m => sameCoord(m.to, c))
         const hint = !!moveToHere
         const isCapture = hint && !!piece && piece.color !== state.turn
+        const sq = algebraic(c)
         return (
           <button
             key={i}
             className={`sq ${isLight ? 'light' : 'dark'} ${isSelected ? 'sel' : ''}`}
             onClick={() => clickSquare(c)}
-            aria-label={`Square ${algebraic(c)} ${piece ? pieceToGlyph(piece) : ''}`}
+            aria-label={`Square ${sq} ${piece ? pieceToGlyph(piece) : ''}`}
+            data-testid={`square-${sq}`}
           >
             <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
-            {hint && <div className={`hint ${isCapture ? 'cap' : ''}`} />}
+            {hint && <div className={`hint ${isCapture ? 'cap' : ''}`} data-testid={`hint-${sq}`} />}
           </button>
         )
       })}

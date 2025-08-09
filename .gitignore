@@ -44,3 +44,13 @@ coverage/
 *.local
 *.log
 *.lock
+
+# Playwright artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+trace.zip
+
+# Optional: VS Code Playwright extension
+.vscode/test-results/
