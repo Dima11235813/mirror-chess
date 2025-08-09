@@ -1,0 +1,14 @@
+:root { --cell: min(10vw, 56px); }
+* { box-sizing: border-box; }
+body, html, #root { height: 100%; margin: 0; }
+.app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
+.board { width: calc(var(--cell) * 8); height: calc(var(--cell) * 8); margin: 12px auto; display: grid; grid-template-columns: repeat(8, 1fr); border: 2px solid #333; border-radius: 12px; overflow: hidden; }
+.sq { position: relative; width: 100%; height: var(--cell); border: 0; display: grid; place-items: center; font-size: calc(var(--cell) * 0.6); }
+.sq.light { background: #f0d9b5; }
+.sq.dark { background: #b58863; }
+.sq.sel { outline: 3px solid #2dd4bf; z-index: 1; }
+.glyph { pointer-events: none; }
+.hint { position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(45, 212, 191, 0.6); }
+.footer { text-align: center; padding-bottom: env(safe-area-inset-bottom); }
+
+
