@@ -6,7 +6,7 @@ import type { Coord } from './types'
 const c = (f: number, r: number): Coord => ({ f, r })
 
 describe('mirror portal (horizontal)', () => {
-  it('queen can portal horizontally to h3 but not diagonally to h7 (non-portal)', () => {
+  it('queen can portal horizontally to h3 and diagonally to h7 via seam wrap', () => {
     const s = initialPosition()
     const s2 = { ...s, board: s.board.slice() }
     // Clear rank r=2 (3rd rank) and place white queen at d3 (f=3,r=2)
@@ -19,9 +19,9 @@ describe('mirror portal (horizontal)', () => {
 
     const moves = legalMovesFor(s2, c(3,2))
     const toH3 = moves.find(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 2)
-    const toH7 = moves.find(m => m.to.f === 7 && m.to.r === 6)
+    const toH7 = moves.find(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 6)
     expect(toH3).toBeTruthy()
-    expect(toH7).toBeFalsy()
+    expect(toH7).toBeTruthy()
   })
 
   it('spec loader: black queen c6 with pawns d6,g6 can wrap-left to h6 (left is clear); cannot wrap-right due to g6', () => {

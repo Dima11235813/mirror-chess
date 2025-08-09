@@ -17,7 +17,12 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
   switch (piece.kind) {
     case 'P': pushAll(acc, pawnMoves(state, from, piece)); break
     case 'N': pushAll(acc, knightMoves(state, from, piece)); break
-    case 'B': pushAll(acc, slideMoves(state, from, piece, [ [1,1], [1,-1], [-1,1], [-1,-1] ])); break
+    case 'B':
+      // Standard bishop slides
+      pushAll(acc, slideMoves(state, from, piece, [ [1,1], [1,-1], [-1,1], [-1,-1] ]))
+      // Diagonal portal wrap (left/right seams) per tri-board model
+      pushAll(acc, diagonalPortalWrap(state, from, piece))
+      break
     case 'R':
       // Standard rook slides
       pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1] ]))
@@ -29,6 +34,8 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
       pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1] ]))
       // Horizontal portal wrap (left/right walls only)
       pushAll(acc, horizontalPortalWrap(state, from, piece))
+      // Diagonal portal wrap as well
+      pushAll(acc, diagonalPortalWrap(state, from, piece))
       break
     case 'K': pushAll(acc, kingMoves(state, from, piece)); break
   }
@@ -40,9 +47,9 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
       if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
     }
   }
-  // Generic mirror for all other pieces: may move to the same-rank opposite file
-  // if the path across the rank between `from` and its mirror square is clear.
-  if (piece.kind !== 'N') {
+  // Generic same-rank mirror for non-knights except bishops:
+  // bishops use diagonal portal wrap instead of horizontal mirror.
+  if (piece.kind !== 'N' && piece.kind !== 'B') {
     const mirror = mirrorFile(from)
     if (!sameSquare(mirror, from) && insideBoard(mirror)) {
       if (rankPathClear(state.board, from, mirror)) {
@@ -157,6 +164,52 @@ function horizontalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
       if (!t) { res.push({ from, to, special: 'mirror' }); wf += df; continue }
       if (t.color !== p.color) res.push({ from, to, special: 'mirror' })
       break
+    }
+  }
+  return res
+}
+
+/**
+ * Diagonal portal wrap for sliders (B, Q):
+ * Walk a diagonal ray from `from` in each diagonal direction. If the path to the
+ * left/right seam is clear (no blockers before stepping out of file bounds),
+ * allow a single wrap across the seam and continue the ray on the wrapped side.
+ * All squares reached after the wrap are emitted with special: 'mirror'.
+ */
+function diagonalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
+  if (p.kind !== 'B' && p.kind !== 'Q') return []
+  const res: Move[] = []
+  const board = state.board
+  const dirs: ReadonlyArray<[number, number]> = [ [1,1], [1,-1], [-1,1], [-1,-1] ]
+  for (const [df, dr] of dirs) {
+    let f = from.f + df
+    let r = from.r + dr
+    // Walk within center board until hitting a blocker or stepping out of file bounds.
+    while (r >= 0 && r < 8) {
+      // If we step out of file bounds, attempt a single wrap.
+      if (f < 0 || f > 7) {
+        // Determine wrapped file after crossing seam once.
+        let wf = f < 0 ? f + 8 : f - 8
+        // Only one seam-cross allowed; if we would step out again immediately, skip.
+        if (wf < 0 || wf > 7) break
+        // Continue the ray after wrap, emitting mirror moves using center occupancy.
+        let tf = wf
+        let tr = r
+        while (tf >= 0 && tf < 8 && tr >= 0 && tr < 8) {
+          const to: Coord = { f: tf, r: tr }
+          const t = board[toIndex(to)]
+          if (!t) { res.push({ from, to, special: 'mirror' }); tf += df; tr += dr; continue }
+          if (t.color !== p.color) res.push({ from, to, special: 'mirror' })
+          break
+        }
+        break
+      }
+      // In bounds: check for blocker before reaching the seam.
+      const to: Coord = { f, r }
+      const t = board[toIndex(to)]
+      if (t) break
+      f += df
+      r += dr
     }
   }
   return res

@@ -54,14 +54,16 @@ describe('mirror rule', () => {
   })
 
   it('bishop can mirror across empty rank path', () => {
-    const s = initialPosition()
-    const s2 = { ...s, board: s.board.slice() }
-    // Clear rank r=2 and place a white bishop at c3 (f=2,r=2)
-    for (let f = 0; f < 8; f++) s2.board[2 * 8 + f] = null
-    s2.board[2 * 8 + 2] = { kind: 'B', color: 'white' }
-    const moves = legalMovesFor(s2, c(2,2))
-    const toF3 = moves.find(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 2)
-    expect(toF3).toBeTruthy()
+    // Updated: bishops do diagonal seam-portal, not same-rank mirror.
+    // Place a white bishop at c1 on an otherwise empty board; expect seam-wrapped squares like h4.
+    const s0 = initialPosition()
+    const s = { ...s0, board: s0.board.slice() }
+    for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) s.board[r * 8 + f] = null
+    s.board[0 * 8 + 2] = { kind: 'B', color: 'white' } // c1
+    const moves = legalMovesFor(s, c(2, 0))
+    // h4 (f=7,r=3) is only reachable via diagonal portal wrap
+    const h4 = moves.find(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 3)
+    expect(h4).toBeTruthy()
   })
 
   it('king mirrors to opposite file if destination not own piece', () => {
