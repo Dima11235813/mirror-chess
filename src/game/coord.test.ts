@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mirrorFile, algebraic } from '../src/game/coord'
+import { mirrorFile, algebraic } from './coord'
 
 describe('coord utils', () => {
   it('mirrors files correctly', () => {

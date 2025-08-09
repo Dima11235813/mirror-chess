@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { initialPosition } from '../src/game/setup'
-import { legalMovesFor } from '../src/game/moves'
-import type { Coord } from '../src/game/types'
+import { initialPosition } from './setup'
+import { legalMovesFor } from './moves'
+import type { Coord } from './types'
 
 const c = (f: number, r: number): Coord => ({ f, r })
 

@@ -24,15 +24,24 @@ describe('mirror portal (horizontal)', () => {
     expect(toH7).toBeFalsy()
   })
 
-  it('spec loader: black queen c6 with pawns d6,g6 allows mirror extension to h6? (should be blocked)', () => {
+  it('spec loader: black queen c6 with pawns d6,g6 can wrap-left to h6 (left is clear); cannot wrap-right due to g6', () => {
     // Arrange the exact position via pieces spec
     const s = fromPiecesSpec('b:Qc6,Pd6,Pg6', 'black')
     const moves = legalMovesFor(s, c(2,5)) // c6 is (f=2,r=5)
-    // Cannot move to d6 (own pawn); cannot mirror-through to h6 because d6 blocks the path
+    // Cannot move to d6 (own pawn); wrap-left to h6 is allowed because left to wall is clear
     const toD6 = moves.find(m => m.to.f === 3 && m.to.r === 5)
     const toH6 = moves.find(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 5)
     expect(toD6).toBeFalsy()
-    expect(toH6).toBeFalsy()
+    expect(toH6).toBeTruthy()
+    // Can slide to b6 and a6 normally
+    expect(moves.some(m => m.to.f === 1 && m.to.r === 5)).toBe(true)
+    expect(moves.some(m => m.to.f === 0 && m.to.r === 5)).toBe(true)
+    // Wrap-right from c6 is blocked immediately by d6/g6 own pawns, so no right-wrap squares should appear
+    const toA6 = moves.find(m => m.special === 'mirror' && m.to.f === 0 && m.to.r === 5)
+    expect(toA6).toBeFalsy()
+    // Ensure it does not include any right-wrap markers (e.g., a6 due to right wrap)
+    const toG6 = moves.find(m => m.to.f === 6 && m.to.r === 5)
+    expect(toG6).toBeFalsy()
   })
 
   it('knight at h3 portals to a5 (not a3)', () => {
@@ -51,7 +60,7 @@ describe('mirror portal (horizontal)', () => {
     expect(toA3).toBeFalsy()
   })
 
-  it('black queen at d6 cannot portal past own pawn at g6 to h6', () => {
+  it('black queen at d6 cannot wrap-right past own pawn at g6; can wrap-left to h6 if clear', () => {
     const s = initialPosition()
     const s2 = { ...s, board: s.board.slice(), turn: 'black' as const }
     // Clear rank 6 (r=5) then place black queen at d6 (f=3,r=5) and own pawn at g6 (f=6,r=5)
@@ -64,7 +73,8 @@ describe('mirror portal (horizontal)', () => {
     const toG6 = moves.find(m => m.to.f === 6 && m.to.r === 5)
     // Should not be able to jump over own pawn via portal extension; may not capture own pawn either
     expect(toG6).toBeFalsy()
-    expect(toH6).toBeFalsy()
+    // Left wrap should be available since left is clear: from d6 (f=3) going left to a-file is empty → wrap-left lands at h6
+    expect(toH6).toBeTruthy()
   })
 })
 

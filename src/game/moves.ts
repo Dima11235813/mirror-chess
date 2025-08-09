@@ -18,42 +18,29 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
     case 'P': pushAll(acc, pawnMoves(state, from, piece)); break
     case 'N': pushAll(acc, knightMoves(state, from, piece)); break
     case 'B': pushAll(acc, slideMoves(state, from, piece, [ [1,1], [1,-1], [-1,1], [-1,-1] ])); break
-    case 'R': pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1] ])); break
-    case 'Q': pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1] ])); break
+    case 'R':
+      // Standard rook slides
+      pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1] ]))
+      // Horizontal portal wrap (left/right walls only)
+      pushAll(acc, horizontalPortalWrap(state, from, piece))
+      break
+    case 'Q':
+      // Standard queen slides
+      pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1] ]))
+      // Horizontal portal wrap (left/right walls only)
+      pushAll(acc, horizontalPortalWrap(state, from, piece))
+      break
     case 'K': pushAll(acc, kingMoves(state, from, piece)); break
   }
-  // Mirror move(s) — strictly horizontal portal only
-  const mirror = mirrorFile(from)
-  if (!sameSquare(mirror, from)) {
-    const pathClear = rankPathClear(state.board, from, mirror)
-    const target = state.board[toIndex(mirror)]
-    const isKnight = piece.kind === 'N'
-
-    if (isKnight) {
-      // Knight portal: ignore blockers and mirror-square occupancy; land on mirror file with ±2 ranks
+  // Knight portal — keep special behavior independent of slider wrap
+  if (piece.kind === 'N') {
+    const mirror = mirrorFile(from)
+    if (!sameSquare(mirror, from)) {
       for (const dr of [-2, 2] as const) {
         const to: Coord = { f: mirror.f, r: from.r + dr }
         if (!insideBoard(to)) continue
         const t = state.board[toIndex(to)]
         if (!t || t.color !== piece.color) acc.push({ from, to, special: 'mirror' })
-      }
-    } else if (pathClear) {
-      // Non-knights: must have clear path and legal mirror-square occupancy
-      const canCaptureOrEmpty = !target || target.color !== piece.color
-      if (canCaptureOrEmpty) {
-        acc.push({ from, to: mirror, special: 'mirror' })
-        // Extended mirror-through for horizontal sliders (R, Q) when the mirror square is empty
-        if ((piece.kind === 'R' || piece.kind === 'Q') && !target) {
-          const dir = mirror.f < from.f ? -1 : 1 // move away from the center on the opposite half
-          let f = mirror.f + dir
-          while (f >= 0 && f < 8) {
-            const to: Coord = { f, r: from.r }
-            const t = state.board[toIndex(to)]
-            if (!t) { acc.push({ from, to, special: 'mirror' }); f += dir; continue }
-            if (t.color !== piece.color) acc.push({ from, to, special: 'mirror' })
-            break
-          }
-        }
       }
     }
   }
@@ -131,6 +118,41 @@ function rankPathClear(board: Board, a: Coord, b: Coord): boolean {
   const hi = Math.max(a.f, b.f) - 1
   for (let f = lo; f <= hi; f++) if (board[a.r * 8 + f]) return false
   return true
+}
+
+/**
+ * Horizontal portal wrap for sliders (R, Q):
+ * If a piece can slide horizontally all the way to a wall without encountering a blocker
+ * in that direction, it may "portal" to the opposite wall and continue sliding in the
+ * same direction. All squares reached after the wrap are emitted as moves with
+ * special: 'mirror'. At most one wrap is allowed per move generation.
+ */
+function horizontalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
+  if (p.kind !== 'R' && p.kind !== 'Q') return []
+  const res: Move[] = []
+  const board = state.board
+  for (const df of [-1, 1] as const) {
+    // Walk towards the wall
+    let f = from.f + df
+    let blocked = false
+    while (f >= 0 && f < 8) {
+      const t = board[from.r * 8 + f]
+      if (t) { blocked = true; break }
+      f += df
+    }
+    if (blocked) continue
+    // We hit the wall (stepped outside). Wrap once.
+    const wrappedStartF = df === -1 ? 7 : 0
+    let wf = wrappedStartF
+    while (wf >= 0 && wf < 8) {
+      const to: Coord = { f: wf, r: from.r }
+      const t = board[toIndex(to)]
+      if (!t) { res.push({ from, to, special: 'mirror' }); wf += df; continue }
+      if (t.color !== p.color) res.push({ from, to, special: 'mirror' })
+      break
+    }
+  }
+  return res
 }
 
 

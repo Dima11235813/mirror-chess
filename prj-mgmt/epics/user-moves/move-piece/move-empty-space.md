@@ -11,7 +11,7 @@ As a user, I want to be able to move an empty space on the board so that I can r
 
 The left and right walls are portals. Pieces that move left or right and hit the wall should appear on the opposite wall and continue moving in the same direction, using usual chess movement rules.
 
-## Bug
+## RESOLVED: Bug
 
 ![alt text](image.png)
 

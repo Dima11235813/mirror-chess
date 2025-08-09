@@ -59,6 +59,9 @@
 
 ## 6) Testing Requirements
 - Use `vitest`.
+- **Test file placement:** unit tests must be `.test.ts` files and be colocated next to the file under test (e.g., `src/game/moves.test.ts`). End-to-end tests must be `.spec.ts` files and live under the user story path in `prj-mgmt/...` or the `e2e/` directory when story-scoped.
+- **Shared test fixtures:** keep reusable board setups/mocks in `tests/shared/` and import from both unit and e2e tests when possible.
+- **Bug fixes policy:** when fixing a bug, add at least one unit test and one e2e test that reproduces the bug and proves the fix. Keep them targeted to the specific scenario.
 - **Mandated coverage for new/changed code:** function-level happy path + edge cases.
 - Each function with inputs of shape `A | B | ...` gets tests for **every variant**.
 - Write at least one **negative test** per feature (illegal move rejected, blocked path, etc.).
