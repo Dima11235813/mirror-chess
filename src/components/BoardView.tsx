@@ -39,6 +39,12 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
           >
             <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
             {hint && <div className={`hint ${isCapture ? 'cap' : ''}`} data-testid={`hint-${sq}`} />}
+            {c.r === 0 && (
+              <span className="coordLabel file" aria-hidden="true">{fileLabel(c.f)}</span>
+            )}
+            {c.f === 0 && (
+              <span className="coordLabel rank" aria-hidden="true">{rankLabel(c.r)}</span>
+            )}
           </button>
         )
       })}
@@ -59,5 +65,14 @@ function pieceToGlyph(p: Piece): string {
 }
 
 function coordIndex(c: Coord): number { return c.r * 8 + c.f }
+
+function fileLabel(file: number): string {
+  return String.fromCharCode('A'.charCodeAt(0) + file)
+}
+
+function rankLabel(rank: number): string {
+  // ranks are 1..8 from white's perspective
+  return String(rank + 1)
+}
 
 

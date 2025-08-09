@@ -43,12 +43,14 @@ describe('mirror rule', () => {
     expect(mirror).toBeUndefined()
   })
 
-  it('knight portal from b1 lands on g3 (not g1)', () => {
+  it('knight mirror from b1 lands on g1 (same rank)', () => {
     const s = initialPosition()
     const s2 = { ...s, board: s.board.slice() }
+    // clear g1 for mirror capture/landing validation
+    s2.board[0 * 8 + 6] = null
     const moves = legalMovesFor(s2, c(1,0)) // white knight at b1
     const mirror = moves.find(m => m.special === 'mirror')
-    expect(mirror?.to).toEqual(c(6,2)) // portalized to g3
+    expect(mirror?.to).toEqual(c(6,0)) // mirrored to g1
   })
 })
 

@@ -1,5 +1,7 @@
 # Move Empty Space Feature
 
+Feature requirements involve implementing this algorithm for moving an empty space on a chess board, including handling mirror movements through left and right walls.
+
 ## Regular Chess Move
 
 As a user, I want to be able to move an empty space on the board so that I can rearrange pieces.
@@ -17,7 +19,7 @@ The left and right walls are portals. Pieces that move left or right and hit the
 
 The queen on c6 should be able to move to h6, due to how the mirror left/right movement works. The queen should be able to move to the left until it hits the portal on the left wall and then appear on the right wall and continue moving left until it hits h6.
 
-## Bug
+## RESOLVED: Bug
 
 ![alt text](image-1.png)
 

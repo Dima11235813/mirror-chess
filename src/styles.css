@@ -2,7 +2,7 @@
 * { box-sizing: border-box; }
 body, html, #root { height: 100%; margin: 0; }
 .app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
-.board { width: calc(var(--cell) * 8); height: calc(var(--cell) * 8); margin: 12px auto; display: grid; grid-template-columns: repeat(8, 1fr); border: 2px solid #333; border-radius: 12px; overflow: hidden; }
+.board { width: calc(var(--cell) * 8); height: calc(var(--cell) * 8); margin: 12px auto; display: grid; grid-template-columns: repeat(8, 1fr); border: 2px solid #333; border-radius: 12px; overflow: hidden; position: relative; }
 .sq { position: relative; width: 100%; height: var(--cell); border: 0; display: grid; place-items: center; font-size: calc(var(--cell) * 0.6); }
 .sq.light { background: #f0d9b5; }
 .sq.dark { background: #b58863; }
@@ -11,5 +11,10 @@ body, html, #root { height: 100%; margin: 0; }
 .hint { position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(45, 212, 191, 0.6); }
 .hint.cap { background: rgba(239, 68, 68, 0.7); }
 .footer { text-align: center; padding-bottom: env(safe-area-inset-bottom); }
+
+/* Coordinate labels */
+.coordLabel { position: absolute; color: rgba(0,0,0,0.7); font-size: 12px; font-weight: 600; pointer-events: none; }
+.coordLabel.file { bottom: 4px; right: 6px; }
+.coordLabel.rank { top: 4px; left: 6px; }
 
 

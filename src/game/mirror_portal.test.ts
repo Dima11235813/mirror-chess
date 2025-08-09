@@ -44,20 +44,17 @@ describe('mirror portal (horizontal)', () => {
     expect(toG6).toBeFalsy()
   })
 
-  it('knight at h3 portals to a5 (not a3)', () => {
+  it('knight at h3 mirrors to a3 (same rank)', () => {
     const s = initialPosition()
     const s2 = { ...s, board: s.board.slice() }
     // Clear rank 3 (r=2) and nearby to avoid blockers; place knight at h3 (f=7,r=2)
     for (let f = 0; f < 8; f++) s2.board[2 * 8 + f] = null
     s2.board[2 * 8 + 7] = { kind: 'N', color: 'white' }
-    // Ensure a5 (f=0,r=4) empty; a3 (f=0,r=2) empty
-    s2.board[4 * 8 + 0] = null
+    // Ensure a3 (f=0,r=2) empty
     s2.board[2 * 8 + 0] = null
     const moves = legalMovesFor(s2, c(7,2))
-    const toA5 = moves.find(m => m.special === 'mirror' && m.to.f === 0 && m.to.r === 4)
     const toA3 = moves.find(m => m.special === 'mirror' && m.to.f === 0 && m.to.r === 2)
-    expect(toA5).toBeTruthy()
-    expect(toA3).toBeFalsy()
+    expect(toA3).toBeTruthy()
   })
 
   it('black queen at d6 cannot wrap-right past own pawn at g6; can wrap-left to h6 if clear', () => {

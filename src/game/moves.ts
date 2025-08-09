@@ -32,16 +32,12 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
       break
     case 'K': pushAll(acc, kingMoves(state, from, piece)); break
   }
-  // Knight portal — keep special behavior independent of slider wrap
+  // Knight mirror: knights may mirror to the same rank's opposite file regardless of blockers
   if (piece.kind === 'N') {
     const mirror = mirrorFile(from)
-    if (!sameSquare(mirror, from)) {
-      for (const dr of [-2, 2] as const) {
-        const to: Coord = { f: mirror.f, r: from.r + dr }
-        if (!insideBoard(to)) continue
-        const t = state.board[toIndex(to)]
-        if (!t || t.color !== piece.color) acc.push({ from, to, special: 'mirror' })
-      }
+    if (!sameSquare(mirror, from) && insideBoard(mirror)) {
+      const t = state.board[toIndex(mirror)]
+      if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
     }
   }
   return acc
