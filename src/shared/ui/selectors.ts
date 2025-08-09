@@ -17,6 +17,10 @@ export enum SquareHintClass {
   Capture = 'cap',
   // Reserve for future variants (e.g., Mirror):
   Mirror = 'mirror',
+  /** Destination for an en passant capture */
+  EnPassantDest = 'ep-dest',
+  /** Captured pawn square for an en passant capture */
+  EnPassantCaptured = 'ep-cap',
 }
 
 

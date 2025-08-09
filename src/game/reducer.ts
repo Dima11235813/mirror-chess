@@ -10,6 +10,11 @@ export function reduceMove(state: GameState, move: Move): GameState {
   const fromI = toIndex(move.from)
   const toI = toIndex(move.to)
   const newBoard: (Piece | null)[] = state.board.slice()
+  // If this move specifies a captured square (e.g., en passant), clear it first
+  if (move.captures) {
+    const capI = toIndex(move.captures)
+    newBoard[capI] = null
+  }
   newBoard[toI] = newBoard[fromI] ?? null
   newBoard[fromI] = null
   const nextTurn = state.turn === 'white' ? 'black' : 'white'

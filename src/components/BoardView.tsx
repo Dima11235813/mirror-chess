@@ -8,6 +8,13 @@ import { SquareHintClass, squareTestId, hintTestId } from '@shared/ui/selectors'
 export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Move) => void }) {
   const [selected, setSelected] = useState<Coord | null>(null)
   const legal = useMemo(() => (selected ? legalMovesFor(state, selected) : []), [state, selected])
+  const epCapturedSquares = useMemo(() => {
+    const set = new Set<string>()
+    for (const m of legal) {
+      if (m.captures) set.add(algebraic(m.captures))
+    }
+    return set
+  }, [legal])
 
   const clickSquare = (c: Coord) => {
     if (selected) {
@@ -30,6 +37,7 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
         const hint = !!moveToHere
         const isCapture = hint && !!piece && piece.color !== state.turn
         const sq = algebraic(c)
+        const showEpCapOverlay = epCapturedSquares.has(sq)
         return (
           <button
             key={i}
@@ -38,10 +46,22 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
             aria-label={`Square ${sq} ${piece ? pieceToGlyph(piece) : ''}`}
             data-testid={squareTestId(sq)}
           >
+            {showEpCapOverlay && (
+              <div
+                className={`${SquareHintClass.Hint} ${SquareHintClass.EnPassantCaptured}`}
+                data-testid={hintTestId(sq)}
+              />
+            )}
             <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
             {hint && (
               <div
-                className={`${SquareHintClass.Hint} ${isCapture ? SquareHintClass.Capture : ''}`}
+                className={`${SquareHintClass.Hint} ${
+                  (moveToHere as Move | undefined)?.captures
+                    ? SquareHintClass.EnPassantDest
+                    : isCapture
+                      ? SquareHintClass.Capture
+                      : ''
+                }`}
                 data-testid={hintTestId(sq)}
               />
             )}
