@@ -1,0 +1,19 @@
+{
+  "root": [
+    "./src/app.tsx",
+    "./src/main.tsx",
+    "./src/components/boardview.tsx",
+    "./src/game/coord.test.ts",
+    "./src/game/coord.ts",
+    "./src/game/mirror.test.ts",
+    "./src/game/mirror_portal.test.ts",
+    "./src/game/moves.test.ts",
+    "./src/game/moves.ts",
+    "./src/game/reducer.ts",
+    "./src/game/setup.ts",
+    "./src/game/types.ts",
+    "./src/shared/boards.ts"
+  ],
+  "errors": true,
+  "version": "5.9.2"
+}

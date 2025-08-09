@@ -16,3 +16,10 @@ The left and right walls are portals. Pieces that move left or right and hit the
 ![alt text](image.png)
 
 The queen on c6 should be able to move to h6, due to how the mirror left/right movement works. The queen should be able to move to the left until it hits the portal on the left wall and then appear on the right wall and continue moving left until it hits h6.
+
+## Bug
+
+![alt text](image-1.png)
+
+When selecting the knight on b1 I shouldn't be able to move to G3.
+

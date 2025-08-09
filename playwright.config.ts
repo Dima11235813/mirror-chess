@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  testDir: 'e2e',
+  testDir: 'proj-mgmt',
   retries: process.env.CI ? 2 : 0,
   fullyParallel: true,
   use: {

@@ -12,7 +12,14 @@
     "jsx": "react-jsx",
     "strict": true,
     "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@game/*": ["src/game/*"],
+      "@components/*": ["src/components/*"],
+      "@shared/*": ["src/shared/*"]
+    }
   },
   "include": ["src", "tests"]
 }
