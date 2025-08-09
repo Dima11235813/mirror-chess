@@ -25,7 +25,9 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
         const piece = state.board[coordIndex(c)]
         const isLight = (c.r + c.f) % 2 === 0
         const isSelected = selected && coordEq(selected, c)
-        const hint = legal.some(m => sameCoord(m.to, c))
+        const moveToHere = legal.find(m => sameCoord(m.to, c))
+        const hint = !!moveToHere
+        const isCapture = hint && !!piece && piece.color !== state.turn
         return (
           <button
             key={i}
@@ -34,7 +36,7 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
             aria-label={`Square ${algebraic(c)} ${piece ? pieceToGlyph(piece) : ''}`}
           >
             <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
-            {hint && <div className="hint" />}
+            {hint && <div className={`hint ${isCapture ? 'cap' : ''}`} />}
           </button>
         )
       })}

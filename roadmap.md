@@ -23,3 +23,7 @@ pnpm test
 * Implement captures/turn log + simple undo,
 * Add a test matrix that covers all input variants per your “each variance has a test” rule,
 * Wire up Capacitor for mobile builds.
+
+## Graphics TODO
+
+- Capture hints: show capture-eligible destination squares with a red indicator; non-capturing moves keep the current teal indicator. Later replace hints with distinct SVG/graphics, but start with color differentiation.

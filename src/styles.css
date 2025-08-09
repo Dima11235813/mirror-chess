@@ -9,6 +9,7 @@ body, html, #root { height: 100%; margin: 0; }
 .sq.sel { outline: 3px solid #2dd4bf; z-index: 1; }
 .glyph { pointer-events: none; }
 .hint { position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(45, 212, 191, 0.6); }
+.hint.cap { background: rgba(239, 68, 68, 0.7); }
 .footer { text-align: center; padding-bottom: env(safe-area-inset-bottom); }
 
 

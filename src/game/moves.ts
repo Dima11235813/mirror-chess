@@ -22,14 +22,39 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
     case 'Q': pushAll(acc, slideMoves(state, from, piece, [ [1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,1], [-1,-1] ])); break
     case 'K': pushAll(acc, kingMoves(state, from, piece)); break
   }
-  // Mirror move
+  // Mirror move(s) — strictly horizontal portal only
   const mirror = mirrorFile(from)
   if (!sameSquare(mirror, from)) {
     const pathClear = rankPathClear(state.board, from, mirror)
     const target = state.board[toIndex(mirror)]
-    const canCapture = !target || target.color !== piece.color
-    const knightException = piece.kind === 'N' // knights may mirror regardless of path
-    if (canCapture && (pathClear || knightException)) acc.push({ from, to: mirror, special: 'mirror' })
+    const knight = piece.kind === 'N'
+    const canCapture = !target || (target && target.color !== piece.color)
+    if (canCapture && (pathClear || knight)) {
+      if (knight) {
+        // Knight portal rule: land on the mirror file, +/-2 ranks (horizontal part is portalized)
+        for (const dr of [-2, 2] as const) {
+          const to: Coord = { f: mirror.f, r: from.r + dr }
+          if (!insideBoard(to)) continue
+          const t = state.board[toIndex(to)]
+          if (!t || t.color !== piece.color) acc.push({ from, to, special: 'mirror' })
+        }
+      } else {
+        // Non-knights: allow the exact mirror square
+        acc.push({ from, to: mirror, special: 'mirror' })
+      }
+      // Extended mirror-through for horizontal sliders (R, Q) when the mirror square is empty
+      if (!knight && (piece.kind === 'R' || piece.kind === 'Q') && !target && pathClear) {
+        const dir = mirror.f < from.f ? -1 : 1 // move away from the center on the opposite half
+        let f = mirror.f + dir
+        while (f >= 0 && f < 8) {
+          const to: Coord = { f, r: from.r }
+          const t = state.board[toIndex(to)]
+          if (!t) { acc.push({ from, to, special: 'mirror' }); f += dir; continue }
+          if (t.color !== piece.color) acc.push({ from, to, special: 'mirror' })
+          break
+        }
+      }
+    }
   }
   return acc
 }
