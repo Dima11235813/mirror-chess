@@ -1,0 +1,46 @@
+# Node / TypeScript
+node_modules/
+dist/
+.tmp/
+.temp/
+
+# Build outputs
+build/
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Ionic / Capacitor
+ios/
+android/
+web-build/
+
+# Vite cache
+vite.config.timestamp*
+.cache/
+
+# Test & coverage outputs
+coverage/
+.vitest/
+
+# Misc
+*.local
+*.log
+*.lock
