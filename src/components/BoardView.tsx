@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import type { GameState, Coord, Move, Kind, Piece } from '../game/types'
-import { coordEq, sameCoord } from '../game/coord'
-import { algebraic } from '../game/coord'
-import { legalMovesFor } from '../game/moves'
+import type { GameState, Coord, Move, Kind, Piece } from '@game/types'
+import { coordEq, sameCoord } from '@game/coord'
+import { algebraic } from '@game/coord'
+import { legalMovesFor } from '@game/moves'
 
 export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Move) => void }) {
   const [selected, setSelected] = useState<Coord | null>(null)

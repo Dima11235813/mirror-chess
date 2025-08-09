@@ -10,6 +10,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
       '@game': resolve(__dirname, 'src/game'),
       '@components': resolve(__dirname, 'src/components'),
+      '@mocks': resolve(__dirname, 'src/mocks'),
       '@shared': resolve(__dirname, 'src/shared'),
     },
   },

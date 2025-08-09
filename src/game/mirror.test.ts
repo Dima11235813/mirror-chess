@@ -52,6 +52,51 @@ describe('mirror rule', () => {
     const mirror = moves.find(m => m.special === 'mirror')
     expect(mirror?.to).toEqual(c(6,0)) // mirrored to g1
   })
+
+  it('bishop can mirror across empty rank path', () => {
+    const s = initialPosition()
+    const s2 = { ...s, board: s.board.slice() }
+    // Clear rank r=2 and place a white bishop at c3 (f=2,r=2)
+    for (let f = 0; f < 8; f++) s2.board[2 * 8 + f] = null
+    s2.board[2 * 8 + 2] = { kind: 'B', color: 'white' }
+    const moves = legalMovesFor(s2, c(2,2))
+    const toF3 = moves.find(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 2)
+    expect(toF3).toBeTruthy()
+  })
+
+  it('king mirrors to opposite file if destination not own piece', () => {
+    const s = initialPosition()
+    const s2 = { ...s, board: s.board.slice() }
+    // Clear rank r=3 and place a white king at d4 (f=3,r=3)
+    for (let f = 0; f < 8; f++) s2.board[3 * 8 + f] = null
+    s2.board[3 * 8 + 3] = { kind: 'K', color: 'white' }
+    // Destination e4 (f=4,r=3) empty → allowed
+    let moves = legalMovesFor(s2, c(3,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 4 && m.to.r === 3)).toBe(true)
+    // If own piece on e4, mirror not allowed
+    s2.board[3 * 8 + 4] = { kind: 'P', color: 'white' }
+    moves = legalMovesFor(s2, c(3,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 4 && m.to.r === 3)).toBe(false)
+  })
+
+  it('pawn can mirror horizontally across clear rank; capture allowed on enemy', () => {
+    const s = initialPosition()
+    const s2 = { ...s, board: s.board.slice() }
+    // Clear rank r=3 and place a white pawn at c4 (f=2,r=3)
+    for (let f = 0; f < 8; f++) s2.board[3 * 8 + f] = null
+    s2.board[3 * 8 + 2] = { kind: 'P', color: 'white' }
+    // Empty destination at f3 (mirror of c4 is f4 → (f=5,r=3))
+    let moves = legalMovesFor(s2, c(2,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(true)
+    // If enemy on destination, capture allowed
+    s2.board[3 * 8 + 5] = { kind: 'N', color: 'black' }
+    moves = legalMovesFor(s2, c(2,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(true)
+    // If own piece on destination, not allowed
+    s2.board[3 * 8 + 5] = { kind: 'N', color: 'white' }
+    moves = legalMovesFor(s2, c(2,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(false)
+  })
 })
 
 

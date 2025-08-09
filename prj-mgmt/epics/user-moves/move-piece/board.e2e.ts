@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { SPEC_C6_Q_WRAP, urlForSpec } from '../../../../src/shared/boards'
+import { SPEC_C6_Q_WRAP, urlForSpec } from '@shared/boards'
 
 test('mirror-chess: c6 queen can wrap-left to h6; cannot move to d6 (own pawn)', async ({ page }) => {
   await page.goto(urlForSpec(SPEC_C6_Q_WRAP, 'black'))

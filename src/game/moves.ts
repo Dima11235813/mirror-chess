@@ -40,7 +40,18 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
       if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
     }
   }
-  return acc
+  // Generic mirror for all other pieces: may move to the same-rank opposite file
+  // if the path across the rank between `from` and its mirror square is clear.
+  if (piece.kind !== 'N') {
+    const mirror = mirrorFile(from)
+    if (!sameSquare(mirror, from) && insideBoard(mirror)) {
+      if (rankPathClear(state.board, from, mirror)) {
+        const t = state.board[toIndex(mirror)]
+        if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
+      }
+    }
+  }
+  return dedupeMoves(acc)
 }
 
 function pushAll<T>(out: T[], xs: T[]): void { for (const x of xs) out.push(x) }
@@ -149,6 +160,19 @@ function horizontalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
     }
   }
   return res
+}
+
+/** Remove duplicate moves that share the same destination and special tag. */
+function dedupeMoves(moves: ReadonlyArray<Move>): Move[] {
+  const seen = new Set<string>()
+  const out: Move[] = []
+  for (const m of moves) {
+    const key = `${m.to.f},${m.to.r},${m.special ?? ''}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(m)
+  }
+  return out
 }
 
 

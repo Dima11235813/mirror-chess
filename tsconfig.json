@@ -18,10 +18,11 @@
       "@/*": ["src/*"],
       "@game/*": ["src/game/*"],
       "@components/*": ["src/components/*"],
+      "@mocks/*": ["src/mocks/*"],
       "@shared/*": ["src/shared/*"]
     }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "prj-mgmt"]
 }
 
 

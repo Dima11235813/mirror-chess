@@ -1,0 +1,20 @@
+# Dev Mode Feature
+
+## Game Notation
+
+As a user in dev mode, I want to be able to click a button to see the game notation.
+
+### Acceptance Criteria
+
+- The game notation should be displayed in a modal.
+- The game notation should be displayed in a readable format.
+
+## Copy to Clipboard
+
+As a user in dev mode viewing the game notation, I want to be able to click a button to copy the game notation to the clipboard.
+
+### Acceptance Criteria
+- The game notation should be displayed in a format that is easy to copy to the clipboard.
+- The game notation should be displayed in a format that is easy to read.
+- The game notation should be displayed in a format that is easy to understand.
+- The game notation should be displayed in a format that is easy to copy to the clipboard.
