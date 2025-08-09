@@ -1,15 +1,25 @@
 import { useState } from 'react'
 import { IonHeader, IonToolbar, IonTitle, IonButton } from '@ionic/react'
 import { BoardView } from './components/BoardView'
-import { initialPosition } from './game/setup'
+import { initialPosition, fromPiecesSpec } from './game/setup'
 import { reduceMove } from './game/reducer'
 import type { GameState, Move } from './game/types'
 
+function loadStateFromUrl(): GameState {
+  const url = new URL(window.location.href)
+  const spec = url.searchParams.get('board')
+  const turn = (url.searchParams.get('turn') as 'white' | 'black') || 'white'
+  if (spec) {
+    try { return fromPiecesSpec(spec, turn) } catch { /* fallthrough */ }
+  }
+  return initialPosition()
+}
+
 export default function App() {
-  const [state, setState] = useState<GameState>(() => initialPosition())
+  const [state, setState] = useState<GameState>(() => loadStateFromUrl())
 
   const onMove = (m: Move) => setState(s => reduceMove(s, m))
-  const onReset = () => setState(initialPosition())
+  const onReset = () => setState(loadStateFromUrl())
 
   return (
     <div className="app">

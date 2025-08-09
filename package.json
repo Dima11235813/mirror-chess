@@ -11,6 +11,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
     "test:watch:coverage": "vitest --coverage",
+    "e2d:preview": "vite preview --strictPort --port 5173",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed --project=chromium",
     "relock": "npm run clean && npm run i:deps && npm run i:devdeps",
     "preclean": "node -e \"try{require('child_process').execSync(process.platform==='win32'?'taskkill /F /IM node.exe /T':'pkill -f node',{stdio:'ignore'})}catch(e){}\"",
     "clean": "npm run preclean && rimraf node_modules package-lock.json",
@@ -26,6 +29,7 @@
     "react-router-dom": "5.3.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
