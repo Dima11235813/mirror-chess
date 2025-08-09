@@ -56,7 +56,10 @@ function pawnMoves(state: GameState, from: Coord, p: Piece): Move[] {
 }
 
 function knightMoves(state: GameState, from: Coord, p: Piece): Move[] {
-  const deltas = [ [1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2] ]
+  const deltas: ReadonlyArray<[number, number]> = [
+    [1, 2], [2, 1], [2, -1], [1, -2],
+    [-1, -2], [-2, -1], [-2, 1], [-1, 2]
+  ]
   const res: Move[] = []
   for (const [df, dr] of deltas) {
     const to: Coord = { f: from.f + df, r: from.r + dr }
