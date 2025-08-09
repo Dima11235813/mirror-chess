@@ -56,6 +56,23 @@ Visit `http://localhost:5173` in your browser to play the game locally.
 - **Docs:** All exported functions/types must have JSDoc with `@param` and `@returns`.
 - **Accessibility:** UI should be usable with screen readers and keyboard navigation.
 
+#### Domain type placement
+- Put complex reusable types in **shared domain files** for intuitive reuse.
+  - Cross‑component/app types (e.g., persistence records like `SavedGameMeta`) live under `src/shared/<domain>/types.ts` and are imported via `@shared/*`.
+  - Game‑domain types live in `src/game/types.ts` (or a co‑located types module within `src/game/*`).
+  - Keep component‑local shapes next to the component if truly local; promote to `src/shared/<domain>/` once reused.
+- Prefer named `interface`/`type` exports over inline object literals in function signatures.
+
+#### UI component structure
+- One component per file under `src/components/*`. If a component grows beyond trivial, use a folder-per-component and colocate tests and local-only types:
+  - `src/components/Foo/`
+    - `Foo.tsx`
+    - `Foo.types.ts` (local-only; promote to `src/shared/<domain>/` if reused)
+    - `Foo.test.tsx` (unit tests with typed mocks and `as const` where appropriate)
+    - `Foo.mocks.ts`
+- Props must be defined with a named `interface`. Avoid inline props object literals.
+- Respect `exactOptionalPropertyTypes`: only pass optional props when they are present (avoid `undefined`).
+
 ### 4. Testing
 - All new or changed functions require:
   - **Happy path** test(s)

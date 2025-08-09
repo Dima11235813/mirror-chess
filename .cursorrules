@@ -32,6 +32,26 @@
   - **Tests** (`tests/*.test.ts`)
 - UI additions go in `src/components/*` and accept explicit props; **no hidden state**.
 
+### 3.1 Domain type placement (shared vs component-local)
+- **Complex reusable types belong in dedicated domain files** for intuitive reuse and discoverability.
+  - **Shared app/domain types** (e.g., persistence records, DTOs, cross-component props/contracts) live under `src/shared/<domain>/` in a `types.ts` (or similarly named) module and are exported via the `@shared/*` alias.
+  - **Game-domain types** that are UI-agnostic live in `src/game/types.ts` or a co-located domain-specific types module within `src/game/*`.
+  - **Component-local only** shapes (used by a single component and not exported) may live next to the component (e.g., `SavedGamesList.types.ts`). If they become reused, promote them to `src/shared/<domain>/`.
+  - Avoid scattering ad-hoc type literals across files; prefer a **single source of truth** per domain.
+
+### 3.2 UI component structure (files, folders, tests)
+- **One component per file.** Avoid defining multiple components in the same file under `src/components/*`.
+  - Example: split `SavedGameRow` out of `SavedGamesList.tsx` into its own component module.
+- **Prefer folder-per-component** for anything non-trivial so tests and local-only types can be colocated:
+  - `src/components/SavedGamesList/`
+    - `SavedGamesList.tsx`
+    - `SavedGamesList.types.ts` (component-local types only; promote to `src/shared/<domain>/` when reused)
+    - `SavedGamesList.test.tsx` (unit tests; cover prop variants with typed mocks)
+    - `SavedGamesList.mocks.ts` (strongly-typed test data; use `as const` and `readonly` where applicable)
+- **Props typing:** always use a named `interface` for props; do not inline object type literals in signatures. Reuse shared domain types from `@shared/*` per 3.1.
+- **Optional props:** honor `exactOptionalPropertyTypes`; only pass optional props when defined (avoid passing `undefined`).
+- **Test guidance:** unit tests should cover variants of props and states using strongly typed mocks and constants (`as const`), without introducing side effects.
+
 ## 4) TypeScript Style (FP-leaning)
 - Prefer `readonly` on object fields and arrays exported from game-layer.
 - Prefer small pure functions with explicit inputs/outputs; no mutation except local copies.
@@ -46,6 +66,18 @@
   - Prefer comparisons like `piece.color === WHITE` instead of `=== 'white'`.
   - If new string unions are introduced, also export a `const` tuple and constants (e.g., `KINDS`, `MOVE_KINDS`).
 - Rationale: prevents typos, eases refactors, and improves autocomplete/testability.
+
+### 4.2 Named types over inline literals
+- Do **not** inline complex object type literals in function signatures or props. If a shape:
+  - has ≥ 2 properties,
+  - is passed across module boundaries, or
+  - is used in more than one place,
+  then define a **named** `interface`/`type` and export it from the appropriate domain file (see 3.1).
+- Prefer `interface` for extendable object shapes and `type` for unions/mapped/utility compositions.
+- Example (UI): replace
+  - `function SavedGameRow({ item, onLoad, onDelete, onRename }: { item: SavedGameMeta; onLoad: (id: string) => void; onDelete?: (id: string) => void; onRename?: (id: string, name: string) => void })`
+  with a named `SavedGameRowProps` exported from `src/shared/persistence/types.ts` (if reused) or `src/components/SavedGamesList.types.ts` (if local-only for now).
+- Continue to import domain constants/unions from `src/game/types.ts` for game logic concerns.
 
 ## 5) Game Rules Baseline (v0.1)
 - Standard chess moves (no castling, no en passant yet).

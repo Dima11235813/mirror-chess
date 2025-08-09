@@ -6,7 +6,7 @@ import { reduceMove } from '@game/reducer'
 import type { GameState, Move } from '@game/types'
 import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
-import { listSavedGames, loadSavedGame, saveGame, deleteSavedGame } from '@shared/persistence'
+import { listSavedGames, loadSavedGame, saveGame, deleteSavedGame, renameSavedGame, isValidGameName } from '@shared/persistence'
 import { useMemo } from 'react'
 
 function loadStateFromUrl(): GameState {
@@ -53,6 +53,13 @@ export default function App() {
     setSavesVersion(v => v + 1)
   }
 
+  const onRenameSaved = (id: string, name: string) => {
+    if (!isValidGameName(name)) return
+    renameSavedGame(id, name)
+    // list is derived from storage; reflect changes
+    setSavesVersion(v => v + 1)
+  }
+
   return (
     <div className="app">
       <IonHeader>
@@ -70,7 +77,7 @@ export default function App() {
       </footer>
       <section className="saves">
         <h3>Saved Games</h3>
-        <SavedGamesList items={savedGames} onLoad={onLoadSaved} onDelete={onDeleteSaved} />
+        <SavedGamesList items={savedGames} onLoad={onLoadSaved} onDelete={onDeleteSaved} onRename={onRenameSaved} />
       </section>
     </div>
   )
