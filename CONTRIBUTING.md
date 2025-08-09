@@ -108,4 +108,24 @@ Pick an item, discuss in an issue, and start a PR!
 
 ---
 
+---
+
+## 🌿 Branching Strategy & Environments
+
+### Branches
+- **`main`**: Protected. Always releasable; tagged releases come from here. Deploys to **QA** (gated by approval in CI/CD).
+- **`dev`**: Integration branch. Auto-deploys to **Dev** environment on every merge.
+- **Feature branches**: `feat/<short-description>` for new features; `fix/<short-description>` for bug fixes; `chore/<short-description>` for tooling/docs.
+
+### Flow
+1. Branch from **`dev`**: `git checkout -b feat/mirror-castling dev`.
+2. Commit small, focused changes.
+3. Open PR **feature → dev**. Ensure tests pass.
+4. After review and squash-merge into `dev`, CI deploys to **Dev** env.
+5. Periodically open PR **dev → main** (release). After review, merging into `main` triggers CI to prepare a **QA** deploy (manual approval required).
+
+> **Future DevOps (planned):** CI/CD will enforce approvals for promoting builds from **Dev → QA** (on `main`) and later **QA → Prod** with versioned tags. Release notes will be generated from conventional commits.
+
+---
+
 **Thanks for contributing!** 🚀
