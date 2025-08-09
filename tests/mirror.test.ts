@@ -24,9 +24,12 @@ describe('mirror rule', () => {
     expect(mirror).toBeUndefined()
   })
 
-  it('knight may mirror regardless of path', () => {
+  it('knight may mirror regardless of path (but not onto own piece)', () => {
     const s = initialPosition()
-    const moves = legalMovesFor(s, c(1,0)) // white knight at b1
+    const s2 = { ...s, board: s.board.slice() }
+    // Clear g1 so destination is empty (same-color piece would be illegal)
+    s2.board[0 * 8 + 6] = null
+    const moves = legalMovesFor(s2, c(1,0)) // white knight at b1
     const mirror = moves.find(m => m.special === 'mirror')
     expect(mirror?.to).toEqual(c(6,0)) // b1 ↔ g1
   })
