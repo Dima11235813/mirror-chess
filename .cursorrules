@@ -39,6 +39,14 @@
 - Avoid `any`, `ts-ignore`, ambient globals. If unavoidable, document with `/** WHY: ... */`.
 - Name data types with nouns (`Coord`, `Move`), functions with verbs (`legalMovesFor`).
 
+### 4.1 No Magic Strings (Colors, kinds, tags)
+- Do not hardcode domain strings like `"white"`, `"black"`, or piece kinds inline.
+- Centralize domain literals in `src/game/types.ts` and import them everywhere.
+  - Use `Color` union with exported constants: `WHITE`, `BLACK`, and `COLORS` tuple.
+  - Prefer comparisons like `piece.color === WHITE` instead of `=== 'white'`.
+  - If new string unions are introduced, also export a `const` tuple and constants (e.g., `KINDS`, `MOVE_KINDS`).
+- Rationale: prevents typos, eases refactors, and improves autocomplete/testability.
+
 ## 5) Game Rules Baseline (v0.1)
 - Standard chess moves (no castling, no en passant yet).
 - Mirror: move from `(f, r)` to `(7 - f, r)` if rank path is clear; **knight** exempt from path check. Capture allowed if target color ≠ mover.
@@ -143,3 +151,6 @@ A change is **Done** when:
 - Lint/format/test pass,
 - README updated if behavior changes,
 - No violations of sections 1–11.
+
+## 16) Code Style
+* Prefer for...of over array-literal forEach to avoid leading semicolons and improve readability.
