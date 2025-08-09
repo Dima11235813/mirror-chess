@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { GameState, Coord, Move } from '../game/types'
+import type { GameState, Coord, Move, Kind, Piece } from '../game/types'
 import { coordEq, sameCoord } from '../game/coord'
 import { algebraic } from '../game/coord'
 import { legalMovesFor } from '../game/moves'
@@ -46,10 +46,15 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
   )
 }
 
-function pieceToGlyph(p: { kind: string; color: 'white' | 'black' }): string {
-  const map: Record<string, [string, string]> = {
-    K: ['♔', '♚'], Q: ['♕', '♛'], R: ['♖', '♜'], B: ['♗', '♝'], N: ['♘', '♞'], P: ['♙', '♟']
-  }
+function pieceToGlyph(p: Piece): string {
+  const map: Record<Kind, readonly [string, string]> = {
+    K: ['♔', '♚'],
+    Q: ['♕', '♛'],
+    R: ['♖', '♜'],
+    B: ['♗', '♝'],
+    N: ['♘', '♞'],
+    P: ['♙', '♟'],
+  } as const
   return p.color === 'white' ? map[p.kind][0] : map[p.kind][1]
 }
 
