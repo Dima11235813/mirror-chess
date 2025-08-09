@@ -1,6 +1,8 @@
 # Node / TypeScript
 node_modules/
 dist/
+*.tsbuildinfo
+.vscode/.tsserver
 .tmp/
 .temp/
 
