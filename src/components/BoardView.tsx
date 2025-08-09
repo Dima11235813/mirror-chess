@@ -3,6 +3,7 @@ import type { GameState, Coord, Move, Kind, Piece } from '@game/types'
 import { coordEq, sameCoord } from '@game/coord'
 import { algebraic } from '@game/coord'
 import { legalMovesFor } from '@game/moves'
+import { SquareHintClass, squareTestId, hintTestId } from '@shared/ui/selectors'
 
 export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Move) => void }) {
   const [selected, setSelected] = useState<Coord | null>(null)
@@ -35,10 +36,15 @@ export function BoardView({ state, onMove }: { state: GameState; onMove: (m: Mov
             className={`sq ${isLight ? 'light' : 'dark'} ${isSelected ? 'sel' : ''}`}
             onClick={() => clickSquare(c)}
             aria-label={`Square ${sq} ${piece ? pieceToGlyph(piece) : ''}`}
-            data-testid={`square-${sq}`}
+            data-testid={squareTestId(sq)}
           >
             <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
-            {hint && <div className={`hint ${isCapture ? 'cap' : ''}`} data-testid={`hint-${sq}`} />}
+            {hint && (
+              <div
+                className={`${SquareHintClass.Hint} ${isCapture ? SquareHintClass.Capture : ''}`}
+                data-testid={hintTestId(sq)}
+              />
+            )}
             {c.r === 0 && (
               <span className="coordLabel file" aria-hidden="true">{fileLabel(c.f)}</span>
             )}

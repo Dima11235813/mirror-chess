@@ -66,11 +66,11 @@ rnbQkbnr/1pp1ppP1/3p4/7p/P7/1P6/2PPPPPP/RNB1KBNR w KQkq - 0 1
 
 **Tests to Add/Adjust**
 
-* **Unit:** `mirrorPawnMoves.spec.ts`
+* **Unit:** `src/game/pawn.mirror.test.ts`
 
   * Case: `A4 (white) -> {A5 green, H8 red, H4 none}`
-  * Add symmetric cases: `H5 (black) -> {H4 green, A1 red, A5 none}`
-* **E2E:** `pawn-highlight-mirror.e2e.spec.ts`
+  * Symmetric: `H5 (black) -> {H4 green, A1 red, A5 none}`
+* **E2E:** `prj-mgmt/epics/game-logic/pawn/pawn-highlight-mirror.e2e.ts`
 
   * Load query string above; assert highlights: green={A5}, red={H8}, absent={H4}.
 

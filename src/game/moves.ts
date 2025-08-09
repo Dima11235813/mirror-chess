@@ -47,15 +47,27 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
       if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
     }
   }
-  // Generic same-rank mirror for non-knights except bishops:
-  // bishops use diagonal portal wrap instead of horizontal mirror.
-  if (piece.kind !== 'N' && piece.kind !== 'B') {
+  // Generic same-rank mirror for K, R, Q only.
+  // Bishops use diagonal portal wrap instead of horizontal mirror; pawns have bespoke mirror behavior.
+  if (piece.kind === 'K' || piece.kind === 'R' || piece.kind === 'Q') {
     const mirror = mirrorFile(from)
     if (!sameSquare(mirror, from) && insideBoard(mirror)) {
       if (rankPathClear(state.board, from, mirror)) {
         const t = state.board[toIndex(mirror)]
         if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
       }
+    }
+  }
+  // Pawn mirror: pawns do NOT mirror horizontally. Instead, they project their
+  // forward-one step across the file seam. If an enemy resides on the mirror of
+  // the forward-one square, emit a mirror capture to that square.
+  if (piece.kind === 'P') {
+    const dir = piece.color === 'white' ? 1 : -1
+    const fwdOne: Coord = { f: from.f, r: from.r + dir }
+    if (insideBoard(fwdOne)) {
+      const target = mirrorFile(fwdOne)
+      const t = state.board[toIndex(target)]
+      if (t && t.color !== piece.color) acc.push({ from, to: target, special: 'mirror' })
     }
   }
   return dedupeMoves(acc)

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { initialPosition } from './setup'
+import { initialPosition, fromPiecesSpec } from './setup'
 import { legalMovesFor } from './moves'
 import type { Coord } from './types'
 
@@ -82,22 +82,18 @@ describe('mirror rule', () => {
   })
 
   it('pawn can mirror horizontally across clear rank; capture allowed on enemy', () => {
-    const s = initialPosition()
-    const s2 = { ...s, board: s.board.slice() }
-    // Clear rank r=3 and place a white pawn at c4 (f=2,r=3)
-    for (let f = 0; f < 8; f++) s2.board[3 * 8 + f] = null
-    s2.board[3 * 8 + 2] = { kind: 'P', color: 'white' }
-    // Empty destination at f3 (mirror of c4 is f4 → (f=5,r=3))
-    let moves = legalMovesFor(s2, c(2,3))
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(true)
-    // If enemy on destination, capture allowed
-    s2.board[3 * 8 + 5] = { kind: 'N', color: 'black' }
-    moves = legalMovesFor(s2, c(2,3))
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(true)
-    // If own piece on destination, not allowed
-    s2.board[3 * 8 + 5] = { kind: 'N', color: 'white' }
-    moves = legalMovesFor(s2, c(2,3))
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 5 && m.to.r === 3)).toBe(false)
+    // Updated: pawns do not mirror horizontally. They project a mirror capture to the opposite file on back rank.
+    // Start from a minimal position with only a white pawn at a4.
+    const s2 = fromPiecesSpec('w:Pa4', 'white')
+    // No enemy on h8 yet → no mirror capture
+    let moves = legalMovesFor(s2, c(0,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 3)).toBe(false)
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 7)).toBe(false)
+    // Put a black rook on h5 (mirror of a5) → expect mirror capture to h5
+    const s3 = { ...s2, board: s2.board.slice() }
+    s3.board[4 * 8 + 7] = { kind: 'R', color: 'black' }
+    moves = legalMovesFor(s3, c(0,3))
+    expect(moves.some(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 4)).toBe(true)
   })
 })
 
