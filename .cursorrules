@@ -136,6 +136,7 @@ export function reduceMove(state: GameState, move: Move): GameState {
 - [ ] Types are stricter or equal (no regressions).
 - [ ] All new exports have JSDoc.
 - [ ] Tests: passing locally; new logic covered across variants.
+- [ ] Build passes locally (`npm run build`).
 - [ ] No side effects in `src/game/*`.
 - [ ] No new dependencies (unless requested).
 - [ ] UI remains responsive and accessible.
@@ -151,6 +152,7 @@ A change is **Done** when:
 - Behavior is correct and documented,
 - Types are explicit and safe,
 - Tests cover success + edge + failure paths,
+- Build succeeds locally (`npm run build`),
 - Lint/format/test pass,
 - README updated if behavior changes,
 - No violations of sections 1–11.

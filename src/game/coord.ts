@@ -14,8 +14,8 @@ export const algebraic = (c: Coord): string => String.fromCharCode(97 + c.f) + (
 /** Parse a coordinate like "e4" into file/rank. Throws on invalid input. */
 export const parseAlgebraic = (sq: string): Coord => {
   if (sq.length !== 2) throw new Error(`Invalid square: ${sq}`)
-  const fileChar = sq[0].toLowerCase()
-  const rankChar = sq[1]
+  const fileChar = sq.charAt(0).toLowerCase()
+  const rankChar = sq.charAt(1)
   const f = fileChar.charCodeAt(0) - 97
   const r = Number(rankChar) - 1
   if (!(f >= 0 && f < 8 && r >= 0 && r < 8) || Number.isNaN(r)) {
