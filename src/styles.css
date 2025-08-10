@@ -284,4 +284,20 @@ ion-toggle {
   transform: rotate(180deg);
 }
 
+/* Download section styling */
+.download-section {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.download-section ion-button {
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
 

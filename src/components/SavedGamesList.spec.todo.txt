@@ -1,0 +1,334 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { SavedGamesList } from './SavedGamesList';
+import * as persistence from '@shared/persistence';
+
+// Mock the persistence module
+vi.mock('@shared/persistence', () => ({
+  getAllSavedGames: vi.fn(),
+  generateGamesExportFilename: vi.fn(),
+  saveGame: vi.fn(),
+}));
+
+// Mock the IonicButton component
+vi.mock('@components/ionic', () => ({
+  IonicButton: ({ children, onClick, 'data-testid': testId, ...props }: any) => (
+    <button onClick={onClick} data-testid={testId} {...props}>
+      {children}
+    </button>
+  ),
+  IonicInput: ({ children, ...props }: any) => <input {...props}>{children}</input>,
+}));
+
+describe('SavedGamesList', () => {
+  const mockItems = [
+    {
+      id: 'game-1',
+      savedAt: Date.now(),
+      turn: 'white' as const,
+      name: 'Test Game 1',
+    },
+    {
+      id: 'game-2',
+      savedAt: Date.now() - 1000,
+      turn: 'black' as const,
+      name: 'Test Game 2',
+    },
+  ];
+
+  const mockOnLoad = vi.fn();
+  const mockOnDelete = vi.fn();
+  const mockOnRename = vi.fn();
+  const mockOnRefresh = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Mock the download functionality
+    Object.defineProperty(document, 'createElement', {
+      value: vi.fn(() => ({
+        href: '',
+        download: '',
+        click: vi.fn(),
+      })),
+      writable: true,
+    });
+    Object.defineProperty(document.body, 'appendChild', {
+      value: vi.fn(),
+      writable: true,
+    });
+    Object.defineProperty(document.body, 'removeChild', {
+      value: vi.fn(),
+      writable: true,
+    });
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: vi.fn(() => 'blob:mock-url'),
+      writable: true,
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      value: vi.fn(),
+      writable: true,
+    });
+    
+    // Mock file input functionality
+    Object.defineProperty(document, 'createElement', {
+      value: vi.fn((tagName: string) => {
+        if (tagName === 'input') {
+          return {
+            type: '',
+            accept: '',
+            multiple: false,
+            onchange: null,
+            click: vi.fn(),
+          };
+        }
+        return {
+          href: '',
+          download: '',
+          click: vi.fn(),
+        };
+      }),
+      writable: true,
+    });
+  });
+
+  describe('Download functionality', () => {
+    it('should show download button when there are saved games and list is expanded', () => {
+      vi.mocked(persistence.getAllSavedGames).mockReturnValue([
+        {
+          id: 'game-1',
+          savedAt: Date.now(),
+          state: {} as any,
+          name: 'Test Game 1',
+        },
+      ]);
+      vi.mocked(persistence.generateGamesExportFilename).mockReturnValue('mirror-chess-games-2024-01-01.json');
+
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Download button should be visible
+      const downloadButton = screen.getByTestId('download-games-button');
+      expect(downloadButton).toBeInTheDocument();
+      expect(downloadButton).toHaveTextContent('Download Games List');
+    });
+
+    it('should not show download button when there are no saved games', () => {
+      render(
+        <SavedGamesList
+          items={[]}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Should show "No saved games" message
+      expect(screen.getByTestId('saves-empty')).toBeInTheDocument();
+      
+      // Download button should not exist
+      expect(screen.queryByTestId('download-games-button')).not.toBeInTheDocument();
+    });
+
+    it('should not show download button when list is collapsed', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // List starts collapsed, download button should not be visible
+      expect(screen.queryByTestId('download-games-button')).not.toBeInTheDocument();
+    });
+
+    it('should call download functions when download button is clicked', () => {
+      const mockGamesData = [
+        {
+          id: 'game-1',
+          savedAt: Date.now(),
+          state: {} as any,
+          name: 'Test Game 1',
+        },
+      ];
+      const mockFilename = 'mirror-chess-games-2024-01-01.json';
+
+      vi.mocked(persistence.getAllSavedGames).mockReturnValue(mockGamesData);
+      vi.mocked(persistence.generateGamesExportFilename).mockReturnValue(mockFilename);
+
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Click download button
+      const downloadButton = screen.getByTestId('download-games-button');
+      fireEvent.click(downloadButton);
+
+      // Verify persistence functions were called
+      expect(persistence.getAllSavedGames).toHaveBeenCalledOnce();
+      expect(persistence.generateGamesExportFilename).toHaveBeenCalledOnce();
+    });
+
+    it('should generate correct filename format', () => {
+      const mockFilename = 'mirror-chess-games-2024-01-01.json';
+      vi.mocked(persistence.generateGamesExportFilename).mockReturnValue(mockFilename);
+
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Click download button
+      const downloadButton = screen.getByTestId('download-games-button');
+      fireEvent.click(downloadButton);
+
+      // Verify filename format
+      expect(persistence.generateGamesExportFilename).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('Upload functionality', () => {
+    it('should show upload button when there are saved games and list is expanded', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Upload button should be visible
+      const uploadButton = screen.getByTestId('upload-games-button');
+      expect(uploadButton).toBeInTheDocument();
+      expect(uploadButton).toHaveTextContent('Upload Games');
+    });
+
+    it('should not show upload button when there are no saved games', () => {
+      render(
+        <SavedGamesList
+          items={[]}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Upload button should not exist
+      expect(screen.queryByTestId('upload-games-button')).not.toBeInTheDocument();
+    });
+
+    it('should not show upload button when list is collapsed', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // List starts collapsed, upload button should not be visible
+      expect(screen.queryByTestId('upload-games-button')).not.toBeInTheDocument();
+    });
+
+    it('should call upload functionality when upload button is clicked', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Click upload button
+      const uploadButton = screen.getByTestId('upload-games-button');
+      fireEvent.click(uploadButton);
+
+      // Verify file input was created
+      expect(document.createElement).toHaveBeenCalledWith('input');
+    });
+  });
+
+  describe('General component behavior', () => {
+    it('should render saved games when expanded', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      // Toggle the list to be visible
+      const toggle = screen.getByLabelText('Toggle saved games visibility');
+      fireEvent.click(toggle);
+
+      // Should show game names
+      expect(screen.getByDisplayValue('Test Game 1')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Test Game 2')).toBeInTheDocument();
+    });
+
+    it('should show correct game count in header', () => {
+      render(
+        <SavedGamesList
+          items={mockItems}
+          onLoad={mockOnLoad}
+          onDelete={mockOnDelete}
+          onRename={mockOnRename}
+          onRefresh={mockOnRefresh}
+        />
+      );
+
+      expect(screen.getByText('Saved Games (2)')).toBeInTheDocument();
+    });
+  });
+});

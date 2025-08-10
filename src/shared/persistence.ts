@@ -111,4 +111,24 @@ export function renameSavedGame(id: string, name: string): void {
   writeAll(next)
 }
 
+/**
+ * Get all saved games data for backup/export purposes.
+ * Returns the full saved games array with complete game states.
+ */
+export function getAllSavedGames(): readonly SavedGame[] {
+  return readAll()
+}
+
+/**
+ * Generate a filename for the games export with current date.
+ * Format: mirror-chess-games-YYYY-MM-DD.json
+ */
+export function generateGamesExportFilename(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `mirror-chess-games-${year}-${month}-${day}.json`
+}
+
 

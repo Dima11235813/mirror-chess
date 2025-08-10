@@ -22,18 +22,22 @@ import {
   gameControllerOutline, 
   trashOutline, 
   downloadOutline,
-  saveOutline
+  saveOutline,
+  cloudUploadOutline
 } from 'ionicons/icons';
+import { getAllSavedGames, generateGamesExportFilename, saveGame } from '@shared/persistence';
+import type { GameState } from '@game/types';
 
 export interface SavedGamesListProps {
   readonly items: readonly SavedGameMeta[];
   readonly onLoad: (id: string) => void;
   readonly onDelete?: (id: string) => void;
   readonly onRename?: (id: string, name: string) => void;
+  readonly onRefresh?: () => void; // Callback to refresh the list after upload
 }
 
 /** Pure list: renders provided items, delegates interactions via callbacks. */
-export function SavedGamesList({ items, onLoad, onDelete, onRename }: SavedGamesListProps) {
+export function SavedGamesList({ items, onLoad, onDelete, onRename, onRefresh }: SavedGamesListProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   if (items.length === 0) {
@@ -46,6 +50,70 @@ export function SavedGamesList({ items, onLoad, onDelete, onRename }: SavedGames
 
   const handleToggleChange = (event: CustomEvent) => {
     setIsVisible(event.detail.checked);
+  };
+
+  const handleDownloadGames = () => {
+    const gamesData = getAllSavedGames();
+    const filename = generateGamesExportFilename();
+    
+    // Create and download the JSON file
+    const blob = new Blob([JSON.stringify(gamesData, null, 2)], { 
+      type: 'application/json' 
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleUploadGames = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.multiple = false;
+    
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const gamesData = JSON.parse(content) as unknown;
+          
+          if (Array.isArray(gamesData)) {
+            let importedCount = 0;
+            
+            for (const game of gamesData) {
+              if (game && typeof game === 'object' && 'state' in game && 'name' in game) {
+                try {
+                  saveGame(game.state as GameState, game.name as string);
+                  importedCount++;
+                } catch (error) {
+                  console.warn('Failed to import game:', game.name, error);
+                }
+              }
+            }
+            
+            if (importedCount > 0) {
+              // Refresh the list to show imported games
+              onRefresh?.();
+            }
+          }
+        } catch (error) {
+          console.error('Failed to parse uploaded file:', error);
+        }
+      };
+      
+      reader.readAsText(file);
+    };
+    
+    input.click();
   };
 
   return (
@@ -77,6 +145,33 @@ export function SavedGamesList({ items, onLoad, onDelete, onRename }: SavedGames
               {...(onRename ? { onRename } : {})}
             />
           ))}
+          
+          {/* Download and Upload buttons at the bottom */}
+          <div className="download-section">
+            <IonicButton
+              onClick={handleDownloadGames}
+              size="small"
+              fill="outline"
+              color="medium"
+              data-testid="download-games-button"
+              aria-label="Download all saved games as JSON file"
+            >
+              <IonIcon icon={downloadOutline} slot="start" />
+              Download Games List
+            </IonicButton>
+            
+            <IonicButton
+              onClick={handleUploadGames}
+              size="small"
+              fill="outline"
+              color="primary"
+              data-testid="upload-games-button"
+              aria-label="Upload games from JSON file"
+            >
+              <IonIcon icon={cloudUploadOutline} slot="start" />
+              Upload Games
+            </IonicButton>
+          </div>
         </div>
       )}
     </div>
