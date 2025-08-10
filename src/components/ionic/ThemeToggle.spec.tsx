@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ThemeToggle } from './ThemeToggle'
+import { ThemeToggle, THEME_TOGGLE_ARIA_LABEL } from './ThemeToggle'
 import { useTheme } from './useTheme'
 
 // Mock the useTheme hook
@@ -13,7 +13,7 @@ describe('ThemeToggle', () => {
     vi.clearAllMocks()
   })
 
-  it.only('renders with light theme by default', () => {
+  it('renders with light theme by default', () => {
     mockUseTheme.mockReturnValue({
       isDark: false,
       toggleTheme: vi.fn(),
@@ -23,11 +23,11 @@ describe('ThemeToggle', () => {
     render(<ThemeToggle />)
     
     expect(screen.getByText('Dark Theme')).toBeDefined()
-    const toggle = screen.getByLabelText('Toggle dark theme')
+    const toggle = screen.getByLabelText(THEME_TOGGLE_ARIA_LABEL)
     // Assert that the toggle is not checked (light theme)
-    console.log(toggle)
-    // Check console log and determine how to best assert that toggle is light
-    expect(toggle).to
+    expect(toggle).toBeDefined()
+    // Check the checked property since ion-toggle doesn't set it as a DOM attribute
+    expect(toggle).toHaveProperty('checked', false)
   })
 
   it('renders with dark theme when enabled', () => {
@@ -40,8 +40,10 @@ describe('ThemeToggle', () => {
     render(<ThemeToggle />)
     
     expect(screen.getByText('Dark Theme')).toBeDefined()
-    const toggle = screen.getByLabelText('Toggle dark theme')
-    expect(toggle)
+    const toggle = screen.getByLabelText(THEME_TOGGLE_ARIA_LABEL)
+    expect(toggle).toBeDefined()
+    // Check the checked property since ion-toggle doesn't set it as a DOM attribute
+    expect(toggle).toHaveProperty('checked', true)
   })
 
   it('calls toggleTheme when toggle is clicked', () => {
@@ -54,8 +56,9 @@ describe('ThemeToggle', () => {
 
     render(<ThemeToggle />)
     
-    const toggle = screen.getByLabelText('Toggle dark theme')
-    fireEvent.click(toggle)
+    const toggle = screen.getByLabelText(THEME_TOGGLE_ARIA_LABEL)
+    // Use the ionChange event which is what IonToggle actually fires
+    fireEvent(toggle, new CustomEvent('ionChange', { detail: { checked: true } }))
     
     expect(mockToggleTheme).toHaveBeenCalledTimes(1)
   })
@@ -81,8 +84,8 @@ describe('ThemeToggle', () => {
 
     render(<ThemeToggle />)
     
-    const toggle = screen.getByLabelText('Toggle dark theme')
-    // TODO Fix this once console log reveals how to best check IonToggle state
-    // expect(toggle).toHaveAttribute('aria-label', 'Toggle dark theme')
+    const toggle = screen.getByLabelText(THEME_TOGGLE_ARIA_LABEL)
+    const ariaLabel = toggle.getAttribute('aria-label')
+    expect(ariaLabel).toBe(THEME_TOGGLE_ARIA_LABEL)
   })
 })

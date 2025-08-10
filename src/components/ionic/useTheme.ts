@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-interface UseThemeReturn {
+export interface UseThemeReturn {
   isDark: boolean
   toggleTheme: () => void
   setTheme: (isDark: boolean) => void

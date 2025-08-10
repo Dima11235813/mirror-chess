@@ -1,6 +1,8 @@
 import { IonToggle, IonLabel, IonItem } from '@ionic/react'
 import { useTheme } from './useTheme'
 
+export const THEME_TOGGLE_ARIA_LABEL = 'Toggle dark theme'
+
 interface ThemeToggleProps {
   className?: string
 }
@@ -14,7 +16,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       <IonToggle
         checked={isDark}
         onIonChange={toggleTheme}
-        aria-label="Toggle dark theme"
+        aria-label={THEME_TOGGLE_ARIA_LABEL}
       />
     </IonItem>
   )
