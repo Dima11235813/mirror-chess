@@ -1,5 +1,6 @@
 import { IonButton } from '@ionic/react';
 import type { IonicButtonProps } from './button.types';
+import { defaultProps } from './button.types';
 
 /**
  * Wrapper component for Ionic Button with customizable properties
@@ -11,36 +12,11 @@ import type { IonicButtonProps } from './button.types';
  * @returns Rendered Ionic button component
  */
 export function IonicButton({ children, ...restProps }: IonicButtonProps) {
-  const {
-    color,
-    size,
-    shape,
-    fill,
-    disabled,
-    expand,
-    strong,
-    className,
-    onClick,
-    type,
-    'aria-label': ariaLabel,
-    'data-testid': dataTestId,
-  } = restProps;
+  // Merge default props with passed props
+  const props = { ...defaultProps, ...restProps };
+  
   return (
-    <IonButton
-      {...(color && { color })}
-      {...(size && { size })}
-      {...(shape && { shape })}
-      {...(fill && { fill })}
-      {...(disabled && { disabled })}
-      {...(expand && { expand })}
-      {...(strong && { strong })}
-      {...(className && { className })}
-      {...(onClick && { onClick })}
-      {...(type && { type })}
-      {...(ariaLabel && { 'aria-label': ariaLabel })}
-      {...(dataTestId && { 'data-testid': dataTestId })}
-      {...restProps}
-    >
+    <IonButton {...props}>
       {children}
     </IonButton>
   );

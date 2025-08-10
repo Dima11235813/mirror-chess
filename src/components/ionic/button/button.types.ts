@@ -31,6 +31,28 @@ export interface IonicButtonProps extends Omit<ComponentProps<typeof import('@io
   readonly "aria-label"?: string
   /** Data test ID for testing */
   readonly "data-testid"?: string
+  /** Button mode for platform-specific styling */
+  readonly mode?: "ios" | "md"
+  /** Router direction for navigation */
+  readonly routerDirection?: "forward" | "back" | "root"
+  /** Whether button has ripple effect */
+  readonly rippleEffect?: boolean
+  /** Whether button is animated */
+  readonly animated?: boolean
+  /** Button type (alias for type) */
+  readonly buttonType?: "button" | "submit" | "reset"
+  /** Download attribute for links */
+  readonly download?: string
+  /** Form association */
+  readonly form?: string | HTMLFormElement
+  /** Href for anchor behavior */
+  readonly href?: string
+  /** Relationship attribute */
+  readonly rel?: string
+  /** Router animation */
+  readonly routerAnimation?: any
+  /** Target for links */
+  readonly target?: string
 }
 
 export const defaultProps: Partial<IonicButtonProps> = {
@@ -40,4 +62,9 @@ export const defaultProps: Partial<IonicButtonProps> = {
   disabled: false,
   strong: false,
   type: "button",
+  buttonType: "button",
+  mode: "md", // Match your main.tsx configuration
+  rippleEffect: true,
+  animated: true,
+  routerDirection: "forward",
 }

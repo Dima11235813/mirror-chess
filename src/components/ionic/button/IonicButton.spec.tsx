@@ -6,33 +6,12 @@ import { mockIonicButtonProps } from './button.mocks'
 // Mock IonButton to avoid Ionic dependencies in tests
 vi.mock('@ionic/react', () => ({
   IonButton: ({ children, ...props }: any) => {
-    // Convert props to attributes for testing
-    const attributes: Record<string, string> = {}
+    // Debug: log what props are received
+    console.log('IonButton mock received props:', props)
     
-    // Handle boolean props - convert to string attributes
-    if (props.strong !== undefined) attributes.strong = props.strong ? 'true' : 'false'
-    if (props.disabled !== undefined) attributes.disabled = props.disabled ? 'true' : 'false'
-    
-    // Handle string props - only add if they exist
-    if (props.color !== undefined) attributes.color = props.color
-    if (props.size !== undefined) attributes.size = props.size
-    if (props.fill !== undefined) attributes.fill = props.fill
-    if (props.shape !== undefined) attributes.shape = props.shape
-    if (props.expand !== undefined) attributes.expand = props.expand
-    if (props.type !== undefined) attributes.type = props.type
-    if (props.className !== undefined) attributes.className = props.className
-    
-    // Handle event handlers and other props
-    const eventProps: Record<string, any> = {}
-    if (props.onClick) eventProps.onClick = props.onClick
-    if (props['aria-label']) attributes['aria-label'] = props['aria-label']
-    if (props['data-testid']) attributes['data-testid'] = props['data-testid']
-    
-    // Spread remaining props
-    Object.assign(attributes, props)
-    
+    // Simple mock that passes through all props as attributes
     return (
-      <button data-testid="ion-button" {...attributes} {...eventProps}>
+      <button data-testid="ion-button" {...props}>
         {children}
       </button>
     )
@@ -150,43 +129,45 @@ describe('IonicButton Integration', () => {
     ]
 
     testCases.forEach(({ name, props }) => {
-      const { unmount } = render(<IonicButton {...props} />)
+      // Ensure props has required children
+      const testProps = { ...props, children: props?.children || 'Test Button' }
+      const { unmount } = render(<IonicButton {...testProps} />)
       
       const button = screen.getByTestId('ion-button')
       expect(button).toBeDefined()
-      expect(button.textContent).toBe(props?.children as string)
+      expect(button.textContent).toBe(testProps.children as string)
       
       // Verify specific props are applied
-      if (props?.color) {
-        expect(button.getAttribute('color')).toBe(props?.color)
+      if (testProps.color) {
+        expect(button.getAttribute('color')).toBe(testProps.color)
       }
-      if (props?.size) {
-        expect(button.getAttribute('size')).toBe(props?.size)
+      if (testProps.size) {
+        expect(button.getAttribute('size')).toBe(testProps.size)
       }
-      if (props?.fill) {
-        expect(button.getAttribute('fill')).toBe(props?.fill)
+      if (testProps.fill) {
+        expect(button.getAttribute('fill')).toBe(testProps.fill)
       }
-      if (props?.disabled) {
+      if (testProps.disabled) {
         const buttonElement = button as HTMLButtonElement
         expect(buttonElement.disabled).toBe(true)
       }
-      if (props?.shape) {
-        expect(button.getAttribute('shape')).toBe(props?.shape)
+      if (testProps.shape) {
+        expect(button.getAttribute('shape')).toBe(testProps.shape)
       }
-      if (props?.expand) {
-        expect(button.getAttribute('expand')).toBe(props?.expand)
+      if (testProps.expand) {
+        expect(button.getAttribute('expand')).toBe(testProps.expand)
       }
-      if (props?.strong) {
+      if (testProps.strong) {
         expect(button.getAttribute('strong')).toBe('true')
       }
-      if (props?.type) {
-        expect(button.getAttribute('type')).toBe(props?.type)
+      if (testProps.type) {
+        expect(button.getAttribute('type')).toBe(testProps.type)
       }
-      if (props['aria-label']) {
-        expect(button.getAttribute('aria-label')).toBe(props['aria-label'])
+      if (testProps['aria-label']) {
+        expect(button.getAttribute('aria-label')).toBe(testProps['aria-label'])
       }
-      if (props['data-testid']) {
-        expect(screen.getByTestId(props['data-testid'] as string)).toBeDefined()
+      if (testProps['data-testid']) {
+        expect(screen.getByTestId(testProps['data-testid'] as string)).toBeDefined()
       }
       
       unmount()
