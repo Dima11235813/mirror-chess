@@ -4,7 +4,12 @@ import { IonApp, IonContent, setupIonicReact } from '@ionic/react'
 import App from './App'
 import './styles.css'
 
-setupIonicReact()
+// Configure Ionic with theme support
+setupIonicReact({
+  mode: 'ios', // Use iOS mode for consistent styling
+  animated: true,
+  rippleEffect: true,
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

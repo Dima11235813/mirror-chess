@@ -74,12 +74,53 @@ Visit `http://localhost:5173` in your browser to play the game locally.
 - Respect `exactOptionalPropertyTypes`: only pass optional props when they are present (avoid `undefined`).
 
 ### 4. Testing
+
+#### Testing Strategy & Priorities
+We follow a **3-tier testing approach** with clear priorities and naming conventions:
+
+1. **Unit Tests** (`.test.ts` / `.test.tsx`) - **HIGHEST PRIORITY**
+   - Test pure, isolated functions and logic
+   - No DOM dependencies or external state
+   - Fast execution, run during local development
+   - **NO testing-library imports allowed** - these are for pure logic only
+
+2. **Integration Tests** (`.spec.ts` / `.spec.tsx`) - **LOWEST PRIORITY**
+   - Test component interactions and DOM behavior
+   - Use testing-library for component rendering
+   - Higher compute overhead, primarily for CI/CD
+   - Can use `@testing-library/*` packages
+
+3. **E2E Tests** (`.e2e.ts`) - **MEDIUM PRIORITY**
+   - Test complete user workflows from prj-mgmt stories
+   - Use Playwright for browser automation
+   - Run during CI/CD and before releases
+
+#### Test Commands
+```bash
+# Unit tests (fast, for local dev)
+npm run test:unit          # Run once
+npm run test:unit:watch    # Watch mode
+
+# E2E tests (slowest, for CI/CD)
+npm run test:e2e
+
+# All tests (CI/CD)
+npm run test:all
+
+# Coverage (unit tests only)
+npm run test:coverage
+```
+
+#### Test Requirements
 - All new or changed functions require:
   - **Happy path** test(s)
   - **Edge cases**
   - **Negative tests** (invalid input, blocked moves)
-- Use **Vitest**. Run `pnpm test:watch` during development.
-- Keep tests focused: one behavior per test.
+- **Unit tests first**: Focus on pure logic in `src/game/*`
+- **Integration tests sparingly**: Only when testing component interactions
+- **E2E tests**: For critical user workflows
+- Use **Vitest** for unit/integration, **Playwright** for E2E
+- Keep tests focused: one behavior per test
 
 ### 5. Submitting Changes
 1. **Branch** from `main`: `feat/mirror-castling`, `fix/rook-path-bug`, etc.

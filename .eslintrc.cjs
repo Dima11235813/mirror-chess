@@ -68,10 +68,34 @@ module.exports = {
       }
     },
     {
-      files: ["**/*.{test,spec}.ts", "**/__tests__/**/*"],
+      files: ["**/*.test.ts", "**/*.test.tsx"],
       env: { jest: true },
       rules: {
-        // Test-friendly relaxations (customize as you like)
+        // Unit tests - no testing-library allowed
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-restricted-imports": ["error", {
+          "patterns": [
+            {
+              "group": ["@testing-library/*"],
+              "message": "Testing library can only be used in integration tests (.spec.ts files). Unit tests (.test.ts) should test pure logic without DOM dependencies."
+            }
+          ]
+        }]
+      }
+    },
+    {
+      files: ["**/*.spec.ts", "**/*.spec.tsx"],
+      env: { jest: true },
+      rules: {
+        // Integration tests - testing-library allowed
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      files: ["**/*.e2e.ts"],
+      env: { jest: true, node: true },
+      rules: {
+        // E2E tests - Playwright specific rules
         "@typescript-eslint/no-explicit-any": "off"
       }
     },

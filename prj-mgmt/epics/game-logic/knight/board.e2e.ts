@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { urlForScenario } from '@shared/boards'
 import { KNIGHT_MIRROR_A3_SCENARIO } from '@mocks/mock-knight-mirror-move'
 
-test.describe.only('mirror-chess: knight moves from a3', () => {
+test.describe('mirror-chess: knight moves from a3', () => {
   test(KNIGHT_MIRROR_A3_SCENARIO.name, async ({ page }) => {
     await page.goto(urlForScenario(KNIGHT_MIRROR_A3_SCENARIO))
 

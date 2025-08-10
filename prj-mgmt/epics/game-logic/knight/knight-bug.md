@@ -1,38 +1,29 @@
-# Knight A3 Move Validation - Bug Fix and Test Scenario
+  2) [chromium] › prj-mgmt\epics\game-logic\knight\board.e2e.ts:6:3 › mirror-chess: knight moves from a3 › Knight A3: Regular moves (b1, b5, c1, c3) + Mirror move (h3)
 
-**Summary**
-As a Mirror Chess player, I want to validate that a knight on a3 can make the correct moves: regular L-shaped moves to b1 and b5, and a mirror move to h3. I also want to ensure that invalid moves like g2 (blocked by enemy pawn) and g4 (not a valid knight move) are not allowed.
+    Error: Timed out 5000ms waiting for expect(locator).toHaveCount(expected)
 
-**Current Test Scenario**
-- **Setup**: White knight on a3, Black pawn on g2
-- **Expected Valid Moves**:
-  - `b1` (regular L-move: 2 files right, 2 ranks down)
-  - `b5` (regular L-move: 2 files right, 2 ranks up)  
-  - `h3` (mirror move: same rank, opposite file)
-- **Expected Invalid Moves**:
-  - `g2` (blocked by black pawn - knight can't capture friendly pieces)
-  - `g4` (not a valid knight move from a3)
+    Locator: getByTestId('hint-c1')
+    Expected: 1
+    Received: 0
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByTestId('hint-c1')
+        9 × locator resolved to 0 elements
+          - unexpected value "0"
 
-**Implementation Status**
-- ✅ Knight mirror logic implemented in `moves.ts`
-- ✅ Regular L-shaped moves working
-- ✅ Same-rank mirror move working (a3 → h3)
-- ✅ Adjacent-rank mirror capture working (when enemy piece present)
-- ✅ E2E test updated to validate all scenarios
 
-**Test Coverage**
-- Unit tests: `src/game/knight.test.ts` covers all move scenarios
-- E2E test: `prj-mgmt/epics/game-logic/knight/board.e2e.ts` validates UI hints
-- Mock data: `src/mocks/mock-knight-mirror-move.ts` provides test board setup
+      12 |     // Validate that required move hints are displayed
+      13 |     for (const sq of KNIGHT_MIRROR_A3_SCENARIO.mustHints) {
+    > 14 |       await expect(page.getByTestId(`hint-${sq}`)).toHaveCount(1)
+         |                                                    ^
+      15 |     }
+      16 |
+      17 |     // Validate that invalid move hints are NOT displayed
+        at C:\Dev\mirror-chess\prj-mgmt\epics\game-logic\knight\board.e2e.ts:14:52
 
-**Related User Stories**
-- [Mirror Move](mirror-move.md) - Basic knight mirror functionality
-- [Mirror Attack](mirror-attack.md) - Knight mirror captures
-- [Regular Move](regular-move.md) - Standard L-shaped knight moves
-- [Regular Attack](regular-attack.md) - Standard knight captures
+    Error Context: test-results\prj-mgmt-epics-game-logic--caaad-b1-b5-c1-c3-Mirror-move-h3--chromium\error-context.md
 
-**Next Steps**
-- Run `npm run test` to ensure unit tests pass
-- Run `npm run e2e` to validate E2E test passes
-- Verify that the knight's moves are correctly displayed in the UI
-- Ensure no regressions in other knight move scenarios
+  2 failed
+    [chromium] › prj-mgmt\epics\game-logic\bishop\bishop-move.e2e.ts:17:3 › mirror-chess: bishop moves › Regular attack: Bc1 captures e3 and stops beyond (no f4,g5,h6)
+    [chromium] › prj-mgmt\epics\game-logic\knight\board.e2e.ts:6:3 › mirror-chess: knight moves from a3 › Knight A3: Regular moves (b1, b5, c1, c3) + Mirror move (h3)
+  4 skipped

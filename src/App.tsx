@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { IonHeader, IonToolbar, IonTitle, IonButton } from '@ionic/react'
 import { BoardView } from '@components/BoardView'
-import { initialPosition, fromPiecesSpec } from '@game/setup'
-import { reduceMove } from '@game/reducer'
-import type { GameState, Move } from '@game/types'
 import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
-import { listSavedGames, loadSavedGame, saveGame, deleteSavedGame, renameSavedGame, isValidGameName } from '@shared/persistence'
-import { useMemo } from 'react'
+import { ThemeToggle } from '@components/ionic'
+import { reduceMove } from '@game/reducer'
+import { fromPiecesSpec, initialPosition } from '@game/setup'
+import type { GameState, Move } from '@game/types'
+import { IonButton, IonHeader, IonTitle, IonToolbar } from '@ionic/react'
+import { deleteSavedGame, isValidGameName, listSavedGames, loadSavedGame, renameSavedGame, saveGame } from '@shared/persistence'
+import { useMemo, useState } from 'react'
 
 function loadStateFromUrl(): GameState {
   const url = new URL(window.location.href)
@@ -68,6 +68,7 @@ export default function App() {
           <div className="actions">
             <IonButton onClick={onReset}>Reset</IonButton>
             <SaveGameButton disabled={!canSave} onClick={onSave} />
+            <ThemeToggle />
           </div>
         </IonToolbar>
       </IonHeader>

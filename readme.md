@@ -16,9 +16,65 @@ Open `http://localhost:5173`.
 
 ## Tests
 
+### Testing Strategy
+
+We follow a **3-tier testing approach** with clear priorities and naming conventions:
+
+#### 1. Unit Tests (`.test.ts` / `.test.tsx`) - **HIGHEST PRIORITY**
+- **Purpose**: Test pure, isolated functions and logic
+- **Scope**: No DOM dependencies or external state
+- **Performance**: Fast execution, run during local development
+- **Restrictions**: **NO testing-library imports allowed** - these are for pure logic only
+- **Location**: Co-located with source files or in `src/game/*`
+
+#### 2. Integration Tests (`.spec.ts` / `.spec.tsx`) - **LOWEST PRIORITY**
+- **Purpose**: Test component interactions and DOM behavior
+- **Scope**: Use testing-library for component rendering
+- **Performance**: Higher compute overhead, primarily for CI/CD
+- **Dependencies**: Can use `@testing-library/*` packages
+- **Use Case**: Only when testing component interactions
+
+#### 3. E2E Tests (`.e2e.ts`) - **MEDIUM PRIORITY**
+- **Purpose**: Test complete user workflows from prj-mgmt stories
+- **Scope**: Use Playwright for browser automation
+- **Performance**: Run during CI/CD and before releases
+- **Location**: In `prj-mgmt/` folders alongside user stories
+
+### Test Commands
+
 ```bash
-npm test
+# Unit tests (fast, for local dev)
+npm run test          # Run once
+npm run test:watch    # Watch mode
+
+# Int tests (slower, for CI/CD)
+npm run test:int   # Run once
+npm run test:int:watch
+
+# E2E tests (slowest, for CI/CD and run locally before authoring PR)
+npm run test:e2e
+
+# All tests (CI/CD)
+npm run test:all
+
+# Coverage (unit tests only)
+npm run test:coverage
 ```
+
+### Development Workflow
+
+- **Local Development**: Run `npm run test:unit:watch` for fast feedback
+- **Before Committing**: Run `npm run test:unit` to ensure unit tests pass
+- **CI/CD**: Runs `npm run test:all` to execute all test types
+- **Pre-release**: Run `npm run test:e2e` to validate user workflows
+
+### Test Naming Enforcement
+
+The build will fail if these naming conventions are violated:
+- Unit tests must use `.test.ts` extension
+- Integration tests must use `.spec.ts` extension  
+- E2E tests must use `.e2e.ts` extension
+- Testing library can only be used in `.spec.ts` files
 
 ## Rules (v0.1)
 

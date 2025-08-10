@@ -1,24 +1,139 @@
-:root { --cell: min(10vw, 56px); }
+:root { 
+  --cell: min(10vw, 56px);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --accent-color: #2dd4bf;
+  --danger-color: #ef4444;
+}
+
+/* Dark theme variables */
+body.dark {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-color: #404040;
+  --accent-color: #2dd4bf;
+  --danger-color: #ef4444;
+}
+
 * { box-sizing: border-box; }
-body, html, #root { height: 100%; margin: 0; }
-.app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
-.board { width: calc(var(--cell) * 8); height: calc(var(--cell) * 8); margin: 12px auto; display: grid; grid-template-columns: repeat(8, 1fr); border: 2px solid #333; border-radius: 12px; overflow: hidden; position: relative; }
-.sq { position: relative; width: 100%; height: var(--cell); border: 0; display: grid; place-items: center; font-size: calc(var(--cell) * 0.6); }
+body, html, #root { 
+  height: 100%; 
+  margin: 0; 
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app { 
+  display: grid; 
+  grid-template-rows: auto 1fr auto; 
+  height: 100%; 
+  background-color: var(--bg-primary);
+}
+
+.board { 
+  width: calc(var(--cell) * 8); 
+  height: calc(var(--cell) * 8); 
+  margin: 12px auto; 
+  display: grid; 
+  grid-template-columns: repeat(8, 1fr); 
+  border: 2px solid var(--border-color); 
+  border-radius: 12px; 
+  overflow: hidden; 
+  position: relative; 
+}
+
+.sq { 
+  position: relative; 
+  width: 100%; 
+  height: var(--cell); 
+  border: 0; 
+  display: grid; 
+  place-items: center; 
+  font-size: calc(var(--cell) * 0.6); 
+}
+
 .sq.light { background: #f0d9b5; }
 .sq.dark { background: #b58863; }
-.sq.sel { outline: 3px solid #2dd4bf; z-index: 1; }
+.sq.sel { outline: 3px solid var(--accent-color); z-index: 1; }
+
 .glyph { pointer-events: none; }
-.hint { position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(45, 212, 191, 0.6); }
+
+.hint { 
+  position: absolute; 
+  width: 30%; 
+  height: 30%; 
+  border-radius: 50%; 
+  background: rgba(45, 212, 191, 0.6); 
+}
+
 .hint.cap { background: rgba(239, 68, 68, 0.7); }
+
 /* En passant destination: darker red dot */
 .hint.ep-dest { background: rgba(190, 18, 60, 0.9); }
+
 /* En passant captured square: translucent red background overlay */
-.hint.ep-cap { width: 100%; height: 100%; border-radius: 0; background: rgba(239, 68, 68, 0.25); }
-.footer { text-align: center; padding-bottom: env(safe-area-inset-bottom); }
+.hint.ep-cap { 
+  width: 100%; 
+  height: 100%; 
+  border-radius: 0; 
+  background: rgba(239, 68, 68, 0.25); 
+}
+
+.footer { 
+  text-align: center; 
+  padding-bottom: env(safe-area-inset-bottom); 
+  color: var(--text-primary);
+}
 
 /* Coordinate labels */
-.coordLabel { position: absolute; color: rgba(0,0,0,0.7); font-size: 12px; font-weight: 600; pointer-events: none; }
+.coordLabel { 
+  position: absolute; 
+  color: var(--text-secondary); 
+  font-size: 12px; 
+  font-weight: 600; 
+  pointer-events: none; 
+}
+
 .coordLabel.file { bottom: 4px; right: 6px; }
 .coordLabel.rank { top: 4px; left: 6px; }
+
+/* Theme toggle styling */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Ionic theme overrides */
+ion-header {
+  background-color: var(--bg-secondary);
+}
+
+ion-toolbar {
+  --background: var(--bg-secondary);
+  --color: var(--text-primary);
+}
+
+ion-item {
+  --background: var(--bg-primary);
+  --color: var(--text-primary);
+}
+
+ion-label {
+  --color: var(--text-primary);
+}
+
+ion-toggle {
+  --background: var(--border-color);
+  --background-checked: var(--accent-color);
+  --handle-background: var(--bg-primary);
+  --handle-background-checked: var(--bg-primary);
+}
 
 
