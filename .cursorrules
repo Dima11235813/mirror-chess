@@ -1,193 +1,142 @@
-# Mirror Chess – Cursor Rules / AI Contributor Style Guide
+# Mirror Chess – AI Contributor Guide (Terse)
 
-> **Purpose:** Instruct any AI/code-gen assistant (e.g., Cursor) how to safely evolve this codebase. Favor correctness, test coverage, and maintainability. All changes MUST comply with these rules.
+**Stack:** Ionic + React + TS + Vite + Vitest
+**Layers:**
 
-## 0) Project Snapshot
-- Stack: **Ionic + React + TypeScript + Vite + Vitest**
-- App layers:
-  - `src/game/*`: pure, FP-first chess logic (no side effects; deterministic). **Source of truth.**
-  - `src/components/*`: React views; render-only; delegate to `game` APIs.
-  - `src/App.tsx`: composition and thin state container.
-- Game twist: **Mirror rule** – file-mirror move on the same rank; path must be clear; **knights** may mirror regardless of blockers. Destination may be empty or enemy piece.
+* `src/game/*`: pure, FP-first chess logic (no side effects; deterministic) – source of truth
+* `src/components/*`: React views; render-only; call game APIs
+* `src/App.tsx`: thin state container
 
-## 1) Prime Directives (in order)
-1. **Correctness** (rules + turn logic) > performance > DX > style.
-2. **Purity/Immutability** in `src/game/*`. No DOM, timers, globals, Date, Math.random, I/O.
-3. **Types First**: Strengthen TypeScript types; don’t weaken `strict` config.
-4. **DRY** and **SOLID**: small pure functions; single-responsibility modules; dependency direction from UI → game APIs (never opposite).
-5. **Every feature ships with tests** (unit for functions, and where applicable component tests later).
-6. **Backwards compatibility** of exported types/APIs unless a major version bump + migration.
+**Game twist:** Mirror move: `(f,r)` ↔ `(7-f,r)` if path clear; knights ignore blockers.
 
-## 2) Allowed Dependencies
-- Runtime: those already in `package.json`.
-- Testing: `vitest` (and `@testing-library/react` later if we add component tests).
-- **Do not add** state libs, chess libs, or global event buses without explicit instruction.
+---
 
-## 3) Directory & Module Rules
-- Keep `src/game` fully UI-agnostic. Export **pure** functions and types only.
-- No cyclic deps. If a util is shared, place in `src/game/util/*`.
-- New game features each get:
-  - **Types** (`types.ts` extensions or new module types)
-  - **Logic** (`moves.ts`, `reducer.ts`, or new pure module)
-  - **Tests** (`tests/*.test.ts`)
-- UI additions go in `src/components/*` and accept explicit props; **no hidden state**.
+## 1. Priorities
 
-### 3.1 Domain type placement (shared vs component-local)
-- **Complex reusable types belong in dedicated domain files** for intuitive reuse and discoverability.
-  - **Shared app/domain types** (e.g., persistence records, DTOs, cross-component props/contracts) live under `src/shared/<domain>/` in a `types.ts` (or similarly named) module and are exported via the `@shared/*` alias.
-  - **Game-domain types** that are UI-agnostic live in `src/game/types.ts` or a co-located domain-specific types module within `src/game/*`.
-  - **Component-local only** shapes (used by a single component and not exported) may live next to the component (e.g., `SavedGamesList.types.ts`). If they become reused, promote them to `src/shared/<domain>/`.
-  - Avoid scattering ad-hoc type literals across files; prefer a **single source of truth** per domain.
+1. Correctness > perf > DX > style
+2. Purity/immutability in `src/game/*`
+3. Strict TS (no weakening `strict`)
+4. DRY + SOLID; UI → game deps only
+5. All features ship with tests (unit + e2e where applicable)
+6. Backward-compatible exports unless major version
 
-### 3.2 UI component structure (files, folders, tests)
-- **One component per file.** Avoid defining multiple components in the same file under `src/components/*`.
-  - Example: split `SavedGameRow` out of `SavedGamesList.tsx` into its own component module.
-- **Prefer folder-per-component** for anything non-trivial so tests and local-only types can be colocated:
-  - `src/components/SavedGamesList/`
-    - `SavedGamesList.tsx`
-    - `SavedGamesList.types.ts` (component-local types only; promote to `src/shared/<domain>/` when reused)
-    - `SavedGamesList.test.tsx` (unit tests; cover prop variants with typed mocks)
-    - `SavedGamesList.mocks.ts` (strongly-typed test data; use `as const` and `readonly` where applicable)
-- **Props typing:** always use a named `interface` for props; do not inline object type literals in signatures. Reuse shared domain types from `@shared/*` per 3.1.
-- **Optional props:** honor `exactOptionalPropertyTypes`; only pass optional props when defined (avoid passing `undefined`).
-- **Test guidance:** unit tests should cover variants of props and states using strongly typed mocks and constants (`as const`), without introducing side effects.
+---
 
-## 4) TypeScript Style (FP-leaning)
-- Prefer `readonly` on object fields and arrays exported from game-layer.
-- Prefer small pure functions with explicit inputs/outputs; no mutation except local copies.
-- Use union types, tagged discriminated unions, and `exactOptionalPropertyTypes`.
-- Avoid `any`, `ts-ignore`, ambient globals. If unavoidable, document with `/** WHY: ... */`.
-- Name data types with nouns (`Coord`, `Move`), functions with verbs (`legalMovesFor`).
+## 2. Dependencies
 
-### 4.1 No Magic Strings (Colors, kinds, tags)
-- Do not hardcode domain strings like `"white"`, `"black"`, or piece kinds inline.
-- Centralize domain literals in `src/game/types.ts` and import them everywhere.
-  - Use `Color` union with exported constants: `WHITE`, `BLACK`, and `COLORS` tuple.
-  - Prefer comparisons like `piece.color === WHITE` instead of `=== 'white'`.
-  - If new string unions are introduced, also export a `const` tuple and constants (e.g., `KINDS`, `MOVE_KINDS`).
-- Rationale: prevents typos, eases refactors, and improves autocomplete/testability.
+* Use existing runtime deps only
+* Testing: Vitest (+ @testing-library/react for components)
+* No chess libs, state libs, or global buses without request
 
-### 4.2 Named types over inline literals
-- Do **not** inline complex object type literals in function signatures or props. If a shape:
-  - has ≥ 2 properties,
-  - is passed across module boundaries, or
-  - is used in more than one place,
-  then define a **named** `interface`/`type` and export it from the appropriate domain file (see 3.1).
-- Prefer `interface` for extendable object shapes and `type` for unions/mapped/utility compositions.
-- Example (UI): replace
-  - `function SavedGameRow({ item, onLoad, onDelete, onRename }: { item: SavedGameMeta; onLoad: (id: string) => void; onDelete?: (id: string) => void; onRename?: (id: string, name: string) => void })`
-  with a named `SavedGameRowProps` exported from `src/shared/persistence/types.ts` (if reused) or `src/components/SavedGamesList.types.ts` (if local-only for now).
-- Continue to import domain constants/unions from `src/game/types.ts` for game logic concerns.
+---
 
-## 5) Game Rules Baseline (v0.1)
-- Standard chess moves (no castling, no en passant yet).
-- Mirror: move from `(f, r)` to `(7 - f, r)` if rank path is clear; **knight** exempt from path check. Capture allowed if target color ≠ mover.
-- Reducer applies only **legal** moves. No check/checkmate validation yet.
+## 3. Structure
 
-### 5.1 When extending rules
-- Add **tests first** that describe new behavior in examples.
-- Update docstrings and README.
-- Keep mirror logic **orthogonal** (separate function) so it composes with other rules.
+* `src/game`: UI-agnostic pure funcs + types
+* Shared utils → `src/game/util`
+* Features: add types + logic + tests
+* UI in `src/components/*`, explicit props, no hidden state
 
-## 6) Testing Requirements
-- Use `vitest`.
-- **Test file placement:** unit tests must be `.test.ts` files and be colocated next to the file under test (e.g., `src/game/moves.test.ts`). End-to-end tests must be `.spec.ts` files and live under the user story path in `prj-mgmt/...` or the `e2e/` directory when story-scoped.
-- **Shared test fixtures:** keep reusable board setups/mocks in `tests/shared/` and import from both unit and e2e tests when possible.
-- **Bug fixes policy:** when fixing a bug, add at least one unit test and one e2e test that reproduces the bug and proves the fix. Keep them targeted to the specific scenario.
-- **Mandated coverage for new/changed code:** function-level happy path + edge cases.
-- Each function with inputs of shape `A | B | ...` gets tests for **every variant**.
-- Write at least one **negative test** per feature (illegal move rejected, blocked path, etc.).
-- Name tests by behavior, not implementation (e.g., `"rook can mirror across empty rank path"`).
+**Types:**
 
-### 6.1 Example Test Templates
-```ts
-// Arrange
-const s = initialPosition();
-// Mutate board minimally for scenario
-// Act
-const moves = legalMovesFor(s, { f: 0, r: 0 });
-// Assert
-expect(moves.some(m => m.special === 'mirror')).toBe(true);
-```
+* Reusable domain types in `src/shared/<domain>/types.ts`
+* Game-domain types in `src/game/types.ts`
+* Component-local shapes near component; promote if reused
 
-## 7) Documentation Requirements
-- Every exported function must include a JSDoc block with:
-  - Description and invariants
-  - `@param` and `@returns` with units/constraints
-  - Notes on performance and failure modes if relevant
-- Update `README.md` with any user-visible rule changes.
+**Components:**
 
-## 8) UI/UX Rules
-- The board remains the single interaction surface.
-- Clicking a piece shows legal destinations (including mirror squares with an indicator). Don’t compute heavy logic in render; memoize.
-- Accessibility: keep `aria-label` updated with algebraic square + piece glyph.
-- No visual-only state encoding; always reflect selection/hints through accessible labels.
+* One component per file
+* Non-trivial → folder with `.tsx`, `.types.ts`, `.test.tsx`, `.mocks.ts`
+* Props: named `interface` (reuse shared types); no inline object literals
+* Optional props only when defined
 
-## 9) Performance
-- Prefer data-local loops to premature generalization.
-- Do not micro-opt without a failing perf test or trace.
-- Avoid re-render storms; compute move hints from state via `useMemo`.
+---
 
-## 10) Coding Pattern Examples
+## 4. TypeScript Style
 
-### 10.1 Pure function structure
-```ts
-/** Return all legal moves for a piece at `from`. Pure, deterministic. */
-export function legalMovesFor(state: GameState, from: Coord): ReadonlyArray<Move> {
-  // implementation...
-}
-```
+* `readonly` on exported arrays/objects
+* Small pure funcs, explicit I/O, no mutation except locals
+* Use unions, discriminated unions, exactOptionalPropertyTypes
+* No magic strings; centralize in constants (e.g., `WHITE`, `BLACK`, `KINDS`)
+* Named types for any shape ≥2 props or reused across modules
 
-### 10.2 Reducer rule
-```ts
-/** Apply `move` if legal; otherwise return the original state. No side effects. */
-export function reduceMove(state: GameState, move: Move): GameState {
-  // implementation...
-}
-```
+---
 
-## 11) Guardrails for AI Changes
-- ❌ Do **not** modify `tsconfig.json` to relax strictness.
-- ❌ Do **not** introduce stateful singletons in `src/game/*`.
-- ❌ Do **not** change exported types without updating all call sites + tests.
-- ✅ If you add a rule (e.g., castling), keep it **composable** (no big switch with intertwined concerns).
-- ✅ If you refactor, preserve public behavior; add characterization tests first when needed.
+## 5. Rules Baseline
 
-## 12) Roadmap (AI may implement in order, 1 PR each)
-1. **Check detection** (inCheck true/false) – pure function `isInCheck(state, color)` + tests.
-2. **Move legality filter** – reject moves that leave own king in check.
-3. **Captures UI** – highlight capture squares distinctly.
-4. **Game over states** – checkmate, stalemate detection.
-5. **Special moves** – castling (consider mirror interactions), pawn promotion, en passant.
-6. **Move log + undo** – immutable history with `past`/`present` pattern.
-7. **Capacitor setup** – Android/iOS builds with minimal native config.
+* Std chess (no castling/en passant yet)
+* Mirror: file-mirror move if path clear; knights exempt; captures allowed if target.color ≠ mover
+* Reducer applies only legal moves; no check/checkmate yet
+* New rules: tests first; mirror logic stays modular
 
-> For each roadmap item: add types, pure logic + tests, minimal UI changes, and README updates.
+---
 
-## 13) Review Checklist (must pass)
-- [ ] Types are stricter or equal (no regressions).
-- [ ] All new exports have JSDoc.
-- [ ] Tests: passing locally; new logic covered across variants.
-- [ ] Build passes locally (`npm run build`).
-- [ ] No side effects in `src/game/*`.
-- [ ] No new dependencies (unless requested).
-- [ ] UI remains responsive and accessible.
+## 6. Testing
 
-## 14) Prompts the AI Can Use Safely
-- "Add `isInCheck(state, color)` in `src/game/rules/check.ts` with tests for attacked squares by sliders/knights/pawns/kings."
-- "Filter `legalMovesFor` by `leavesOwnKingSafe` without mixing mirror generation logic."
-- "Introduce `MoveKind = 'normal' | 'capture' | 'mirror'` and update tests accordingly."
-- "Implement Android/iOS build via Capacitor without altering runtime logic."
+* Vitest (`.test.ts` near file; `.spec.ts` for e2e in story path)
+* Shared mocks in `tests/shared/`
+* Bugfixes: add unit + e2e for scenario
+* Coverage: happy path + edge cases + negative tests
+* Name tests by behavior, not impl
+* Always run `npm run test` + `npm run e2e`
 
-## 15) Definition of Done
-A change is **Done** when:
-- Behavior is correct and documented,
-- Types are explicit and safe,
-- Tests cover success + edge + failure paths,
-- Build succeeds locally (`npm run build`),
-- Lint/format/test pass,
-- README updated if behavior changes,
-- No violations of sections 1–11.
+---
 
-## 16) Code Style
-* Prefer for...of over array-literal forEach to avoid leading semicolons and improve readability.
+## 7. Docs
+
+* JSDoc for all exports: desc, invariants, @param/@returns, perf/failure notes
+* Update README on user-visible changes
+
+---
+
+## 8. UI/UX
+
+* Board = sole interaction
+* Click piece → legal moves (mirror indicated)
+* Heavy calc: memoize
+* `aria-label` for a11y; no visual-only cues
+
+---
+
+## 9. Performance
+
+* Simple loops; no premature opts
+* Avoid re-render storms; compute hints in `useMemo`
+
+---
+
+## 10. Guardrails
+
+* ❌ Relax TS strictness / global state in game layer / change exports w/o tests
+* ✅ New rules composable; refactors preserve behavior (add characterization tests first)
+
+---
+
+## 11. Roadmap (1 PR each)
+
+1. isInCheck
+2. Filter illegal (self-check) moves
+3. Capture UI
+4. Game over states
+5. Special moves (castling, promo, en passant)
+6. Move log + undo
+7. Capacitor Android/iOS
+
+---
+
+## 12. Review Checklist
+
+* Types stricter or equal
+* All new exports documented
+* All tests pass (unit + e2e)
+* Build OK (`npm run build`)
+* No side effects in `src/game/*`
+* No unapproved deps
+* UI responsive + a11y intact
+
+---
+
+## 13. Style
+
+* Prefer `for...of` over array `forEach`
+* Functions named with verbs; types with nouns

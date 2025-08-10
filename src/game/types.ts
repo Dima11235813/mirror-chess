@@ -1,6 +1,11 @@
 /** Color of a side. */
 export type Color = 'white' | 'black'
 
+/** Color constants to avoid magic strings */
+export const WHITE: Color = 'white'
+export const BLACK: Color = 'black'
+export const COLORS: readonly [Color, Color] = [WHITE, BLACK] as const
+
 /** Files [0..7] left→right (a..h), Ranks [0..7] bottom→top from White's POV. */
 export interface Coord { readonly f: number; readonly r: number }
 

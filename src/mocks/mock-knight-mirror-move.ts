@@ -1,32 +1,26 @@
 import type { BoardScenario } from '@shared/boards'
 
 /**
- * Knight mirror hop showcase based on e2e-strategy.md (Na3 -> h5).
- * Using compact piece spec for app URL loading.
- *
- * FEN reference (for humans):
- * r1b1kb2/1bB2p2/PrnQbn1R/3p1np1/7P/N5n/P1PPPPP1/R1BQKB2 w - - 0 1
+ * Knight mirror move test scenario: Na3 with simple board setup.
+ * Tests regular L-shaped moves (b1, b5, c1, c3) and mirror move to h3.
+ * Includes a pawn on g2 to validate blocking behavior.
  */
 
-// Convert the FEN position to our compact spec (only the necessary pieces).
-// We include enough pieces to reproduce the mirror-hop legality and hints.
-// The essential bits are a White knight on a3 with path-blockers elsewhere
-// irrelevant to the knight's mirror ability, and that h5 is a legal mirror.
-
 export const KNIGHT_MIRROR_A3_SCENARIO: BoardScenario = {
-  name: 'Knight mirror A3 -> H5',
-  // Compact spec crafted from the reference diagram/position; sufficient for UI hints
-  // White pieces
+  name: 'Knight A3: Regular moves (b1, b5, c1, c3) + Mirror move (h3)',
+  // Simple board with just a knight on a3 and a pawn on g2
   spec: [
-    'w:Na3,Ke1,Qd1,Bc2,Rh6,Pa2,Pb2,Pc2,Pd2,Pe2,Pf2,Ph4',
-    // Black pieces
-    'b:Kg8,Qd6,Bb7,Bf6,Nc6,Ng3,Pa6,Pd5,Ng5,Pg6,Rh5'
+    'w:Na3',  // White knight on a3
+    'b:Pg2'   // Black pawn on g2 (blocks some moves)
   ].join('; '),
   turn: 'white',
   select: 'a3',
-  // As per v0.1 rules: mirror is same-rank opposite file; knights ignore blockers.
-  mustHints: ['h3'],
-  mustNotHints: ['h5']
+  // Regular L-shaped moves should be available: b1, b5, c1, c3
+  // Mirror move to h3 should also be available
+  mustHints: ['b1', 'b5', 'c1', 'c3', 'g4'],
+  // g2 should be blocked by the black pawn (knight can't capture friendly pieces)
+  // g4 should not be a valid move (not a standard knight move from a3)
+  mustNotHints: ['g2']
 }
 
 

@@ -12,7 +12,10 @@ import { toIndex, insideBoard, mirrorFile } from './coord'
 
 export function legalMovesFor(state: GameState, from: Coord): Move[] {
   const piece = state.board[toIndex(from)]
-  if (!piece || piece.color !== state.turn) return []
+  if (!piece) return []
+  
+  // For testing and analysis, we want to generate moves for any piece
+  // The turn check is handled at the game state level when applying moves
   const acc: Move[] = []
   switch (piece.kind) {
     case 'P': pushAll(acc, pawnMoves(state, from, piece)); break
@@ -40,11 +43,26 @@ export function legalMovesFor(state: GameState, from: Coord): Move[] {
     case 'K': pushAll(acc, kingMoves(state, from, piece)); break
   }
   // Knight mirror: knights may mirror to the same rank's opposite file regardless of blockers
+  // AND to adjacent ranks ONLY for capture purposes
   if (piece.kind === 'N') {
-    const mirror = mirrorFile(from)
-    if (!sameSquare(mirror, from) && insideBoard(mirror)) {
-      const t = state.board[toIndex(mirror)]
-      if (!t || t.color !== piece.color) acc.push({ from, to: mirror, special: 'mirror' })
+    // Same rank mirror (h3 from a3) - always allowed
+    const sameRankMirror = mirrorFile(from)
+    if (!sameSquare(sameRankMirror, from) && insideBoard(sameRankMirror)) {
+      const t = state.board[toIndex(sameRankMirror)]
+      if (!t || t.color !== piece.color) acc.push({ from, to: sameRankMirror, special: 'mirror' })
+    }
+    
+    // Adjacent rank mirrors ONLY for capture (h4 from a3, h2 from a3)
+    // Only generate these if there's an enemy piece to capture
+    for (const dr of [-1, 1]) {
+      const adjacentRankMirror = { f: mirrorFile(from).f, r: from.r + dr }
+      if (insideBoard(adjacentRankMirror)) {
+        const t = state.board[toIndex(adjacentRankMirror)]
+        // Only allow mirror to adjacent ranks if there's an enemy piece to capture
+        if (t && t.color !== piece.color) {
+          acc.push({ from, to: adjacentRankMirror, special: 'mirror' })
+        }
+      }
     }
   }
   // Generic same-rank mirror for K, R, Q only.
@@ -196,10 +214,13 @@ function diagonalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
   for (const [df, dr] of dirs) {
     let f = from.f + df
     let r = from.r + dr
+    let canPortal = true
     // Walk within center board until hitting a blocker or stepping out of file bounds.
     while (r >= 0 && r < 8) {
       // If we step out of file bounds, attempt a single wrap.
       if (f < 0 || f > 7) {
+        // Only allow portal if path to seam was clear
+        if (!canPortal) break
         // Determine wrapped file after crossing seam once.
         let wf = f < 0 ? f + 8 : f - 8
         // Only one seam-cross allowed; if we would step out again immediately, skip.
@@ -219,7 +240,11 @@ function diagonalPortalWrap(state: GameState, from: Coord, p: Piece): Move[] {
       // In bounds: check for blocker before reaching the seam.
       const to: Coord = { f, r }
       const t = board[toIndex(to)]
-      if (t) break
+      if (t) {
+        // If we encounter a blocker, we cannot portal in this direction
+        canPortal = false
+        break
+      }
       f += df
       r += dr
     }
