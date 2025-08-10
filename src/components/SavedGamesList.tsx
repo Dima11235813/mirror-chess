@@ -2,7 +2,7 @@
 import type { SavedGameMeta } from '@shared/persistence';
 import type { SavedGameRowProps } from '@shared/persistence/types';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { IonicButton } from '@components/ionic/button/IonicButton';
+import { IonicButton, IonicInput } from '@components/ionic';
 
 export interface SavedGamesListProps {
   readonly items: readonly SavedGameMeta[];
@@ -61,19 +61,21 @@ function SavedGameRow({ item, onLoad, onDelete, onRename }: SavedGameRowProps) {
   return (
     <li className="saved-game">
       <div className="meta">
-        <input
+        <IonicInput
           type="text"
           placeholder="Name this game…"
           value={name}
-          onChange={(e) => {
-            const v = e.currentTarget.value;
+          onIonInput={(e) => {
+            const v = e.detail.value as string;
             setName(v);
             debouncedRename(v);
           }}
           aria-label="Saved game name"
           data-testid={`name-${item.id}`}
-          minLength={3}
-          maxLength={200}
+          minlength={3}
+          maxlength={200}
+          label="Game Name"
+          helperText="Enter a name for this saved game"
         />
         <span className="turn">
           Turn: <strong>{item.turn}</strong>

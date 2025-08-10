@@ -11,6 +11,11 @@ describe('IonicButton Types and Defaults', () => {
       disabled: false,
       strong: false,
       type: "button",
+      buttonType: "button",
+      mode: "md",
+      rippleEffect: true,
+      animated: true,
+      routerDirection: "forward",
     })
   })
 
@@ -38,7 +43,7 @@ describe('IonicButton Types and Defaults', () => {
     validColors.forEach(color => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        color,
+        color: color!,
       }
       expect(props.color).toBe(color)
     })
@@ -52,7 +57,7 @@ describe('IonicButton Types and Defaults', () => {
     validSizes.forEach(size => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        size,
+        size: size!,
       }
       expect(props.size).toBe(size)
     })
@@ -66,7 +71,7 @@ describe('IonicButton Types and Defaults', () => {
     validFills.forEach(fill => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        fill,
+        fill: fill!,
       }
       expect(props.fill).toBe(fill)
     })
@@ -80,7 +85,7 @@ describe('IonicButton Types and Defaults', () => {
     validShapes.forEach(shape => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        shape,
+        shape: shape!,
       }
       expect(props.shape).toBe(shape)
     })
@@ -94,7 +99,7 @@ describe('IonicButton Types and Defaults', () => {
     validExpands.forEach(expand => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        expand,
+        expand: expand!,
       }
       expect(props.expand).toBe(expand)
     })
@@ -108,7 +113,7 @@ describe('IonicButton Types and Defaults', () => {
     validTypes.forEach(type => {
       const props: Partial<IonicButtonProps> = {
         children: 'Test',
-        type,
+        type: type!,
       }
       expect(props.type).toBe(type)
     })
