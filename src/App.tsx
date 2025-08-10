@@ -77,7 +77,6 @@ export default function App() {
         <p>Turn: <strong>{state.turn}</strong>{state.inCheck ? ' (check)' : ''}</p>
       </footer>
       <section className="saves">
-        <h3>Saved Games</h3>
         <SavedGamesList items={savedGames} onLoad={onLoadSaved} onDelete={onDeleteSaved} onRename={onRenameSaved} />
       </section>
     </div>

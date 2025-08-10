@@ -238,4 +238,50 @@ ion-toggle {
   --ion-color-step-950: #f2f2f2;
 }
 
+/* Saved Games Section Styling */
+.saved-games-section {
+  margin: 16px;
+}
+
+.saved-games-header {
+  --background: var(--bg-secondary);
+  --color: var(--text-primary);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.saved-games-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Update CSS selectors to match new structure */
+.saved-game-card {
+  margin: 0;
+  --background: var(--bg-primary);
+  --color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.saved-game-card ion-card-content {
+  padding: 16px;
+}
+
+.saved-game-card .actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+/* Accordion toggle animation */
+.saved-games-accordion .accordion-header ion-icon[slot="end"] {
+  transition: transform 0.3s ease;
+}
+
+.saved-games-accordion .accordion-header ion-icon[slot="end"].expanded {
+  transform: rotate(180deg);
+}
+
 
