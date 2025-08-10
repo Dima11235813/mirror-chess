@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+
 import type { SavedGameMeta } from '@shared/persistence';
 import type { SavedGameRowProps } from '@shared/persistence/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { IonicButton } from '@components/ionic/button/IonicButton';
 
 export interface SavedGamesListProps {
   readonly items: readonly SavedGameMeta[];
@@ -81,17 +83,24 @@ function SavedGameRow({ item, onLoad, onDelete, onRename }: SavedGameRowProps) {
         </span>
       </div>
       <div className="actions">
-        <button onClick={() => onLoad(item.id)} data-testid={`load-${item.id}`}>
+        <IonicButton 
+          onClick={() => onLoad(item.id)} 
+          data-testid={`load-${item.id}`}
+          size="large"
+          fill='solid'
+        >
           Load
-        </button>
+        </IonicButton>
         {onDelete && (
-          <button
+          <IonicButton
             onClick={() => onDelete(item.id)}
             aria-label="Delete save"
             data-testid={`delete-${item.id}`}
+            size="large"
+            fill="outline"
           >
             Delete
-          </button>
+          </IonicButton>
         )}
       </div>
     </li>

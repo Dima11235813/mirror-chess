@@ -6,7 +6,8 @@ import './styles.css'
 
 // Configure Ionic with theme support
 setupIonicReact({
-  mode: 'ios', // Use iOS mode for consistent styling
+  // mode: 'ios', // Use iOS mode for consistent styling
+  mode: 'md', // Use Material mode for consistent styling
   animated: true,
   rippleEffect: true,
 })

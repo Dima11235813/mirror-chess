@@ -12,4 +12,3 @@ As a dev of the application, I want to have buttons that can be easily customize
 - Document the usage of the button component in the project documentation.
 - This should be a button-readme.md file, in the same folder as the component, that explains how to use the component, what properties are available, and provides examples of different configurations.
 - We should include a button mocks file that provides mocks of different inputs to the component for testing and documentation purposes.
-- 

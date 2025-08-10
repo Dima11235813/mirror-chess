@@ -1,7 +1,7 @@
 import { BoardView } from '@components/BoardView'
 import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
-import { ThemeToggle } from '@components/ionic'
+import { ThemeToggle } from '@components/ionic/ThemeToggle'
 import { reduceMove } from '@game/reducer'
 import { fromPiecesSpec, initialPosition } from '@game/setup'
 import type { GameState, Move } from '@game/types'
