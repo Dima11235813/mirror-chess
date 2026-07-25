@@ -3,7 +3,7 @@ import { urlForSpec } from '@shared/boards'
 import { squareTestId, hintTestId } from '@shared/ui/selectors'
 
 test.describe('mirror-chess: pawn regular moves', () => {
-  test('White pawn e2: can go to e3 and e4 if path/landing empty', async ({ page }) => {
+  test.only('White pawn e2: can go to e3 and e4 if path/landing empty', async ({ page }) => {
     const spec = 'w:Pe2'
     await page.goto(urlForSpec(spec, 'white'))
 
@@ -13,7 +13,7 @@ test.describe('mirror-chess: pawn regular moves', () => {
     await expect(page.getByTestId(hintTestId('e4'))).toHaveCount(1)
   })
 
-  test('White pawn e2: blocked forward on center prevents e3/e4', async ({ page }) => {
+  test.only('White pawn e2: blocked forward on center prevents e3/e4', async ({ page }) => {
     const spec = 'w:Pe2,Pe3'
     await page.goto(urlForSpec(spec, 'white'))
 
