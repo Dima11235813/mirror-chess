@@ -1,86 +1,240 @@
 # Mirror Chess
 
-What’s implemented now:
+A chess variant on a standard 8×8 board with an added **mirror portal**: the `a`-file
+and the `h`-file are linked at equal rank (`a4 ↔ h4`), so the board has no left or
+right edge. Every piece crosses, in one of two ways:
 
-* Clean board UI with selectable pieces + legal-move hints.
-* Core game engine (pure functions) in `src/game/*`.
-* Mirror rule (v0.1): a piece may also move to the **file-mirrored square** (a↔h, b↔g, c↔f, d↔e) on the **same rank** if the horizontal path is clear; **knights** may mirror regardless of blockers. Tests included.
+- **Sliders** (bishop, rook, queen) pass *through* the seam: a ray that reaches an
+  empty edge square hops across at the same rank and keeps sliding on the far side.
+  A bishop on `b3` reaches `h4, g5, f6, e7, d8`.
+- **Steppers** (knight, king, pawn) *land* across it: the file of the destination
+  wraps while the rank is whatever the move dictates. A knight on `a3` keeps all
+  eight of its L-moves — `h5, g4, g2, h1` among them. Pawn captures wrap; pawn
+  pushes do not.
 
-## Dev
+The long-term vision is a polished, projectable variant that can be rendered multiple
+ways (2D board, later a 3D / "tri-board" projection) and played by people against
+each other online.
+
+> **Status: early prototype.** The mirror mechanic is now formally specified in
+> [`prj-mgmt/epics/rules/mirror-portal-spec.md`](./prj-mgmt/epics/rules/mirror-portal-spec.md),
+> and the game core is derived from it — the spec's worked examples run as unit
+> tests. What is still missing is the legality layer (check, pins, castling,
+> promotion, en passant) and everything above a single-device hot-seat prototype.
+> See [CLAUDE.md](./CLAUDE.md) for the contributor/AI operating manual and
+> [roadmap.md](./roadmap.md) for direction.
+
+---
+
+## The vision
+
+- **Play mirror chess with other people** — a mobile and web app.
+- **Log in with Google**, connect via social integrations, and **track scores**.
+- **Let players propose new rules** — the variant is meant to evolve.
+- **A fast, authoritative rules engine** (candidate: a Rust core) consumed by the
+  front end over the network, so all clients agree on legality and outcomes.
+
+None of the above is built yet. Today the repo is a single-device, hot-seat web
+prototype. The vision is what the reboot is organizing toward.
+
+---
+
+## What actually works today
+
+- **Board UI** (Ionic React): click a piece to select it; legal destinations are
+  highlighted as hints; click a hint to move. Ordinary moves, captures and **portal
+  moves** are all distinguishable — portal destinations are drawn as hollow rings, so
+  they differ by shape and not only colour. Choosing a square your king's safety
+  forbids explains why. File/rank labels are drawn on the board edges.
+- **Check is shown, not just enforced**: the checked king, the piece giving check and
+  the squares the check passes through are marked — including across the seam, so a
+  check from the far side of the board can be traced back to its source. Every visual
+  cue has a screen-reader counterpart in the square's label.
+- **Pure game core** in `src/game/*`: standard chess move generation for all pieces,
+  plus the **mirror portal for every piece**, derived from the rules spec — sliders
+  by transit, steppers by wrapping the file.
+- **Full legality**: check detection, self-check filtering (so pins and
+  check-resolution work), checkmate and stalemate. Attacks travel through the seam,
+  so a bishop can give check — or mate — from the far side of the board.
+- **Games end**: draws by threefold repetition, the fifty-move rule and insufficient
+  material, each announced by name. Insufficient material is decided *per ruleset*,
+  because the seam changes the answer — see [Known issues](#known-issues) and
+  `src/game/draw-rules.ts`.
+- **All the rules**: promotion (with a picker offering all four pieces), castling, and
+  en passant. Two of the three are untouched by the seam; **en passant is not** — a pawn
+  on `a5` can take one that just played `h7–h5`, landing on `h6`. Castling needed no new
+  rule, but a bishop can forbid it from the opposite corner of the board.
+- **Checked against published chess.** With every portal flag off this *is* chess, so the
+  standard perft suite applies: start position to depth 5 (4,865,609), Kiwipete to depth 4
+  (4,085,603), Positions 3–5. All match. `src/game/fen.ts` reads FEN, which is how those
+  positions are distributed and what a bug report should carry.
+- **Play against the engine.** Pick a side and a strength, and it plays. `src/engine/*` is
+  negamax with alpha-beta, MVV-LVA move ordering, iterative deepening and quiescence search,
+  over a deliberately geometry-free evaluation. It runs on a **Web Worker**, so the page
+  never freezes while it thinks, and it announces its progress to screen readers.
+  It wins a hanging queen, declines a poisoned capture, prefers mate to material, finds a
+  two-move back-rank tactic on its gentlest setting, and finds the king-and-bishop mate that
+  exists *only* because of the seam.
+  → **[A guided tour of the engine](./docs/engine/README.md)**, which explains how a chess
+  engine works using this one as the text, and ends each section with *what the mirror seam
+  changes here*. Plus a [glossary](./docs/engine/glossary.md).
+- **Save / load games** to browser storage, name/rename/delete saved games, and
+  **export/import** the saved-game list as a JSON file.
+- **Light/dark theme** toggle.
+- **Load a position from the URL** via a compact piece spec, e.g.
+  `?board=w:Ke1,Qd1,Ra1;b:Kg8,Qd8&turn=white` (see `fromPiecesSpec` in `src/game/setup.ts`).
+  `&rules=` picks the variant and `&clock=` presets the fifty-move counter.
+
+What is **not** built: a move log, undo, notation, any networking, accounts, or mobile
+packaging.
+
+---
+
+## Tech stack
+
+| Area | Choice |
+| --- | --- |
+| UI | [Ionic React](https://ionicframework.com/) 8, React 19 |
+| Build / dev server | Vite |
+| Language | TypeScript (strict) |
+| Unit / integration tests | Vitest (+ `@testing-library/react`) |
+| E2E tests | Playwright |
+| Routing | react-router-dom 5 |
+| Lint / format | ESLint + Prettier |
+
+The game core (`src/game/*`) is intentionally **pure and UI-agnostic** — plain
+functions over immutable data — so it can later be replaced or mirrored by a
+native (Rust) engine without touching the rules' definition of truth.
+
+---
+
+## Getting started
 
 ```bash
-npm i
-npm run dev
+npm install
+npm run dev        # Vite dev server at http://localhost:5173
 ```
-Open `http://localhost:5173`.
 
-## Tests
-
-### Testing Strategy
-
-We follow a **3-tier testing approach** with clear priorities and naming conventions:
-
-#### 1. Unit Tests (`.test.ts` / `.test.tsx`) - **HIGHEST PRIORITY**
-- **Purpose**: Test pure, isolated functions and logic
-- **Scope**: No DOM dependencies or external state
-- **Performance**: Fast execution, run during local development
-- **Restrictions**: **NO testing-library imports allowed** - these are for pure logic only
-- **Location**: Co-located with source files or in `src/game/*`
-
-#### 2. Integration Tests (`.spec.ts` / `.spec.tsx`) - **LOWEST PRIORITY**
-- **Purpose**: Test component interactions and DOM behavior
-- **Scope**: Use testing-library for component rendering
-- **Performance**: Higher compute overhead, primarily for CI/CD
-- **Dependencies**: Can use `@testing-library/*` packages
-- **Use Case**: Only when testing component interactions
-
-#### 3. E2E Tests (`.e2e.ts`) - **MEDIUM PRIORITY**
-- **Purpose**: Test complete user workflows from prj-mgmt stories
-- **Scope**: Use Playwright for browser automation
-- **Performance**: Run during CI/CD and before releases
-- **Location**: In `prj-mgmt/` folders alongside user stories
-
-### Test Commands
+### Build
 
 ```bash
-# Unit tests (fast, for local dev)
-npm run test          # Run once
-npm run test:watch    # Watch mode
+npm run build      # tsc -b && vite build
+npm run preview    # serve the production build on :5173
+```
 
-# Int tests (slower, for CI/CD)
-npm run test:int   # Run once
-npm run test:int:watch
+### Tests
 
-# E2E tests (slowest, for CI/CD and run locally before authoring PR)
-npm run test:e2e
+The project uses a **3-tier** strategy with enforced file-naming (a build script,
+`scripts/validate-test-naming.js`, fails the build on violations):
 
-# All tests (CI/CD)
-npm run test:all
+| Tier | Extension | Runner | Purpose |
+| --- | --- | --- | --- |
+| Unit (highest priority) | `*.test.ts(x)` | Vitest | Pure logic, no DOM, **no testing-library** |
+| Integration (lowest priority) | `*.spec.ts(x)` | Vitest + Testing Library | Component / DOM behavior |
+| E2E (medium priority) | `*.e2e.ts` | Playwright | User workflows, colocated with `prj-mgmt` stories |
 
-# Coverage (unit tests only)
+```bash
+npm run test          # unit (fast, local dev)
+npm run test:watch
 npm run test:coverage
+
+npm run test:int      # integration
+npm run e2e           # end-to-end (Playwright); needs the preview server
 ```
 
-### Development Workflow
+> Note: `readme` references to `npm run test:e2e` / `test:all` / `test:unit:*` are
+> aspirational — the real script names are in [`package.json`](./package.json).
+> Cleaning these up is a tracked task in the reboot.
 
-- **Local Development**: Run `npm run test:unit:watch` for fast feedback
-- **Before Committing**: Run `npm run test:unit` to ensure unit tests pass
-- **CI/CD**: Runs `npm run test:all` to execute all test types
-- **Pre-release**: Run `npm run test:e2e` to validate user workflows
+---
 
-### Test Naming Enforcement
+## Repository map
 
-The build will fail if these naming conventions are violated:
-- Unit tests must use `.test.ts` extension
-- Integration tests must use `.spec.ts` extension  
-- E2E tests must use `.e2e.ts` extension
-- Testing library can only be used in `.spec.ts` files
+```
+src/
+  game/                Pure chess core (source of truth for rules)
+    types.ts           Coord, Piece, Board, Move, GameState
+    coord.ts           index/algebraic helpers, mirrorFile()
+    moves.ts           legalMovesFor() — standard + mirror move generation
+    reducer.ts         reduceMove() — applies a legal move, flips turn
+    setup.ts           initialPosition(), fromPiecesSpec()
+    *.test.ts          Unit tests per piece / rule
+  components/          React views (render-only; call the game API)
+    BoardView.tsx      The interactive board
+    ionic/             Wrapped Ionic components (button, input, theme)
+    Saved*.tsx         Save/load games UI
+  shared/              Persistence, board fixtures, UI selectors/testids
+  App.tsx              Thin state container
+prj-mgmt/              Project management: epics → features → stories → tasks/bugs
+qa/                    QA fixtures (e.g. sample saved-game export)
+scripts/               Build tooling (test-naming validator)
+```
 
-## Rules (v0.1)
+## Project management
 
-- Standard chess moves (no castling/en passant yet). Captures are allowed per normal chess.
-- Mirror portal (horizontal):
-  - For any piece, compute the file-mirror on the same rank. If the rank path is clear (knights ignored), and the destination is empty or contains an opponent piece, the piece may move to that mirror square with `special: 'mirror'`.
-  - For rooks and queens, if the mirror square is empty and the rank path is clear, they may continue sliding on the same rank on the opposite half (away from the center) until blocked, also as `special: 'mirror'` moves.
-  - Portal movement is strictly horizontal: it never changes rank. Example: a queen on `d3` may portal to `h3` (and potentially `g3`, `f3`), but not to `h7` via the portal. Any non‑horizontal target like `h7` would only be legal if it is a standard queen move with an unobstructed path.
-  - Knights portal differently: the horizontal component is portalized, then the knight completes the vertical ±2 step. Example: a knight on `h3` portals to file `a` and lands on `a5` or `a1` if inside the board and not blocked by own piece. The square `a3` is not a knight portal target.
+Work is tracked as Markdown under `prj-mgmt/` in a hierarchy of
+**epic → feature → story → task / bug**. Each user story carries acceptance
+criteria and, where relevant, a colocated `*.e2e.ts` that verifies it. See
+[CLAUDE.md](./CLAUDE.md) for the conventions the reboot standardizes on.
+
+---
+
+## Known issues
+
+Resolved by the rules-first reboot: the mirror rule now has a single specification,
+`moves.ts` is derived from it, and the story files agree with the code. What remains:
+
+- **The engine is slow, and the board is why.** It reaches depth 4 on a middlegame in about
+  a second and depth 6 in minutes — roughly tens of thousands of nodes per second where a
+  chess engine manages millions. The cause is not the search: a single node costs ~300 µs
+  because the reference move generator copies the board and re-scans for attacks on every
+  legality test. The fix is make/unmake and attack tables
+  ([`search-engine.md`](./prj-mgmt/epics/balance/search-engine.md)), with the current
+  generator kept as the oracle they are checked against. A transposition table would help
+  the node *count*, but not this gap.
+- **Quiescence is 80–94% of the search**, and the seam roughly triples the tree. The
+  predicted quiescence explosion is real and measured; it is the reason evaluation is
+  material-only.
+- **The three difficulty levels are asserted, not measured.** They differ only in search
+  depth, which is the right design, but "each level beats the one below" needs the
+  self-play harness to verify.
+- **Piece values are inherited from chess and are probably wrong.** They are flagged as
+  such in `src/engine/eval.ts`. The seam invalidates the geometric assumptions every chess
+  engine is built on — piece-square tables are near-meaningless, bishops are not
+  colour-bound, and each rank is a cycle — so evaluation starts deliberately geometry-free
+  and the values are meant to be *derived* from self-play rather than asserted.
+  See the [engine epic](./prj-mgmt/epics/engine/README.md).
+- **No move *log*.** `GameState` now carries the history the draw rules need —
+  positions since the last irreversible move, plus the halfmove clock — but not the
+  sequence of *moves*, so undo, a move log and notation still have nothing to read.
+- **Balance is untested.** Now that every piece crosses the seam, kings are much
+  harder to corner and edge files are stronger. Which pieces *should* cross is being
+  turned into an experiment rather than a guess: each piece's portal becomes a feature
+  flag, an engine plays all 64 combinations against itself, and the best-balanced one
+  becomes the default. See the
+  [balance epic](./prj-mgmt/epics/balance/README.md).
+- **A bishop is mating material here.** Not a defect — a finding, and one that
+  overturned an assumption inherited from chess. `Ka1, Bd4` mates a lone `Kh8`: the
+  bishop checks along `d4–h8` while its other diagonal steps through the seam onto
+  `h7` and continues to `g8`, covering both flight squares. So "king and bishop versus
+  king" is a draw only when the bishop cannot capture across the seam, and
+  same-coloured bishops stop being a draw as soon as a bishop can cross at all, since
+  crossing flips its square colour. Both gates are proved by enumerating every
+  placement under every relevant flag setting in `src/game/draw-rules.test.ts`.
+- **Notation.** SAN cannot express a portal move; the spec proposes a tag
+  (`Bb3–h4*`) but nothing implements it.
+- **Unrelated component debt.** `SavedGamesList.spec.ts` fails the test-naming
+  validator and, with the Ionic input/button specs, accounts for the failing
+  integration tests. None of it touches `src/game/*`.
+- **E2E flakiness.** `npm run e2e` intermittently times out on `page.goto` against
+  the preview server. It is much worse at the default worker count, but happens
+  occasionally even at `--workers=1`; an affected test always passes when re-run on
+  its own (`prj-mgmt/epics/rules/task-e2e-parallelism.md`).
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for PR conventions and
+[CLAUDE.md](./CLAUDE.md) for the coding standards and the research → plan →
+implement → QA → review → commit workflow.
