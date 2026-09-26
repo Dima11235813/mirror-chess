@@ -76,7 +76,9 @@ record rather than trusted from the miner that wrote it.
 | [`mine-mate-in-2.md`](./mine-mate-in-2.md) | ✅ the miner, the solver, the criteria and the first committed set |
 | [`puzzle-screen.md`](./puzzle-screen.md) | ✅ solve them: `?mode=puzzles`, the move played on the board, the seam route revealed after |
 | Harder goals | 📋 mate in 3 (needs depth 5, ~10–40× the cost); "win material" is **blocked** on evaluation, since it rests on piece values known to be wrong here |
-| Difficulty rating | 📋 no human data exists; the honest proxy is the shallowest engine level that finds the answer |
+| [`difficulty-and-novelty.md`](./difficulty-and-novelty.md) | ✅ bands + diversity ranking. The engine-depth proxy turned out to be **dead** for a fixed goal; difficulty cannot be *predicted* without human data, so the bands are transparent features, never a rating |
+
+| [`solve-logging.md`](./solve-logging.md) | 📋 opted-in solve data, pseudonymous by construction — the only real path to calibrated difficulty |
 
 ## 6. What would make this better, in order
 

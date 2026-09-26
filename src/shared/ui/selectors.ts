@@ -69,6 +69,8 @@ export const PUZZLE_VERDICT_TESTID = 'puzzle-verdict'
 export const PUZZLE_REVEAL_TESTID = 'puzzle-reveal'
 export const PUZZLE_NEXT_TESTID = 'puzzle-next'
 export const PUZZLE_MODE_TESTID = 'puzzle-mode'
+/** The difficulty band — a coarse label, never a rating. See `src/puzzles/difficulty.ts`. */
+export const PUZZLE_BAND_TESTID = 'puzzle-band'
 
 /** A square on the route the solution travelled, marked only after solving. */
 export const ROUTE_CLASS = 'route'

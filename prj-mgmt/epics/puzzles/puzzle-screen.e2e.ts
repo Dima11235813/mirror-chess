@@ -6,6 +6,7 @@ import {
   PUZZLE_REVEAL_TESTID,
   PUZZLE_SCREEN_TESTID,
   PUZZLE_VERDICT_TESTID,
+  PUZZLE_BAND_TESTID,
   GAME_STATUS_TESTID,
   squareTestId,
 } from '@shared/ui/selectors'
@@ -26,8 +27,16 @@ import {
  * assuming it did cost three red tests.
  */
 
-/** The seam puzzle, opened by index. `?puzzle=` is 1-based, as the screen numbers them. */
-const SEAM_PUZZLE_URL = '/?mode=puzzles&puzzle=2'
+/**
+ * The seam puzzle, opened by **id**.
+ *
+ * Indexes were the first attempt and cost three red runs: the library is re-mined whenever
+ * a criterion changes, and every index shifts. An id is derived from the position and the
+ * ruleset, so it survives a re-mine — which is also why a bug report should carry one.
+ * `1b53rpm` is `5Bk1/8/8/6K1/2n5/2B5/8/8 w`, solved by `f8-c4*`, and pinned in
+ * `src/puzzles/mate.test.ts` too.
+ */
+const SEAM_PUZZLE_URL = '/?mode=puzzles&puzzle=1b53rpm'
 
 const play = async (page: import('@playwright/test').Page, from: string, to: string) => {
   await page.getByTestId(squareTestId(from)).click()
@@ -52,7 +61,10 @@ test.describe('mirror-chess: solving a puzzle', () => {
   test('a link opens the puzzle screen directly', async ({ page }) => {
     await page.goto('/?mode=puzzles')
 
-    await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText('White to play. Mate in 2.')
+    // Not "Mate in 2": the library is mixed, and the first puzzle in play order is
+    // whichever the diversity ordering put there. Asserting the goal of puzzle 1 would
+    // pin an ordering that is meant to change whenever the set is re-mined.
+    await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText(/White to play\. Mate in [23]\./)
     await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText('Puzzle 1 of')
   })
 
@@ -87,17 +99,33 @@ test.describe('mirror-chess: solving a puzzle', () => {
 
   test('next moves on, and the new puzzle hides its own answer', async ({ page }) => {
     await page.goto(SEAM_PUZZLE_URL)
+    const before = await page.getByTestId(PUZZLE_PROMPT_TESTID).textContent()
     await play(page, 'f8', 'c4')
     await page.getByTestId(PUZZLE_NEXT_TESTID).click()
 
-    await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText('Puzzle 3 of')
+    await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).not.toHaveText(before ?? '')
     await expect(page.getByTestId(PUZZLE_REVEAL_TESTID)).toHaveCount(0)
   })
 
-  test('a link can open one specific puzzle', async ({ page }) => {
+  test('a link can open one specific puzzle, by index or by id', async ({ page }) => {
     await page.goto('/?mode=puzzles&puzzle=2')
-
     await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText('Puzzle 2 of')
+
+    // The durable form: an id keeps pointing at the same puzzle across a re-mine.
+    await page.goto(SEAM_PUZZLE_URL)
+    await page.getByTestId(squareTestId('f8')).click()
+    await expect(page.getByTestId(squareTestId('c4'))).toHaveAttribute(
+      'aria-label', /legal mirror capture through the seam$/,
+    )
+  })
+
+  test('shows a difficulty band and the goal the puzzle actually has', async ({ page }) => {
+    // Bands are a coarse label, never a rating: difficulty cannot be predicted from a
+    // position, so the honest claim is only that these roughly order the library.
+    await page.goto('/?mode=puzzles')
+
+    await expect(page.getByTestId(PUZZLE_BAND_TESTID)).toHaveText(/easy|medium|hard/)
+    await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).toContainText(/Mate in [23]/)
   })
 
   test('the board still shows portal destinations while solving', async ({ page }) => {

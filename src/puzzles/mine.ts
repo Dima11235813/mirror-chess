@@ -28,31 +28,46 @@
  *    Then the "only answer" is not the best answer, and a player who mates at once would
  *    be told they are wrong. This removes ~30% of otherwise usable candidates, and it was
  *    found only because the engine disagreed with the solver about a mined fixture.
- * 2. **Not also a mate in chess.** With every flag off the position must *not* be a forced
- *    mate. This is the only defensible definition of a novel puzzle — the answer changes
- *    when the seam closes — and it is the same differential habit the rest of the repo
- *    uses (ADR 0002), with two rulesets in place of two implementations.
+ * 2. **The chess differential is graded, not gated.** Every candidate is re-solved with
+ *    every portal flag off, and what that produces is a *label* — the same differential
+ *    habit the rest of the repo uses (ADR 0002), with two rulesets in place of two
+ *    implementations.
  *
- * **What does the mirror seam change about this?** It is the entire product. A puzzle that
- * would also be a puzzle in chess teaches nothing about this game, so it is thrown away
- * however pretty it is.
+ * **What does the mirror seam change about this?** It is the entire product, and the reason
+ * the differential stopped being a gate (owner, 2026-09-26). A library where the seam always
+ * matters is a library a player can predict: "this is Mirror Chess, so the seam is involved"
+ * was true 161 times out of 161 in the first set. Mixing in ordinary chess tactics keeps the
+ * real question open — *does the seam matter here at all?* — which is the appeal.
  */
 import { fromPiecesSpec } from '../game/setup'
 import { toFen } from '../game/fen'
 import { gameStatus, isGameOver } from '../game/status'
 import { algebraic } from '../game/coord'
 import { RULES_STANDARD_CHESS, rulesOf, type RuleSetToken } from '../game/rules'
-import { hasMateInOne, mateInTwoMoves } from './mate'
-import { PUZZLE_SCHEMA, type Puzzle, type PuzzleMove } from './types'
+import { fastestMateIn, forcedMateMoves } from './mate'
+import { bandOf, measureDifficulty } from './difficulty'
+import { search } from '../engine/search'
+import { movesToMate, type Depth } from '../engine/types'
+import { PUZZLE_SCHEMA, type ChessDifferential, type Puzzle, type PuzzleGoal, type PuzzleMove } from './types'
 import type { GameState, Kind, Move } from '../game/types'
 
 /** The criteria a candidate must pass, in the order they are cheapest to check. */
 export const CRITERIA = [
   'the position is legal and the game is not already over',
-  'exactly one first move forces mate in two',
+  'exactly one first move forces mate in the requested number of moves',
   'no faster mate exists, so the unique answer is also the best answer',
-  'with every portal flag off it is not a forced mate — the seam is what makes it work',
 ] as const
+
+/**
+ * What is **no longer** a criterion, and why.
+ *
+ * Until 2026-09-26 a candidate was rejected unless it was impossible in chess. That made
+ * every puzzle a seam puzzle, which makes the library predictable: a player learns in an
+ * evening that the seam is always involved, and the interesting question — *does it matter
+ * here?* — is answered before they look. The chess differential is now recorded as a label
+ * ({@link ChessDifferential}) and ordinary chess tactics are welcome in the set.
+ */
+export const NOT_A_CRITERION = 'being impossible in chess — now a label, see ChessDifferential' as const
 
 /** A material set to mine, as piece kinds per side. */
 export interface MaterialSet {
@@ -155,18 +170,29 @@ function puzzleId(fen: string, ruleset: RuleSetToken): string {
   return (hash >>> 0).toString(36).padStart(7, '0')
 }
 
-/** What a rejected candidate failed on, for reporting yield honestly. */
+/**
+ * Where every candidate went, for reporting yield honestly.
+ *
+ * **`keptAlsoMateInChess` is not a rejection reason.** It counts puzzles that were *kept*
+ * and happen to mate in chess too — until 2026-09-26 that was a rejection, and the name
+ * outlived the meaning. The accounting identity is therefore:
+ *
+ * ```
+ * candidates = illegalOrOver + notUniqueMate + fasterMateExists + kept
+ * ```
+ */
 export interface MineStats {
   candidates: number
   illegalOrOver: number
-  notUniqueMateInTwo: number
+  notUniqueMate: number
   fasterMateExists: number
-  alsoMateInChess: number
+  /** A tally over the kept puzzles, not a rejection — see the note above. */
+  keptAlsoMateInChess: number
   kept: number
 }
 
 export function emptyStats(): MineStats {
-  return { candidates: 0, illegalOrOver: 0, notUniqueMateInTwo: 0, fasterMateExists: 0, alsoMateInChess: 0, kept: 0 }
+  return { candidates: 0, illegalOrOver: 0, notUniqueMate: 0, fasterMateExists: 0, keptAlsoMateInChess: 0, kept: 0 }
 }
 
 /**
@@ -185,23 +211,36 @@ export function evaluateCandidate(
   seed: number,
   material: string,
   stats: MineStats,
+  goal: PuzzleGoal = 'mate-in-2',
 ): Puzzle | null {
+  const goalMoves = goal === 'mate-in-3' ? 3 : 2
   stats.candidates++
   const state: GameState = fromPiecesSpec(spec, 'white', rulesOf(ruleset))
   if (isGameOver(gameStatus(state))) { stats.illegalOrOver++; return null }
 
-  const solutions = mateInTwoMoves(state)
-  if (solutions.length !== 1) { stats.notUniqueMateInTwo++; return null }
+  // Proving a mate in three costs ~100x proving a mate in two, and the expensive case is
+  // the common one — there usually is no mate. The engine finds mates fast with alpha-beta
+  // and ordering, so it screens first and the exhaustive solver only *proves* survivors.
+  // A false negative here costs yield, never correctness: nothing enters the set unproved.
+  if (goalMoves === 3) {
+    const seen = search(state, { maxDepth: 5 as Depth })
+    if (movesToMate(seen.score) !== 3) { stats.notUniqueMate++; return null }
+  }
 
-  // Criterion 3. See the module note: without this the "only answer" is not the best one.
-  if (hasMateInOne(state)) { stats.fasterMateExists++; return null }
+  const solutions = forcedMateMoves(state, goalMoves)
+  if (solutions.length !== 1) { stats.notUniqueMate++; return null }
 
-  // Criterion 4, the novelty gate: the same position, with the seam closed.
-  const asChess = fromPiecesSpec(spec, 'white', RULES_STANDARD_CHESS)
-  const chessIsOver = isGameOver(gameStatus(asChess))
-  const mateInChess = !chessIsOver && (hasMateInOne(asChess) || mateInTwoMoves(asChess).length > 0)
-  if (mateInChess) { stats.alsoMateInChess++; return null }
+  // Without this the "only answer" is not the best answer, and a player who mates sooner
+  // is told they are wrong. It cost a broken fixture to learn.
+  if (fastestMateIn(state, goalMoves - 1) !== null) { stats.fasterMateExists++; return null }
 
+  const solution = solutions[0]!
+  const differential = gradeDifferential(spec, solution, goalMoves)
+  if (differential === 'same-mate-in-chess' || differential === 'different-mate-in-chess') {
+    stats.keptAlsoMateInChess++
+  }
+
+  const features = measureDifficulty(state, solution, goalMoves)
   stats.kept++
   const fen = toFen(state)
   return {
@@ -210,14 +249,39 @@ export function evaluateCandidate(
     fen,
     ruleset,
     sideToMove: 'white',
-    goal: 'mate-in-2',
+    goal,
     material,
-    solution: describeMove(solutions[0]!),
+    chessDifferential: differential,
+    difficulty: bandOf(features),
+    features,
+    solution: describeMove(solution),
     unique: true,
-    mateInChess: false,
+    mateInChess: differential === 'same-mate-in-chess' || differential === 'different-mate-in-chess',
     source: 'composed',
     seed,
   }
+}
+
+/**
+ * How much the seam matters: re-solve the same position with every portal flag off.
+ *
+ * Graded rather than boolean, because "impossible in chess" spans a dead position (a lone
+ * bishop, which chess calls insufficient material) and a position where chess simply has no
+ * forced win. Those are not equally interesting, and the format could not tell them apart.
+ */
+function gradeDifferential(spec: string, solution: Move, goalMoves: number): ChessDifferential {
+  const asChess = fromPiecesSpec(spec, 'white', RULES_STANDARD_CHESS)
+  if (isGameOver(gameStatus(asChess))) return 'dead-in-chess'
+
+  const chessSolutions = forcedMateMoves(asChess, goalMoves)
+  const faster = fastestMateIn(asChess, goalMoves - 1)
+  if (chessSolutions.length === 0 && faster === null) return 'no-mate-in-chess'
+
+  const sameMove = chessSolutions.some(
+    m => m.from.f === solution.from.f && m.from.r === solution.from.r &&
+         m.to.f === solution.to.f && m.to.r === solution.to.r,
+  )
+  return sameMove ? 'same-mate-in-chess' : 'different-mate-in-chess'
 }
 
 export interface MineOptions {
@@ -226,6 +290,8 @@ export interface MineOptions {
   /** Candidate placements to try **per material set**. */
   readonly perSet: number
   readonly material?: readonly MaterialSet[]
+  /** What to look for. Mate in 3 costs ~15x more per candidate — measured, not guessed. */
+  readonly goal?: PuzzleGoal
 }
 
 /**
@@ -248,7 +314,7 @@ export function minePuzzles(options: MineOptions): { puzzles: Puzzle[]; stats: M
     for (let i = 0; i < options.perSet; i++) {
       const spec = placeMaterial(next, set)
       if (!spec) continue
-      const puzzle = evaluateCandidate(spec, options.ruleset, options.seed, label, stats)
+      const puzzle = evaluateCandidate(spec, options.ruleset, options.seed, label, stats, options.goal)
       if (puzzle && !byId.has(puzzle.id)) byId.set(puzzle.id, puzzle)
     }
   }

@@ -5,6 +5,7 @@ import { allLegalMoves, gameStatus, isGameOver } from '../game/status'
 import { algebraic, parseAlgebraic } from '../game/coord'
 import { RULES_STANDARD_CHESS, TOKEN_ALL_ON, rulesOf } from '../game/rules'
 import { hasMateInOne, mateInTwoMoves } from './mate'
+import { bandOf, measureDifficulty } from './difficulty'
 import { DEFAULT_MATERIAL, materialLabel, minePuzzles, placeMaterial, rng } from './mine'
 import type { Puzzle } from './types'
 
@@ -80,11 +81,15 @@ describe('the mined set', () => {
   })
 
   it('accounts for every candidate it rejected', () => {
+    // `keptAlsoMateInChess` is deliberately NOT in this sum: since the chess differential
+    // became a label rather than a gate, it tallies puzzles that were *kept*. Including it
+    // double-counts, which is how this test caught the change of meaning.
     const s = BATCH.stats
-    const rejected = s.illegalOrOver + s.notUniqueMateInTwo + s.fasterMateExists + s.alsoMateInChess
+    const rejected = s.illegalOrOver + s.notUniqueMate + s.fasterMateExists
 
     expect(s.candidates).toBe(rejected + s.kept)
     expect(s.kept).toBe(BATCH.puzzles.length + duplicatesDropped(BATCH.puzzles, s.kept))
+    expect(s.keptAlsoMateInChess).toBeLessThanOrEqual(s.kept)
   })
 })
 
@@ -144,16 +149,47 @@ describe('every puzzle keeps its promises', () => {
     }
   })
 
-  it('is not a puzzle in ordinary chess — the seam is what makes it work', () => {
-    // The novelty gate, re-checked on the finished record: this is the claim that makes
-    // the set worth publishing rather than a chess puzzle app with extra steps.
+  it('labels how much the seam matters, and the label survives re-solving as chess', () => {
+    // This used to assert that NO puzzle is a chess mate — the novelty gate. The gate was
+    // removed on 2026-09-26 so the library stops being predictable, and the differential
+    // became a label. A wrong label is no longer caught by the puzzle simply vanishing,
+    // so it is re-derived here instead.
     for (const p of BATCH.puzzles) {
-      expect(p.mateInChess).toBe(false)
-
       const asChess = parseFen(p.fen, RULES_STANDARD_CHESS)
-      if (isGameOver(gameStatus(asChess))) continue
-      expect(hasMateInOne(asChess), `${p.id} must not be a mate in one in chess`).toBe(false)
-      expect(mateInTwoMoves(asChess), `${p.id} must not be a mate in two in chess`).toHaveLength(0)
+      if (isGameOver(gameStatus(asChess))) {
+        expect(p.chessDifferential, `${p.id}`).toBe('dead-in-chess')
+        continue
+      }
+      const noMateInChess = mateInTwoMoves(asChess).length === 0 && !hasMateInOne(asChess)
+      expect(p.chessDifferential === 'no-mate-in-chess', `${p.id}`).toBe(noMateInChess)
+      expect(p.mateInChess, `${p.id} mateInChess must agree with the label`).toBe(!noMateInChess)
+    }
+  })
+
+  it('bands every puzzle, and the band re-derives from the position', () => {
+    for (const p of BATCH.puzzles) {
+      const state = parseFen(p.fen, rulesOf(p.ruleset))
+      const move = allLegalMoves(state, 'white').find(
+        m => algebraic(m.from) === p.solution.from && algebraic(m.to) === p.solution.to,
+      )!
+      const features = measureDifficulty(state, move, p.features.goalMoves)
+
+      expect(features).toEqual(p.features)
+      expect(bandOf(features)).toBe(p.difficulty)
+      expect(['easy', 'medium', 'hard']).toContain(p.difficulty)
+    }
+  })
+
+  it('keeps the seam out of the difficulty band', () => {
+    // The band must not move just because a move crossed the seam: that measures
+    // unfamiliarity, which decays as a player learns the variant (research §5).
+    const seam = BATCH.puzzles.filter(p => p.features.crossedSeam)
+    const plain = BATCH.puzzles.filter(p => !p.features.crossedSeam)
+    if (seam.length === 0 || plain.length === 0) return
+
+    for (const p of [...seam, ...plain]) {
+      const withoutSeam = { ...p.features, crossedSeam: !p.features.crossedSeam }
+      expect(bandOf(withoutSeam), `${p.id} band must not depend on the seam`).toBe(p.difficulty)
     }
   })
 

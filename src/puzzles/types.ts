@@ -14,24 +14,44 @@
  *
  * - `unique` — no other first move also forces mate. Without it a puzzle UI rejects
  *   correct answers, which is worse than having no puzzle.
- * - `mateInChess` — whether the same position is also a forced mate with every portal
- *   flag **off**. When it is `false`, the puzzle exists *because* of the seam, and that is
- *   the only defensible definition of "novel" we have. Measured 2026-09-25: 12 of 12
- *   K+B vs K mates were chess-impossible.
+ * - `chessDifferential` — how much the seam matters, graded by re-solving the same position
+ *   with every portal flag **off**. It is a *label*, not a gate: a library where the seam
+ *   always matters is predictable, and unpredictability is the appeal.
  *
  * **What does the mirror seam change about this?** It is why `ruleset` is not optional
  * metadata but part of the puzzle's identity. The same board with the same side to move is
  * a different puzzle under a different token, often with a different answer — which is
- * exactly what `mateInChess` records.
+ * exactly what `chessDifferential` records.
  */
 import type { RuleSetToken } from '../game/rules'
 import type { Color, PromotionKind } from '../game/types'
+import type { DifficultyBand, DifficultyFeatures } from './difficulty'
 
 /** The format version. Bumped when a field changes meaning, never when one is appended. */
-export const PUZZLE_SCHEMA = 1
+export const PUZZLE_SCHEMA = 2
 
-/** What a solver is being asked to achieve. Only one goal exists so far. */
-export type PuzzleGoal = 'mate-in-2'
+/** What a solver is being asked to achieve. */
+export type PuzzleGoal = 'mate-in-2' | 'mate-in-3'
+
+/**
+ * How much the seam matters to this puzzle, graded.
+ *
+ * **This used to be a rejection gate and is now a label** (owner, 2026-09-26). Every puzzle
+ * in the v1 set was impossible in chess, which made the library predictable in exactly the
+ * way that spoils it: "this is Mirror Chess, so the seam is involved" was true 161 times
+ * out of 161, and a player learns that in an evening. A library that mixes seam-dependent
+ * puzzles with ordinary chess tactics keeps the real question open — *does the seam matter
+ * here at all?* — which is the appeal.
+ */
+export type ChessDifferential =
+  /** The position is not even a live game in chess: insufficient material, or already over. */
+  | 'dead-in-chess'
+  /** Live in chess, but no forced mate exists there. The seam creates the win. */
+  | 'no-mate-in-chess'
+  /** A forced mate exists in chess too, but it is a different move. The seam changes the answer. */
+  | 'different-mate-in-chess'
+  /** The same key move mates in chess. An ordinary tactic that happens to live here. */
+  | 'same-mate-in-chess'
 
 /** Where a puzzle's position came from, so the library can be filtered by provenance. */
 export type PuzzleSource =
@@ -69,11 +89,21 @@ export interface Puzzle {
   readonly goal: PuzzleGoal
   /** The material, as `"KB-K"`, for grouping and for reporting yield by set. */
   readonly material: string
+  /** How much the seam matters here — a label, not a gate. See {@link ChessDifferential}. */
+  readonly chessDifferential: ChessDifferential
+  /** How hard it looks, and why. Never a rating — see `difficulty.ts`. */
+  readonly difficulty: DifficultyBand
+  readonly features: DifficultyFeatures
   /** The one first move that forces mate. */
   readonly solution: PuzzleMove
   /** True when no other first move also forces mate — verified, not assumed. */
   readonly unique: boolean
-  /** True when this is *also* a forced mate with every flag off. A novel puzzle is `false`. */
+  /**
+   * True when this is *also* a forced mate with every flag off.
+   *
+   * Kept for continuity with the v1 set; {@link ChessDifferential} is the graded form and
+   * the one to read. No longer implies the puzzle was rejected — see the type's note.
+   */
   readonly mateInChess: boolean
   readonly source: PuzzleSource
   /** The seed that produced this position, so the whole set is reproducible. */
@@ -83,7 +113,8 @@ export interface Puzzle {
 /** A mined set, with everything needed to reproduce it exactly. */
 export interface PuzzleSet {
   readonly schema: typeof PUZZLE_SCHEMA
-  readonly goal: PuzzleGoal
+  /** Every goal present. A mixed set is the point — see {@link ChessDifferential}. */
+  readonly goals: readonly PuzzleGoal[]
   readonly ruleset: RuleSetToken
   readonly generatedBy: string
   readonly seed: number

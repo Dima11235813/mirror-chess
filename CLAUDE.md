@@ -423,7 +423,11 @@ Bump the pinned commit to update Serena.
 3. **Engine path:** TS core vs. a native (Rust/WASM) engine. See §6 — do the board-
    representation work before concluding the language is the problem.
 4. **Product scaffolding order:** when to introduce Capacitor (mobile), auth, and the
-   networking layer.
+   networking layer. **Partly decided 2026-09-26:** Google authentication is coming, and
+   gameplay telemetry must be *structurally* unlinkable to the Google identity — a random
+   device-side pseudonym, no join key written anywhere, stated plainly at onboarding. The
+   account side may hold email and marketing data; the gameplay side must not be able to
+   reach it. → `prj-mgmt/epics/puzzles/solve-logging.md`
 5. **Default ruleset.** Currently "every piece crosses", but this is an *experimental*
    question — see §12 and `prj-mgmt/epics/balance/`. Two competing predictions are now on
    record: seam-crossing kings are hard to corner (raises draws), seam-crossing bishops mate

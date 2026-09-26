@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PuzzleScreen } from './PuzzleScreen'
-import { SEAM_PUZZLE, TWO_PUZZLES } from './PuzzleScreen.mocks'
+import { CHESS_TACTIC_PUZZLE, MATE_IN_3_PUZZLE, SEAM_PUZZLE, TWO_PUZZLES } from './PuzzleScreen.mocks'
 import {
   PUZZLE_NEXT_TESTID,
   PUZZLE_PROMPT_TESTID,
   PUZZLE_REVEAL_TESTID,
   PUZZLE_VERDICT_TESTID,
+  PUZZLE_BAND_TESTID,
   squareTestId,
 } from '@shared/ui/selectors'
 
@@ -25,6 +26,30 @@ describe('PuzzleScreen', () => {
     // The ruleset is part of a puzzle's identity: the same board under another token is a
     // different puzzle, usually with a different answer.
     expect(screen.getByTestId(PUZZLE_PROMPT_TESTID).textContent).toContain(SEAM_PUZZLE.ruleset)
+    // A band, not a rating: difficulty cannot be predicted from a position to better than
+    // ~259 Glicko points even with 4.2M labelled puzzles (research).
+    expect(screen.getByTestId(PUZZLE_BAND_TESTID).textContent).toBe(SEAM_PUZZLE.difficulty)
+  })
+
+  it('asks for the goal the puzzle actually has', () => {
+    render(<PuzzleScreen puzzles={[MATE_IN_3_PUZZLE]} />)
+
+    expect(screen.getByTestId(PUZZLE_PROMPT_TESTID).textContent).toContain('Mate in 3')
+  })
+
+  it('says plainly when a puzzle is an ordinary chess tactic', () => {
+    // The payoff of dropping the novelty gate: a player cannot assume the seam matters,
+    // so the reveal has to be willing to say that it did not.
+    render(<PuzzleScreen puzzles={[CHESS_TACTIC_PUZZLE]} />)
+
+    play(CHESS_TACTIC_PUZZLE.solution.from, CHESS_TACTIC_PUZZLE.solution.to)
+
+    const reveal = screen.getByTestId(PUZZLE_REVEAL_TESTID)
+    expect(reveal.textContent).toContain('ordinary tactic')
+    expect(reveal.textContent).not.toContain('Impossible in chess')
+    // The reveal must not contradict itself: it once said the mate "still depends on"
+    // the seam directly above saying the same move mates in chess.
+    expect(reveal.textContent).not.toContain('depends on it')
   })
 
   it('hides the answer until it is solved', () => {

@@ -5,7 +5,8 @@ import { reduceMove } from '../game/reducer'
 import { allLegalMoves, gameStatus, isGameOver } from '../game/status'
 import { algebraic } from '../game/coord'
 import { RULES_STANDARD_CHESS, isRuleSetToken, rulesOf } from '../game/rules'
-import { hasMateInOne, mateInTwoMoves } from './mate'
+import { fastestMateIn, forcedMateMoves } from './mate'
+import { bandOf, measureDifficulty } from './difficulty'
 import { PUZZLE_SCHEMA } from './types'
 import type { Puzzle, PuzzleSet } from './types'
 
@@ -20,7 +21,7 @@ import type { Puzzle, PuzzleSet } from './types'
  * proving one costs ~50 ms and the set is meant to grow. `PUZZLES_DEEP=1 npm run test`
  * proves every one of them — the same gate the deep perft counts use, for the same reason.
  */
-const SET_PATH = 'puzzles/mate-in-2.v1.json'
+const SET_PATH = 'puzzles/puzzles.v2.json'
 const DEEP = process.env.PUZZLES_DEEP === '1'
 const SAMPLE_EVERY = 5
 
@@ -31,7 +32,7 @@ describe('the committed puzzle set', () => {
   it('is not empty, and says how it was made', () => {
     expect(set.puzzles.length).toBeGreaterThan(0)
     expect(set.schema).toBe(PUZZLE_SCHEMA)
-    expect(set.goal).toBe('mate-in-2')
+    expect(set.goals.length).toBeGreaterThan(0)
     expect(isRuleSetToken(set.ruleset)).toBe(true)
     // The seed is what makes the set reproducible; without it the file is unrepeatable.
     expect(Number.isInteger(set.seed)).toBe(true)
@@ -42,10 +43,10 @@ describe('the committed puzzle set', () => {
     const ids = new Set<string>()
     for (const p of set.puzzles) {
       expect(p.schema).toBe(PUZZLE_SCHEMA)
-      expect(p.goal).toBe('mate-in-2')
+      expect(set.goals).toContain(p.goal)
       expect(p.sideToMove).toBe('white')
       expect(p.unique).toBe(true)
-      expect(p.mateInChess).toBe(false)
+      expect(typeof p.chessDifferential).toBe('string')
       expect(isRuleSetToken(p.ruleset)).toBe(true)
       expect(p.solution.from).toMatch(/^[a-h][1-8]$/)
       expect(p.solution.to).toMatch(/^[a-h][1-8]$/)
@@ -69,10 +70,11 @@ describe('the committed puzzle set', () => {
   it(`re-proves ${DEEP ? 'every' : 'a sample of'} puzzle: unique, forced, and no faster mate`, () => {
     for (const p of sample) {
       const state = parseFen(p.fen, rulesOf(p.ruleset))
+      const goalMoves = p.goal === 'mate-in-3' ? 3 : 2
       expect(isGameOver(gameStatus(state)), `${p.id} is already over`).toBe(false)
-      expect(hasMateInOne(state), `${p.id} has a faster mate`).toBe(false)
+      expect(fastestMateIn(state, goalMoves - 1), `${p.id} has a faster mate`).toBeNull()
 
-      const solutions = mateInTwoMoves(state)
+      const solutions = forcedMateMoves(state, goalMoves)
       expect(solutions, `${p.id} must have exactly one solution`).toHaveLength(1)
       expect(algebraic(solutions[0]!.from)).toBe(p.solution.from)
       expect(algebraic(solutions[0]!.to)).toBe(p.solution.to)
@@ -80,12 +82,39 @@ describe('the committed puzzle set', () => {
     }
   }, 600_000)
 
-  it(`is ${DEEP ? 'entirely' : 'demonstrably'} impossible in chess — the point of the whole set`, () => {
+  it('records a chess differential that matches re-solving the position as chess', () => {
+    // The label the library's variety depends on. Re-derived rather than trusted, because
+    // it is what tells a seam puzzle from an ordinary tactic — and since 2026-09-26 both
+    // belong in the set, a wrong label is no longer caught by the puzzle simply vanishing.
     for (const p of sample) {
       const asChess = parseFen(p.fen, RULES_STANDARD_CHESS)
-      if (isGameOver(gameStatus(asChess))) continue // insufficient material in chess: still novel
-      expect(hasMateInOne(asChess), `${p.id} is a mate in one in chess`).toBe(false)
-      expect(mateInTwoMoves(asChess), `${p.id} is a mate in two in chess`).toHaveLength(0)
+      if (isGameOver(gameStatus(asChess))) {
+        expect(p.chessDifferential, `${p.id} is dead in chess`).toBe('dead-in-chess')
+        continue
+      }
+      const goalMoves = p.goal === 'mate-in-3' ? 3 : 2
+      const chessSolutions = forcedMateMoves(asChess, goalMoves)
+      const faster = fastestMateIn(asChess, goalMoves - 1)
+      const noMate = chessSolutions.length === 0 && faster === null
+
+      if (p.chessDifferential === 'no-mate-in-chess') {
+        expect(noMate, `${p.id} claims no mate in chess`).toBe(true)
+      } else {
+        expect(noMate, `${p.id} claims a mate exists in chess`).toBe(false)
+      }
+    }
+  }, 600_000)
+
+  it('re-derives the difficulty band from the position, so it cannot be hand-edited', () => {
+    for (const p of sample) {
+      const state = parseFen(p.fen, rulesOf(p.ruleset))
+      const move = allLegalMoves(state, 'white').find(
+        m => algebraic(m.from) === p.solution.from && algebraic(m.to) === p.solution.to,
+      )!
+      const features = measureDifficulty(state, move, p.goal === 'mate-in-3' ? 3 : 2)
+
+      expect(features, `${p.id} features`).toEqual(p.features)
+      expect(bandOf(features), `${p.id} band`).toBe(p.difficulty)
     }
   }, 600_000)
 

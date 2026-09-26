@@ -6,7 +6,7 @@ import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
 import { ThemeToggle } from '@components/ionic/ThemeToggle'
 import { PuzzleScreen } from '@components/PuzzleScreen/PuzzleScreen'
-import { allPuzzles } from '@/puzzles/set'
+import { indexOfPuzzleId, puzzlesInPlayOrder } from '@/puzzles/set'
 import { reduceMove } from '@game/reducer'
 import { fromPiecesSpec, initialPosition } from '@game/setup'
 import { DEFAULT_RULES, type RuleSet } from '@game/rules'
@@ -72,10 +72,20 @@ function puzzleModeFromUrl(): boolean {
   return new URL(window.location.href).searchParams.get('mode') === 'puzzles'
 }
 
-/** Which puzzle to open, from `?puzzle=` (1-based, as the screen numbers them). */
+/**
+ * Which puzzle to open, from `?puzzle=`.
+ *
+ * Accepts a 1-based position (`?puzzle=2`) or a puzzle **id** (`?puzzle=1b53rpm`). The id
+ * is the durable form: indexes shift whenever the set is re-mined, ids do not, so a bug
+ * report should carry one.
+ */
 function puzzleIndexFromUrl(): number {
-  const raw = Number(new URL(window.location.href).searchParams.get('puzzle'))
-  return Number.isInteger(raw) && raw > 0 ? raw - 1 : 0
+  const raw = new URL(window.location.href).searchParams.get('puzzle')
+  if (!raw) return 0
+  const byId = indexOfPuzzleId(raw)
+  if (byId >= 0) return byId
+  const position = Number(raw)
+  return Number.isInteger(position) && position > 0 ? position - 1 : 0
 }
 
 export default function App() {
@@ -154,7 +164,7 @@ export default function App() {
         game in progress. Switching back leaves that game untouched.
       */}
       {puzzleMode ? (
-        <PuzzleScreen puzzles={allPuzzles()} startIndex={puzzleIndexFromUrl()} />
+        <PuzzleScreen puzzles={puzzlesInPlayOrder()} startIndex={puzzleIndexFromUrl()} />
       ) : (
         <>
           <BoardView state={state} status={status} onMove={onMove} locked={boardLocked} />

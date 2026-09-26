@@ -46,6 +46,19 @@ which expands the configuration space by ~32× and makes brute force infeasible.
 | Self-play statistics | **Complete** → [`self-play-statistics.md`](./self-play-statistics.md). Found that standard paired-opening practice is *counterproductive* for our estimator, and that per-cell precision is unaffordable while factorial contrasts are ~free. |
 | Variant precedent | **Complete** → [`variant-precedent.md`](./variant-precedent.md). Divergent pieces are a well-trodden design space, Fairy-Stockfish ships the quiet/capture split, and the king's flags must be constrained. |
 
+### Round 3 — puzzles (2026-09-26)
+
+[`puzzle-difficulty-and-novelty.md`](./puzzle-difficulty-and-novelty.md) — how to rank
+mined puzzles once they are generated automatically. **The headline is a negative
+result:** difficulty cannot be predicted without human solve data (the state of the art
+manages MAE ≈ 259 Glicko points with 4.2M labelled puzzles), and the principled method —
+Maia-style human-move prediction — needs millions of human games *in the variant being
+modelled*, which for Mirror Chess do not exist.
+
+Measured on our own set at the same time: the obvious engine-depth proxy is **dead** for a
+fixed goal, two-thirds of the puzzles give Black only one defence, and the top four motifs
+are 71% of the library.
+
 ### Follow-up measurement (2026-08-03)
 
 [`opening-set-legality.md`](./opening-set-legality.md) — answering round 2's

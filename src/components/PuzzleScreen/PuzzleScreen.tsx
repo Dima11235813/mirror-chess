@@ -5,15 +5,17 @@ import { gameStatus } from '@game/status'
 import { reduceMove } from '@game/reducer'
 import { checkPath } from '@game/attacks'
 import { algebraic, parseAlgebraic } from '@game/coord'
-import { isSolution, positionOf } from '@/puzzles/set'
+import { isSolution, positionOf } from '@/puzzles/puzzle'
 import {
   PUZZLE_NEXT_TESTID,
   PUZZLE_PROMPT_TESTID,
   PUZZLE_REVEAL_TESTID,
   PUZZLE_SCREEN_TESTID,
   PUZZLE_VERDICT_TESTID,
+  PUZZLE_BAND_TESTID,
 } from '@shared/ui/selectors'
 import type { GameState, Move } from '@game/types'
+import type { ChessDifferential, PuzzleGoal } from '@/puzzles/types'
 import type { PuzzleScreenProps, SolveState } from './PuzzleScreen.types'
 
 /**
@@ -94,9 +96,10 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
     <section className="puzzle" data-testid={PUZZLE_SCREEN_TESTID}>
       <header className="puzzle-prompt">
         <p data-testid={PUZZLE_PROMPT_TESTID}>
-          <strong>White to play. Mate in 2.</strong>{' '}
+          <strong>White to play. {GOAL_TEXT[puzzle.goal]}.</strong>{' '}
           <span className="puzzle-meta">
-            Puzzle {index + 1} of {puzzles.length} · {puzzle.material} · rules {puzzle.ruleset}
+            Puzzle {index + 1} of {puzzles.length} · {puzzle.material} ·{' '}
+            <span data-testid={PUZZLE_BAND_TESTID}>{puzzle.difficulty}</span> · rules {puzzle.ruleset}
           </span>
         </p>
       </header>
@@ -109,7 +112,9 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
       <BoardView state={shown} status={status} onMove={onMove} locked={solveState === 'solved'} />
 
       <p role="status" aria-live="polite" data-testid={PUZZLE_VERDICT_TESTID}>
-        {solveState === 'solved' && <strong>Solved — that is the only move that forces mate.</strong>}
+        {solveState === 'solved' && (
+          <strong>Solved — that is the only move that forces {GOAL_TEXT[puzzle.goal].toLowerCase()}.</strong>
+        )}
         {solveState === 'wrong' && <span>Not the move: that does not force mate. Try again.</span>}
         {solveState === 'thinking' && <span>Find the move that forces mate next turn.</span>}
       </p>
@@ -118,9 +123,13 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
         <div className="puzzle-reveal" data-testid={PUZZLE_REVEAL_TESTID}>
           <p>
             <strong>{puzzle.solution.coordinate}</strong>
-            {puzzle.solution.crossedSeam
-              ? ' crosses the seam.'
-              : ' wins without crossing the seam — the mate still depends on it.'}
+            {/*
+              States only what the MOVE did. Whether the seam mattered at all is the next
+              line's job: written when every puzzle was seam-dependent, this clause used to
+              claim "the mate still depends on it", which flatly contradicted the reveal
+              below on an ordinary tactic. A screenshot caught it.
+            */}
+            {puzzle.solution.crossedSeam ? ' crosses the seam.' : ' stays on its own side of the seam.'}
           </p>
           {route.length > 1 && (
             <p className="puzzle-route">
@@ -128,14 +137,14 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
             </p>
           )}
           {/*
-            The claim the whole set is built on, and it is checked rather than asserted:
-            every mined puzzle carries `mateInChess: false`, re-proved against the rules in
-            `puzzle-set.test.ts` by running the same position with every flag off.
+            What the seam was actually worth here, re-derived from the position rather than
+            asserted (`puzzle-set.test.ts` re-solves each one with every flag off).
+
+            Since 2026-09-26 this can say "ordinary chess tactic", and that is the point:
+            a library where the seam always matters is one a player can predict, and the
+            interesting question is whether it matters *here*.
           */}
-          <p className="puzzle-novelty">
-            Impossible in chess: with every piece's portal closed, this position has no
-            forced mate at all.
-          </p>
+          <p className="puzzle-novelty">{DIFFERENTIAL_TEXT[puzzle.chessDifferential]}</p>
         </div>
       )}
 
@@ -146,6 +155,30 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
       </div>
     </section>
   )
+}
+
+/** What the player is asked for, per goal. */
+const GOAL_TEXT: Readonly<Record<PuzzleGoal, string>> = {
+  'mate-in-2': 'Mate in 2',
+  'mate-in-3': 'Mate in 3',
+}
+
+/**
+ * What the seam was worth, in the player's terms.
+ *
+ * Read after solving, never before: three of these four give away that the seam matters.
+ */
+const DIFFERENTIAL_TEXT: Readonly<Record<ChessDifferential, string>> = {
+  'dead-in-chess':
+    'Impossible in chess — with the portals closed this is not even a live game: ' +
+    'chess would call this material insufficient to mate at all.',
+  'no-mate-in-chess':
+    'Impossible in chess: with every piece’s portal closed, this position has no forced mate at all.',
+  'different-mate-in-chess':
+    'Chess has a mate here too — but a different one. The seam changes the answer.',
+  'same-mate-in-chess':
+    'An ordinary tactic: this same move mates in chess. Not every puzzle here needs the seam, ' +
+    'which is why you cannot assume the answer crosses it.',
 }
 
 /** Keep a requested index inside the set, so a stale link opens a puzzle rather than crashing. */
