@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
       '@game': resolve(__dirname, 'src/game'),
+      '@engine': resolve(__dirname, 'src/engine'),
       '@components': resolve(__dirname, 'src/components'),
       '@mocks': resolve(__dirname, 'src/mocks'),
       '@shared': resolve(__dirname, 'src/shared'),

@@ -56,3 +56,5 @@ trace.zip
 
 # Optional: VS Code Playwright extension
 .vscode/test-results/
+# Serena (semantic code tools) — local index and cache, per-machine
+.serena/
