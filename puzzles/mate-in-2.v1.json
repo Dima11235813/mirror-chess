@@ -1,0 +1,3230 @@
+{
+  "schema": 1,
+  "goal": "mate-in-2",
+  "ruleset": "2:bBrRqQnNkKP",
+  "generatedBy": "scripts/mine-puzzles.ts",
+  "seed": 20260925,
+  "candidates": 10000,
+  "puzzles": [
+    {
+      "schema": 1,
+      "id": "11iye8u",
+      "fen": "7B/8/8/n7/8/B1K5/k7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a3",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a3-d6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1b53rpm",
+      "fen": "5Bk1/8/8/6K1/2n5/2B5/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f8",
+        "to": "c4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f8-c4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1f95gt4",
+      "fen": "8/8/6B1/5n2/8/6K1/8/1k4B1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "g6",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g6-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0eltywi",
+      "fen": "8/7n/8/7B/7K/4k3/2B5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c2",
+        "to": "h7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c2-h7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0rxc7yu",
+      "fen": "5n2/8/K3B3/8/8/8/8/5Bk1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f1",
+        "to": "c5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f1-c5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0um4x0i",
+      "fen": "2kB4/5n2/8/8/5K2/5B2/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d8",
+        "to": "g4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "d8-g4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "156us60",
+      "fen": "8/5B2/4K3/1k1n4/8/8/5B2/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e6",
+        "to": "d5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e6-d5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0szz6fm",
+      "fen": "8/4B2B/8/8/n7/3K4/8/4k3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e7",
+        "to": "a4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "e7-a4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "00q9w5c",
+      "fen": "8/7n/8/7K/8/B7/k5B1/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a3",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a3-e6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0342s6k",
+      "fen": "8/7n/8/5B2/8/6K1/1B6/2k5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b2",
+        "to": "c3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b2-c3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0gpd8d4",
+      "fen": "6B1/3n4/2k5/8/8/3K2B1/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "g8",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "g8-e3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0seioeu",
+      "fen": "2n4k/8/4B3/8/8/8/4B3/5K2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e6",
+        "to": "d5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e6-d5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "03868dm",
+      "fen": "5k2/4B3/K5B1/8/8/8/8/5n2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e7",
+        "to": "c5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e7-c5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0awh5j6",
+      "fen": "8/1BB5/8/8/8/7K/8/2k1n3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b7",
+        "to": "g5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "b7-g5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "19ywi64",
+      "fen": "B1k5/8/1B6/8/7K/8/8/2n5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b6",
+        "to": "g4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "b6-g4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "15qwkpc",
+      "fen": "k2K4/2B5/8/2B5/8/8/5n2/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c7",
+        "to": "f3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "c7-f3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "082vg1m",
+      "fen": "2B5/n7/1B6/8/6k1/8/K7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a2",
+        "to": "h2",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a2-h2*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1m8jhp0",
+      "fen": "8/3n4/4K3/8/5B2/6B1/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f4",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f4-e5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0gr304k",
+      "fen": "3n4/6k1/8/B7/8/8/7K/7B w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h1",
+        "to": "d4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h1-d4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "05ce5wy",
+      "fen": "5B2/4Kn2/8/8/4B3/8/8/5k2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f8",
+        "to": "b5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f8-b5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0pvng3a",
+      "fen": "2B1kB2/8/8/8/8/7K/4n3/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f8",
+        "to": "b4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f8-b4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0cl19su",
+      "fen": "4n3/1B6/8/B7/8/5K2/3k4/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a5",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a5-g6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1320c34",
+      "fen": "3K4/k7/6B1/8/2B5/8/8/n7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d8",
+        "to": "c7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d8-c7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0di5zh4",
+      "fen": "8/8/8/6B1/8/2B5/1k3K2/4n3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c3",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c3-e5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1cbs3rs",
+      "fen": "4B3/8/2n5/8/4B3/8/8/2k2K2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e4",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e4-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0qnsxn2",
+      "fen": "8/3B4/8/8/K7/1n6/3B4/3k4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d2",
+        "to": "h5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "d2-h5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "03fbfmi",
+      "fen": "1Bk5/8/8/8/8/K5B1/8/4n3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b8",
+        "to": "f4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b8-f4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0gxvtew",
+      "fen": "8/8/2B5/K6n/8/3B4/7k/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d3",
+        "to": "c4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d3-c4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "00t5m2s",
+      "fen": "2K3n1/8/8/5B2/8/7k/8/B7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a1",
+        "to": "c6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a1-c6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1orqo0g",
+      "fen": "k2n4/8/8/3K4/4B3/8/5B2/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d5",
+        "to": "c4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d5-c4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0utcs8y",
+      "fen": "4n1K1/8/k7/2B5/8/5B2/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c5",
+        "to": "f1",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "c5-f1*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hb38v2",
+      "fen": "1n6/5K2/8/8/8/7B/k7/7B w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h3",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h3-e6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0xt7nzo",
+      "fen": "8/4n3/8/8/8/B4B2/8/1k1K4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f3",
+        "to": "c7",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f3-c7*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "07cgtq4",
+      "fen": "3B4/8/6KB/8/8/8/2k5/4n3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d8",
+        "to": "f6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d8-f6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1p09iui",
+      "fen": "4K3/8/B7/8/8/7n/B7/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a2",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a2-e5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "192b2hk",
+      "fen": "1k1K4/3B4/8/8/8/4B3/8/5n2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d7",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d7-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1dklu2u",
+      "fen": "8/8/3n4/3K1B2/2B5/8/k7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d5",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d5-d6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hwq8nu",
+      "fen": "1BK5/8/8/8/8/3B4/2n5/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d3",
+        "to": "g7",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "d3-g7*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1107p22",
+      "fen": "2k5/8/B7/8/8/8/3nK2B/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h2",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h2-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hih4u0",
+      "fen": "8/2B5/4nB2/5K2/8/8/k7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "f5",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f5-e6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "10itor8",
+      "fen": "2K4B/7k/8/8/8/8/n7/4B3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h8",
+        "to": "d4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h8-d4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "00ronyw",
+      "fen": "6B1/8/3B4/8/2K1n3/8/8/5k2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d6",
+        "to": "b4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d6-b4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0pqh0pk",
+      "fen": "1n6/2B5/5B2/8/8/3K4/2k5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d3",
+        "to": "e2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d3-e2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "12qzynu",
+      "fen": "8/8/1k5K/1B6/5B2/8/8/n7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b5",
+        "to": "f2",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "b5-f2*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0dbu668",
+      "fen": "6K1/2n5/8/8/8/6B1/k7/3B4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "g3",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g3-e5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1spjj7w",
+      "fen": "B7/8/8/8/1Bnk4/8/4K3/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b4",
+        "to": "f8",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b4-f8"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0n3kg0m",
+      "fen": "6n1/8/7B/1K5k/8/8/3B4/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h6",
+        "to": "c8",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h6-c8*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0agonyw",
+      "fen": "3n4/8/1k6/8/5B2/6B1/8/4K3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "g3",
+        "to": "f2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g3-f2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0sr12li",
+      "fen": "3K1k2/4B3/8/7B/8/8/2n5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "h5",
+        "to": "c3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h5-c3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0guvj6m",
+      "fen": "8/k5B1/1B6/1K6/8/6n1/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b6",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b6-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1egolnc",
+      "fen": "5k2/8/8/8/1B6/8/2B3K1/1n6 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c2",
+        "to": "f6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "c2-f6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1a9n5u6",
+      "fen": "6n1/8/K7/8/8/3B4/k7/6B1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "d3",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d3-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1xd6l5q",
+      "fen": "8/7k/1B4B1/8/n7/8/8/2K5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "g6",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g6-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0oazmyg",
+      "fen": "8/1n3B2/2K5/8/1k6/8/B7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "a2",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a2-d6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0bgm9tg",
+      "fen": "1B6/8/1Bn5/6k1/8/8/8/4K3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "b6",
+        "to": "d1",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "b6-d1*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1raeh6w",
+      "fen": "4n3/8/8/1k6/4B3/8/8/5BK1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e4",
+        "to": "f3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e4-f3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0xnrwig",
+      "fen": "8/8/4B3/8/6k1/4K3/3B4/4n3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "e3",
+        "to": "f2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e3-f2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "099ifay",
+      "fen": "2B4K/8/2B5/8/8/8/8/6kn w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBB-KN",
+      "solution": {
+        "from": "c8",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c8-e6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0v9rftp",
+      "fen": "8/8/8/8/8/8/B3K3/1k5N w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBN-K",
+      "solution": {
+        "from": "a2",
+        "to": "b8",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a2-b8*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "03ultgf",
+      "fen": "2K5/8/8/8/8/5N1B/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBN-K",
+      "solution": {
+        "from": "h3",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h3-d6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "09i3c2v",
+      "fen": "8/8/8/B3N3/8/8/8/k1K5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBN-K",
+      "solution": {
+        "from": "a5",
+        "to": "f7",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a5-f7*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1lqmxah",
+      "fen": "4N3/8/8/1B6/8/8/8/k1K5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBN-K",
+      "solution": {
+        "from": "b5",
+        "to": "c4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b5-c4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0c07glz",
+      "fen": "8/8/3BN3/8/8/5K2/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KBN-K",
+      "solution": {
+        "from": "f3",
+        "to": "f2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f3-f2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1fb62c1",
+      "fen": "8/Q7/8/8/7K/8/6k1/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a7",
+        "to": "f7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a7-f7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1upic55",
+      "fen": "8/1K6/6Q1/8/8/8/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "g6",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g6-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1b05o6x",
+      "fen": "8/8/8/8/8/Q5K1/8/4k3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a3",
+        "to": "a5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a3-a5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0e52ond",
+      "fen": "8/6Q1/8/7k/1K6/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "b4",
+        "to": "a3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b4-a3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0q5521d",
+      "fen": "8/8/8/7Q/4K3/8/8/3k4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e4",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e4-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0fohkxj",
+      "fen": "2Q5/8/8/8/K7/8/7k/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "c8",
+        "to": "g5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "c8-g5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1toje0x",
+      "fen": "6Q1/8/8/8/8/8/7K/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h2",
+        "to": "a3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h2-a3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "12pql15",
+      "fen": "8/8/3K4/8/8/8/8/4Q2k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e1",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e1-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1xhufrv",
+      "fen": "7k/5Q2/8/8/8/8/1K6/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f7",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f7-g6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0f4ccgf",
+      "fen": "8/2K5/8/8/8/7Q/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h3",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h3-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "03xgym3",
+      "fen": "8/8/4Q3/8/8/8/3K4/6k1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e6",
+        "to": "g8",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e6-g8"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1pltq5v",
+      "fen": "k7/8/8/3K4/8/8/4Q3/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e2",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "e2-b6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "12tqgqf",
+      "fen": "8/8/1Q6/k7/8/7K/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "b6",
+        "to": "b7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b6-b7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "17srg6n",
+      "fen": "8/8/8/2Q5/K7/8/8/6k1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a4",
+        "to": "h4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a4-h4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1j9uxk7",
+      "fen": "8/3Q3k/8/K7/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "d7",
+        "to": "g4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d7-g4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1pks55r",
+      "fen": "8/1Q5K/8/8/8/8/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "b7",
+        "to": "b3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b7-b3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0shmtnh",
+      "fen": "8/8/8/K4Q2/8/8/8/1k6 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a5",
+        "to": "a4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a5-a4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1l2aq05",
+      "fen": "2k5/5K1Q/8/8/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f7",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f7-e6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1xq20dv",
+      "fen": "k7/2Q5/8/8/8/1K6/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "c7",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c7-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0gyhmzv",
+      "fen": "k7/8/8/8/K7/1Q6/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "b3",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b3-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "11gi9b5",
+      "fen": "8/7Q/8/7k/8/K7/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h7",
+        "to": "g7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h7-g7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0navlzv",
+      "fen": "7k/8/3K4/8/8/8/8/4Q3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e1",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "e1-g6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1y4zucp",
+      "fen": "8/4K1k1/8/8/8/Q7/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a3",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a3-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0bdfh75",
+      "fen": "8/8/4Q3/8/5K2/8/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e6",
+        "to": "b3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e6-b3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1nqabmv",
+      "fen": "8/5Q2/8/7k/8/K7/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f7",
+        "to": "g7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f7-g7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1g2xnhv",
+      "fen": "k7/8/2Q5/5K2/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "c6",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c6-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0y1jc2v",
+      "fen": "7k/8/Q7/8/8/4K3/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a6",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a6-g6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0vp4oqr",
+      "fen": "k7/8/7Q/8/8/8/8/4K3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h6",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h6-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0zni6gf",
+      "fen": "k7/8/5Q2/8/K7/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f6",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f6-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0cjtemj",
+      "fen": "8/7K/8/8/6Q1/8/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "g4",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g4-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1jwoq4b",
+      "fen": "2Q1K1k1/8/8/8/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "c8",
+        "to": "d7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c8-d7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "11dhcvv",
+      "fen": "8/8/8/8/8/1Q6/6k1/4K3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "e1",
+        "to": "e2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e1-e2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hbj6n1",
+      "fen": "8/8/8/1K6/7Q/8/8/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h4",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h4-g3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "01gxtyh",
+      "fen": "7k/8/8/7Q/8/3K4/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "h5",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h5-g6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "07qjnhv",
+      "fen": "1k6/5Q2/7K/8/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f7",
+        "to": "d7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f7-d7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0s06ynt",
+      "fen": "8/8/5Q2/8/8/8/8/2K4k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f6",
+        "to": "f2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f6-f2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0z3wg6n",
+      "fen": "5k2/8/7K/8/8/8/6Q1/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "g2",
+        "to": "b4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "g2-b4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1i3pua9",
+      "fen": "8/8/5Q2/4K3/8/8/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f6",
+        "to": "b3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f6-b3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "09rd6fl",
+      "fen": "8/5Q2/5K2/8/8/8/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "f7",
+        "to": "b3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f7-b3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "03fs6nj",
+      "fen": "Q7/8/k7/8/7K/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "a8",
+        "to": "b8",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a8-b8"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1hc6esx",
+      "fen": "7k/8/8/8/8/8/6Q1/K7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KQ-K",
+      "solution": {
+        "from": "g2",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g2-g6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0p3eboc",
+      "fen": "8/kR3B2/2K5/8/6p1/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f7",
+        "to": "c3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f7-c3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hub4h8",
+      "fen": "6k1/3B1p2/8/8/7R/2K5/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d7",
+        "to": "b5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d7-b5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "17whcc4",
+      "fen": "4K3/8/5p2/8/4B3/8/8/1kR5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "e4",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e4-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1jaw7e4",
+      "fen": "8/kp4K1/7R/1B6/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b5",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b5-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "01w6te0",
+      "fen": "1k6/8/2K5/8/8/8/B1pR4/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d2",
+        "to": "d7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d2-d7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0v5k9qy",
+      "fen": "2k5/8/8/1K3R2/8/p7/2B5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b5",
+        "to": "c6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b5-c6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1nk6iq4",
+      "fen": "8/R7/8/pk6/6K1/8/8/5B2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a7",
+        "to": "b7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a7-b7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1uzl55w",
+      "fen": "4B3/7p/5R2/8/8/4K3/8/3k4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f6",
+        "to": "c6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f6-c6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "11za7es",
+      "fen": "8/3B4/8/1K6/8/p7/8/k3R3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d7",
+        "to": "a3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "d7-a3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0b3nhua",
+      "fen": "5B2/k4R2/8/2K5/1p6/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f8",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "f8-d3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0nkd1qe",
+      "fen": "3K4/1k6/6R1/2B5/1p6/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "c5",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c5-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0cahpsi",
+      "fen": "B1k3R1/K7/8/p7/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a8",
+        "to": "c6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a8-c6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "11l0xeu",
+      "fen": "4K3/4B3/8/8/8/1R1p4/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "e7",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e7-d6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "001ukzq",
+      "fen": "3k4/8/2K3R1/8/8/1p3B2/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g6",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g6-e6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0v0kge4",
+      "fen": "1k1K4/B3p3/8/5R2/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a7",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a7-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "07brj3a",
+      "fen": "8/8/2p5/6B1/6K1/1R6/8/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g4",
+        "to": "h3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g4-h3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1mxlugs",
+      "fen": "1k3K2/p7/8/3B4/8/8/8/4R3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "e1",
+        "to": "c1",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e1-c1"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0jvjn4w",
+      "fen": "8/k5K1/8/8/p2B4/8/2R5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d4",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d4-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1xk0qw0",
+      "fen": "8/8/8/7K/1R6/8/k2p3B/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "h2",
+        "to": "d6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h2-d6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0qajrqa",
+      "fen": "1R6/2p5/k7/8/3K4/8/8/5B2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f1",
+        "to": "e2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f1-e2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0g8vb7k",
+      "fen": "1k6/2p4B/8/8/R7/8/5K2/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "h7",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h7-e3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "02skcms",
+      "fen": "8/7k/8/2B5/6R1/8/2p3K1/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "c5",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c5-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "06cklg4",
+      "fen": "7R/8/8/8/8/6B1/1k1p4/3K4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "h8",
+        "to": "h3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "h8-h3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "18ep8s2",
+      "fen": "8/2RKp3/8/8/8/8/kB6/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b2",
+        "to": "e6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "b2-e6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1br9784",
+      "fen": "8/2K4k/8/8/8/3p4/7R/1B6 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b1",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b1-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0itmk2a",
+      "fen": "3B2R1/8/8/7k/8/6pK/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g8",
+        "to": "g7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g8-g7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "08ixsuw",
+      "fen": "2k1R3/8/B4p2/8/8/K7/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a6",
+        "to": "f4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a6-f4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1dyo7bg",
+      "fen": "8/k5K1/6B1/8/8/1R1p4/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g6",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g6-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0gujbdq",
+      "fen": "4K2k/8/3R4/8/8/8/2B2p2/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "c2",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c2-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "09le4cm",
+      "fen": "8/1k6/5K2/8/3B4/2R5/2p5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d4",
+        "to": "e3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d4-e3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1fu769s",
+      "fen": "6k1/8/8/2BR4/8/2p5/4K3/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d5",
+        "to": "d7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d5-d7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "13mw69u",
+      "fen": "B7/7p/7K/8/8/6R1/7k/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a8",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a8-e5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0pqvzka",
+      "fen": "8/8/K2p4/8/8/B7/4R3/1k6 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a3",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "a3-f5*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0nvygoy",
+      "fen": "k7/7B/3R2K1/1p6/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d6",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d6-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1w5q96y",
+      "fen": "1k3K2/1p6/8/2R5/8/8/B7/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a2",
+        "to": "b1",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a2-b1"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1p71i5y",
+      "fen": "8/8/8/2K2pB1/8/8/8/2k1R3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "e1",
+        "to": "a1",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "e1-a1*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1e8yc0y",
+      "fen": "2k5/7R/8/K7/8/7B/7p/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a5",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a5-b6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1gf5l2u",
+      "fen": "6B1/8/8/8/3R4/1K6/p7/3k4 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g8",
+        "to": "b6",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "g8-b6*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1rsskdq",
+      "fen": "6k1/8/2B4R/4p1K1/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "g5",
+        "to": "f6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "g5-f6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0jcja8c",
+      "fen": "8/p7/8/8/3K4/8/2B5/1k2R3 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "c2",
+        "to": "f5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c2-f5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1jfx2bo",
+      "fen": "8/8/8/p3B2R/8/8/1K6/1k6 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b2",
+        "to": "c3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b2-c3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0datkgg",
+      "fen": "8/R6p/8/8/6B1/8/7K/2k5 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a7",
+        "to": "a2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a7-a2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1t8fi7i",
+      "fen": "6k1/8/1R6/7K/8/1p1B4/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b6",
+        "to": "f6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b6-f6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0hocs2u",
+      "fen": "8/4K1k1/8/8/R7/4B3/1p6/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a4",
+        "to": "g4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a4-g4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1qv1m6u",
+      "fen": "8/B7/6p1/8/7K/8/kR6/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a7",
+        "to": "d4",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a7-d4"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "19t43ye",
+      "fen": "8/8/8/3R4/3p4/1B6/4K3/6k1 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "d5",
+        "to": "g5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "d5-g5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0pt7mtg",
+      "fen": "1k6/1p6/K7/8/8/1R5B/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b3",
+        "to": "b7",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b3-b7"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1jihxli",
+      "fen": "K7/8/1R6/8/8/8/1p6/1B5k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "b6",
+        "to": "g6",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "b6-g6"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "150jade",
+      "fen": "8/8/8/5B1K/5p2/7k/8/R7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "a1",
+        "to": "g1",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "a1-g1"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1ivex5a",
+      "fen": "1K6/8/5B2/8/8/8/2p5/5R1k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f6",
+        "to": "e5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f6-e5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0u552za",
+      "fen": "k5B1/8/8/8/3pK3/8/4R3/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "e2",
+        "to": "b2",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e2-b2"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0i3hf06",
+      "fen": "5R2/8/7B/3p4/8/4K3/8/5k2 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KRB-KP",
+      "solution": {
+        "from": "f8",
+        "to": "g8",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "f8-g8"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0i73ybc",
+      "fen": "8/8/7B/8/8/8/2K5/k7 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KB-K",
+      "solution": {
+        "from": "h6",
+        "to": "c4",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h6-c4*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "00t2z80",
+      "fen": "5K2/7k/8/8/8/8/2B5/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KB-K",
+      "solution": {
+        "from": "c2",
+        "to": "d3",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "c2-d3"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "1hh428y",
+      "fen": "k1K5/4B3/8/8/8/8/8/8 w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KB-K",
+      "solution": {
+        "from": "e7",
+        "to": "c5",
+        "promotion": null,
+        "crossedSeam": false,
+        "coordinate": "e7-c5"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0lq0soa",
+      "fen": "4B3/8/8/8/8/8/5K2/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KB-K",
+      "solution": {
+        "from": "e8",
+        "to": "g3",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "e8-g3*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    },
+    {
+      "schema": 1,
+      "id": "0mq72ky",
+      "fen": "8/8/8/7B/8/8/5K2/7k w - - 0 1",
+      "ruleset": "2:bBrRqQnNkKP",
+      "sideToMove": "white",
+      "goal": "mate-in-2",
+      "material": "KB-K",
+      "solution": {
+        "from": "h5",
+        "to": "c7",
+        "promotion": null,
+        "crossedSeam": true,
+        "coordinate": "h5-c7*"
+      },
+      "unique": true,
+      "mateInChess": false,
+      "source": "composed",
+      "seed": 20260925
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+# Epic — Puzzles
+
+A puzzle game built out of this variant: a position, one right answer, and a reason the
+answer only exists because of the seam.
+
+---
+
+## 1. Why this is a real product and not a side quest
+
+The pitch is narrow and testable: **a puzzle that cannot exist in chess**. Not a chess
+puzzle on a strange board — a position whose answer *changes* when the seam closes. That is
+computable here and nowhere else, because this engine plays 64 games and one of them is
+ordinary chess (CLAUDE.md §12).
+
+It also fits where the project actually is. The variant study is blocked on evaluation —
+the engine scores every quiet move identically, so self-play is 100% repetition draws
+([`../balance/readiness-probe.md`](../balance/readiness-probe.md) §1). **Puzzle mining is
+not blocked by that**, because a forced mate is a *rules fact*, proved by the perft-verified
+generator, with no opinion from the evaluation anywhere in it. This epic can ship while the
+engine work proceeds.
+
+## 2. What was measured before building anything
+
+2026-09-25, two candidate sources:
+
+| Source | Cost/position | Forced mates | Seam mates |
+| --- | --- | --- | --- |
+| positions reached by random **play** | 223–1253 ms | ~2% | **0 of 5** |
+| random **placement** of small material | 3–53 ms | 1–11% | many |
+
+Game-like positions are a bad source, and the reason is a property of the game: the seam
+makes kings hard to corner, so mates are rare in a crowded middlegame. The seam's own
+mating patterns live in sparse endgames — where **a lone bishop mates**, which chess cannot
+do at all. Yield by material, 300 placements each:
+
+| Material | Mates | Not a mate in chess |
+| --- | --- | --- |
+| K+Q vs K | 11% | 20 / 34 |
+| K+B+B vs K+N | 10% | **30 / 31** |
+| K+B vs K | 4% | **12 / 12** |
+| K+N+B vs K | 2% | 7 / 7 |
+| K+R vs K | 1% | 0 / 4 |
+
+That last row is the control that makes the rest believable: a rook mates the same way here
+as in chess, so none of its mates are novel — exactly as expected.
+
+## 3. The four criteria a puzzle must pass
+
+In `src/puzzles/mine.ts`, and each one exists because skipping it produces a broken puzzle:
+
+1. **Legal and live** — the position is not already over.
+2. **Exactly one solution** — a second answer means the UI rejects a correct move.
+3. **No faster mate** — a position can have a unique mate in two *and* an immediate mate,
+   in which case the "only answer" is not the best answer. This removes ~30% of otherwise
+   usable candidates and was found only because the engine disagreed with the solver about
+   a mined fixture.
+4. **Not a mate in chess** — with every flag off it must not be a forced mate. This is the
+   novelty gate, and the only defensible definition of novel we have.
+
+## 4. How the puzzles are proved
+
+**The miner never asks the engine.** It uses `src/puzzles/mate.ts`, an exhaustive solver
+built on nothing but `allLegalMoves`, `reduceMove` and `gameStatus` — so a puzzle is exactly
+as trustworthy as the published perft counts, and no engine bug can make one wrong. The
+engine is used the other way round: `mate.test.ts` checks that the search *agrees* with the
+solver, which is ADR 0002's two-implementations habit pointed at puzzles.
+
+Every mined puzzle is then re-proved in `mine.test.ts`: the solution is replayed through the
+rules against **every** defence, and the chess-differential is re-checked on the finished
+record rather than trusted from the miner that wrote it.
+
+## 5. Status
+
+| | |
+| --- | --- |
+| [`mine-mate-in-2.md`](./mine-mate-in-2.md) | ✅ the miner, the solver, the criteria and the first committed set |
+| Puzzle player UI | 📋 not started — needs a screen, and the ruleset shown beside the board |
+| Harder goals | 📋 mate in 3 (needs depth 5, ~10–40× the cost); "win material" is **blocked** on evaluation, since it rests on piece values known to be wrong here |
+| Difficulty rating | 📋 no human data exists; the honest proxy is the shallowest engine level that finds the answer |
+
+## 6. What would make this better, in order
+
+1. **A puzzle screen**, so the set can be judged as a game rather than as JSON.
+2. **Mate in 3**, which is where puzzles get satisfying.
+3. **Positions from real games** once self-play works, tagged `source: "selfplay"`, so the
+   library can be compared: composed puzzles are fine in a puzzle book, but a position that
+   demonstrably arose in play is a stronger claim.
