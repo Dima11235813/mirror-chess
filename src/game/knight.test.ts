@@ -1,274 +1,97 @@
-import { describe, it, expect } from 'vitest';
-import { legalMovesFor } from './moves';
-import { initialPosition, fromPiecesSpec } from './setup';
-import type { GameState, Coord } from './types';
-import { WHITE, BLACK } from './types';
+import { describe, it, expect } from 'vitest'
+import { legalMovesFor } from './moves'
+import { fromPiecesSpec } from './setup'
+import { algebraic, parseAlgebraic } from './coord'
+import type { GameState } from './types'
 
-describe.skip('knight moves', () => {
-  describe('debug', () => {
-    it('simple knight test', () => {
-      // Create a simple board with just a knight
-      const state = fromPiecesSpec('w:Na3', 'white');
+/**
+ * The knight crosses the seam by **L measured across it**
+ * (`prj-mgmt/epics/rules/mirror-portal-spec.md` §11): the file of its landing square
+ * wraps, the rank is whatever its own L dictates. A knight therefore never loses
+ * moves to the left or right edge.
+ */
 
-      // Check if the knight is actually placed
-      const knightSquare = { f: 0, r: 2 }; // a3
-      const piece = state.board[2 * 8 + 0];
-      expect(piece).toBeDefined();
-      expect(piece?.kind).toBe('N');
-      expect(piece?.color).toBe(WHITE);
+const movesFrom = (state: GameState, square: string) =>
+  legalMovesFor(state, parseAlgebraic(square))
 
-      // Check if we can get moves
-      const moves = legalMovesFor(state, knightSquare);
-      console.log('Moves for knight on a3:', moves);
-      expect(moves.length).toBeGreaterThan(0);
-    });
-  });
+const destinations = (state: GameState, square: string): string[] =>
+  movesFrom(state, square).map(m => algebraic(m.to)).sort()
 
-  describe('regular moves', () => {
-    it('knight on e4 has 9 legal moves (8 regular + 1 mirror)', () => {
-      const state = initialPosition();
-      // Place knight on e4
-      const board = [...state.board];
-      board[3 * 8 + 4] = { kind: 'N', color: WHITE }; // e4 = (4, 3)
-      const testState: GameState = { ...state, board };
+const mirrorDestinations = (state: GameState, square: string): string[] =>
+  movesFrom(state, square).filter(m => m.crossedSeam).map(m => algebraic(m.to)).sort()
 
-      const moves = legalMovesFor(testState, { f: 4, r: 3 });
+const sorted = (squares: readonly string[]): string[] => [...squares].sort()
 
-      console.log('DEBUG: All moves for knight on e4:', JSON.stringify(moves, null, 2));
-      expect(moves).toHaveLength(9); // 8 regular + 1 mirror
-      const destinations = moves.map((m) => m.to);
-      expect(destinations).toContainEqual({ f: 2, r: 1 }); // c2
-      expect(destinations).toContainEqual({ f: 2, r: 5 }); // c6
-      expect(destinations).toContainEqual({ f: 3, r: 1 }); // d2
-      expect(destinations).toContainEqual({ f: 3, r: 5 }); // d6
-      expect(destinations).toContainEqual({ f: 5, r: 1 }); // f2
-      expect(destinations).toContainEqual({ f: 5, r: 5 }); // f6
-      expect(destinations).toContainEqual({ f: 6, r: 2 }); // g3
-      expect(destinations).toContainEqual({ f: 6, r: 4 }); // g5
+describe('knight: away from the seam it is ordinary chess', () => {
+  it('a knight on e4 has the eight L-moves and none of them wrap', () => {
+    const s = fromPiecesSpec('w:Ne4', 'white')
 
-      // Should also have mirror move
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-    });
+    expect(destinations(s, 'e4')).toEqual(sorted(['d6', 'f6', 'c5', 'g5', 'c3', 'g3', 'd2', 'f2']))
+    expect(mirrorDestinations(s, 'e4')).toEqual([])
+  })
 
-    it('knight on edge square has fewer moves', () => {
-      const state = initialPosition();
-      // Place knight on a1
-      const board = [...state.board];
-      board[0 * 8 + 0] = { kind: 'N', color: WHITE }; // a1 = (0, 0)
-      const testState: GameState = { ...state, board };
+  it('a knight jumps over blockers', () => {
+    const s = fromPiecesSpec('w:Ne4,Pe5,Pd5,Pf5,Pd4,Pf4', 'white')
 
-      const moves = legalMovesFor(testState, { f: 0, r: 0 });
+    expect(destinations(s, 'e4')).toEqual(sorted(['d6', 'f6', 'c5', 'g5', 'c3', 'g3', 'd2', 'f2']))
+  })
 
-      console.log('DEBUG: All moves for knight on a1:', JSON.stringify(moves, null, 2));
-      expect(moves).toHaveLength(3); // 2 regular + 1 mirror
-      const destinations = moves.map((m) => m.to);
-      expect(destinations).toContainEqual({ f: 1, r: 2 }); // b3
-      expect(destinations).toContainEqual({ f: 2, r: 1 }); // c2
+  it('a knight can capture an enemy piece', () => {
+    expect(destinations(fromPiecesSpec('w:Ne4; b:Pd6', 'white'), 'e4')).toContain('d6')
+  })
 
-      // Should also have mirror move
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-    });
+  it('a knight cannot land on a friendly piece', () => {
+    expect(destinations(fromPiecesSpec('w:Ne4,Pd6', 'white'), 'e4')).not.toContain('d6')
+  })
+})
 
-    it('knight can jump over pieces', () => {
-      const state = initialPosition();
-      // Place knight on e4 with pieces blocking its path
-      const board = [...state.board];
-      board[3 * 8 + 4] = { kind: 'N', color: WHITE }; // e4 = (4, 3)
-      board[4 * 8 + 4] = { kind: 'P', color: BLACK }; // e5 = (4, 4) - blocks path to f6
-      board[5 * 8 + 4] = { kind: 'P', color: BLACK }; // f5 = (5, 4) - blocks path to g6
-      const testState: GameState = { ...state, board };
+describe('knight: §11 crossing the seam', () => {
+  it('§11.4 a knight on a3 keeps all eight moves, four of them across the seam', () => {
+    const s = fromPiecesSpec('w:Na3', 'white')
 
-      const moves = legalMovesFor(testState, { f: 4, r: 3 });
+    expect(destinations(s, 'a3')).toHaveLength(8)
+    expect(mirrorDestinations(s, 'a3')).toEqual(sorted(['h5', 'g4', 'g2', 'h1']))
+    expect(destinations(s, 'a3')).toEqual(
+      sorted(['b5', 'c4', 'c2', 'b1', 'h5', 'g4', 'g2', 'h1']),
+    )
+  })
 
-      // Should still be able to reach f6 and g5 despite blockers
-      const destinations = moves.map((m) => m.to);
-      expect(destinations).toContainEqual({ f: 5, r: 5 }); // f6
-      expect(destinations).toContainEqual({ f: 6, r: 4 }); // g5
-    });
-  });
+  it('§11.4 a knight on h6 crosses the other way', () => {
+    const s = fromPiecesSpec('w:Nh6', 'white')
 
-  describe('regular captures', () => {
-    it('knight can capture enemy pieces', () => {
-      const state = initialPosition();
-      // Place knight on e4 with enemy pieces to capture
-      const board = [...state.board];
-      board[3 * 8 + 4] = { kind: 'N', color: WHITE }; // e4 = (4, 3)
-      board[5 * 8 + 4] = { kind: 'P', color: BLACK }; // e6 = (4, 5) - enemy pawn
-      board[5 * 8 + 5] = { kind: 'R', color: BLACK }; // f6 = (5, 5) - enemy rook
-      const testState: GameState = { ...state, board };
+    expect(mirrorDestinations(s, 'h6')).toEqual(sorted(['a8', 'b7', 'b5', 'a4']))
+    expect(destinations(s, 'h6')).toEqual(sorted(['g8', 'f7', 'f5', 'g4', 'a8', 'b7', 'b5', 'a4']))
+  })
 
-      const moves = legalMovesFor(testState, { f: 4, r: 3 });
+  it('a knight in the corner gains two moves it would not have in standard chess', () => {
+    const s = fromPiecesSpec('w:Na1', 'white')
 
-      const captures = moves.filter(
-        (m) => (m.to.f === 4 && m.to.r === 5) || (m.to.f === 5 && m.to.r === 5),
-      );
-      expect(captures).toHaveLength(2);
-      expect(captures.every((m) => !m.special)).toBe(true); // Regular captures, not mirror
-    });
+    expect(destinations(s, 'a1')).toEqual(sorted(['b3', 'c2', 'g2', 'h3']))
+    expect(mirrorDestinations(s, 'a1')).toEqual(sorted(['g2', 'h3']))
+  })
 
-    it('knight cannot capture friendly pieces', () => {
-      const state = initialPosition();
-      // Place knight on e4 with friendly pieces blocking
-      const board = [...state.board];
-      board[3 * 8 + 4] = { kind: 'N', color: WHITE }; // e4 = (4, 3)
-      board[4 * 8 + 5] = { kind: 'P', color: WHITE }; // e6 = (4, 5) - friendly pawn
-      const testState: GameState = { ...state, board };
+  it('does not land on the file mirror of its own rank — the rejected a3→h3 idea', () => {
+    const s = fromPiecesSpec('w:Na3', 'white')
 
-      const moves = legalMovesFor(testState, { f: 4, r: 3 });
+    expect(destinations(s, 'a3')).not.toContain('h3')
+  })
 
-      const blockedMoves = moves.filter((m) => m.to.f === 4 && m.to.r === 5);
-      expect(blockedMoves).toHaveLength(0);
-    });
-  });
+  it('ranks never wrap: a knight on a1 gets nothing from rank offsets that leave the board', () => {
+    const s = fromPiecesSpec('w:Na1', 'white')
 
-  describe('mirror moves', () => {
-    it('knight on a3 can mirror to h3', () => {
-      const state = initialPosition();
-      // Place knight on a3
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      const testState: GameState = { ...state, board };
+    // (-1,-2) and (-2,-1) would need ranks -1 and -2; no square exists there.
+    expect(destinations(s, 'a1')).toHaveLength(4)
+  })
 
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
+  it('a wrapped destination obeys ordinary occupancy — own piece blocks', () => {
+    const s = fromPiecesSpec('w:Na3,Ph5', 'white')
 
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-      expect(mirrorMoves[0]?.to).toEqual({ f: 7, r: 2 }); // h3
-    });
+    expect(mirrorDestinations(s, 'a3')).toEqual(sorted(['g4', 'g2', 'h1']))
+  })
 
-    it('knight on h6 can mirror to a6', () => {
-      const state = initialPosition();
-      // Place knight on h6
-      const board = [...state.board];
-      board[5 * 8 + 7] = { kind: 'N', color: WHITE }; // h6 = (7, 5)
-      const testState: GameState = { ...state, board };
+  it('a wrapped destination may capture an enemy', () => {
+    const s = fromPiecesSpec('w:Na3; b:Ph5', 'white')
 
-      const moves = legalMovesFor(testState, { f: 7, r: 5 });
-
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-      expect(mirrorMoves[0]?.to).toEqual({ f: 0, r: 5 }); // a6
-    });
-
-    it('knight on e4 can mirror to d4', () => {
-      const state = initialPosition();
-      // Place knight on e4
-      const board = [...state.board];
-      board[3 * 8 + 4] = { kind: 'N', color: WHITE }; // e4 = (4, 3)
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 4, r: 3 });
-
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-      expect(mirrorMoves[0]?.to).toEqual({ f: 3, r: 3 }); // d4
-    });
-
-    it('knight mirror ignores path blockers', () => {
-      const state = initialPosition();
-      // Place knight on a3 with pieces blocking the path to h3
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      board[2 * 8 + 3] = { kind: 'P', color: BLACK }; // d3 = (3, 2) - blocks path
-      board[2 * 8 + 6] = { kind: 'R', color: BLACK }; // g3 = (6, 2) - blocks path
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1); // Should still be able to mirror despite blockers
-      expect(mirrorMoves[0]?.to).toEqual({ f: 7, r: 2 }); // h3
-    });
-  });
-
-  describe('mirror captures', () => {
-    it('knight on a3 can mirror-capture enemy piece on h4', () => {
-      const state = initialPosition();
-      // Place knight on a3 with enemy piece on h4
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      board[3 * 8 + 7] = { kind: 'P', color: BLACK }; // h4 = (7, 3) - enemy pawn
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      const mirrorCaptures = moves.filter(
-        (m) => m.special === 'mirror' && m.to.f === 7 && m.to.r === 3,
-      );
-      expect(mirrorCaptures).toHaveLength(1);
-      expect(mirrorCaptures[0]?.to).toEqual({ f: 7, r: 3 }); // h4
-    });
-
-    it('knight cannot mirror-capture friendly pieces', () => {
-      const state = initialPosition();
-      // Place knight on a3 with friendly piece on h4
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      board[3 * 8 + 7] = { kind: 'P', color: WHITE }; // h4 = (7, 3) - friendly pawn
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      const mirrorCaptures = moves.filter(
-        (m) => m.special === 'mirror' && m.to.f === 7 && m.to.r === 3,
-      );
-      expect(mirrorCaptures).toHaveLength(0);
-    });
-
-    it('knight cannot mirror to empty squares (must be enemy piece for capture)', () => {
-      const state = initialPosition();
-      // Place knight on a3 with empty h4
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      // h4 is empty (no piece)
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [null];
-      expect(mirrorMoves).toHaveLength(1);
-      expect(mirrorMoves[0]?.to).toEqual({ f: 7, r: 2 }); // h3 (same rank), not h4
-    });
-  });
-
-  describe('combined scenarios', () => {
-    it('knight on a3 has both regular and mirror moves', () => {
-      const state = initialPosition();
-      // Place knight on a3
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      // Should have regular L-shaped moves + mirror move
-      expect(moves.length).toBeGreaterThan(1);
-
-      const regularMoves = moves.filter((m) => !m.special);
-      const mirrorMoves = moves.filter((m) => m.special === 'mirror') ?? [undefined];
-
-      expect(regularMoves.length).toBeGreaterThan(0);
-      expect(mirrorMoves).toHaveLength(1);
-      expect(mirrorMoves[0]?.to).toEqual({ f: 7, r: 2 }); // h3
-    });
-
-    it('knight on a3 can capture enemy piece on h4 via mirror', () => {
-      const state = initialPosition();
-      // Place knight on a3 with enemy piece on h4
-      const board = [...state.board];
-      board[2 * 8 + 0] = { kind: 'N', color: WHITE }; // a3 = (0, 2)
-      board[3 * 8 + 7] = { kind: 'P', color: BLACK }; // h4 = (7, 3) - enemy pawn
-      const testState: GameState = { ...state, board };
-
-      const moves = legalMovesFor(testState, { f: 0, r: 2 });
-
-      const mirrorCaptures = moves.filter(
-        (m) => m.special === 'mirror' && m.to.f === 7 && m.to.r === 3,
-      ) ?? [undefined];
-      expect(mirrorCaptures).toHaveLength(1);
-      expect(mirrorCaptures[0]?.to).toEqual({ f: 7, r: 3 }); // h4
-    });
-  });
-});
+    expect(mirrorDestinations(s, 'a3')).toContain('h5')
+  })
+})

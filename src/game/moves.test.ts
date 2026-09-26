@@ -12,9 +12,9 @@ describe('horizontal portal wrap – sliders', () => {
     // Cannot step to d6 (own pawn)
     expect(moves.some(m => m.to.f === 3 && m.to.r === 5)).toBe(false)
     // Left-wrap: path to the left wall is clear → h6 should be reachable via portal
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 5)).toBe(true)
+    expect(moves.some(m => m.crossedSeam && m.to.f === 7 && m.to.r === 5)).toBe(true)
     // Right-wrap is blocked by own pieces at d6/g6 → a6 should NOT appear as a portal move
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 0 && m.to.r === 5)).toBe(false)
+    expect(moves.some(m => m.crossedSeam && m.to.f === 0 && m.to.r === 5)).toBe(false)
   })
 
   it('queen at d6 with own pawn at g6: cannot wrap-right beyond g6; can wrap-left to h6', () => {
@@ -27,9 +27,9 @@ describe('horizontal portal wrap – sliders', () => {
     // Cannot land on own pawn at g6 and cannot include it via wrap
     expect(moves.some(m => m.to.f === 6 && m.to.r === 5)).toBe(false)
     // Right-wrap should not produce portal squares (e.g., a6) due to blocker at g6
-    expect(moves.some(m => m.special === 'mirror' && m.to.f === 0 && m.to.r === 5)).toBe(false)
+    expect(moves.some(m => m.crossedSeam && m.to.f === 0 && m.to.r === 5)).toBe(false)
     // Wrap-left: path to left wall is clear → h6 should be reachable via portal
-    const leftWrapH6 = moves.find(m => m.special === 'mirror' && m.to.f === 7 && m.to.r === 5)
+    const leftWrapH6 = moves.find(m => m.crossedSeam && m.to.f === 7 && m.to.r === 5)
     expect(leftWrapH6).toBeTruthy()
   })
 })
