@@ -3,6 +3,27 @@
 export const SQUARE_TESTID_PREFIX = 'square-'
 export const HINT_TESTID_PREFIX = 'hint-'
 
+/** The footer live region announcing turn / check / checkmate / stalemate. */
+export const GAME_STATUS_TESTID = 'game-status'
+
+/** The live region explaining why an attempted move was rejected. */
+export const MOVE_MESSAGE_TESTID = 'move-message'
+
+/** Classes applied to a square to show its role in the current check. */
+export enum SquareStateClass {
+  Selected = 'sel',
+  /** The king of the side to move, currently attacked. */
+  Check = 'check',
+  /** The king of the side to move, checkmated. */
+  Mate = 'mate',
+  /** The king of the side to move, stalemated. */
+  Stalemate = 'stalemate',
+  /** An enemy piece delivering check. */
+  Checker = 'checker',
+  /** A square the check travels through, including across the seam. */
+  CheckPath = 'check-path',
+}
+
 export function squareTestId(square: string): string {
   return `${SQUARE_TESTID_PREFIX}${square}`
 }
@@ -21,6 +42,22 @@ export enum SquareHintClass {
   EnPassantDest = 'ep-dest',
   /** Captured pawn square for an en passant capture */
   EnPassantCaptured = 'ep-cap',
+  /** Destination of a castling move — the king's landing square */
+  Castle = 'castle',
+  /** Destination where a pawn promotes */
+  Promotion = 'promo',
+}
+
+/** Opponent selection, strength, and the engine's live "thinking" region. */
+export const OPPONENT_SIDE_TESTID = 'opponent-side'
+export const OPPONENT_DIFFICULTY_TESTID = 'opponent-difficulty'
+export const ENGINE_STATUS_TESTID = 'engine-status'
+
+/** The promotion picker, and one button per piece it offers. */
+export const PROMOTION_DIALOG_TESTID = 'promotion-picker'
+
+export function promotionOptionTestId(kind: string): string {
+  return `promote-${kind}`
 }
 
 

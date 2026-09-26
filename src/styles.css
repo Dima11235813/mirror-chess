@@ -74,20 +74,175 @@ body, html, #root {
 
 .hint.cap { background: rgba(239, 68, 68, 0.7); }
 
+/*
+ * Mirror (portal) destinations: a hollow ring rather than a filled dot, so they are
+ * distinguishable by shape and not by colour alone. Pairs with `.cap` for a portal
+ * capture, which keeps the capture colour and adds the ring.
+ */
+.hint.mirror {
+  width: 44%;
+  height: 44%;
+  background: transparent;
+  border: max(2px, calc(var(--cell) * 0.07)) solid rgba(45, 212, 191, 0.95);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.hint.mirror.cap {
+  background: transparent;
+  border-color: rgba(239, 68, 68, 0.95);
+}
+
 /* En passant destination: darker red dot */
 .hint.ep-dest { background: rgba(190, 18, 60, 0.9); }
 
 /* En passant captured square: translucent red background overlay */
-.hint.ep-cap { 
-  width: 100%; 
-  height: 100%; 
-  border-radius: 0; 
-  background: rgba(239, 68, 68, 0.25); 
+.hint.ep-cap {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: rgba(239, 68, 68, 0.25);
 }
 
-.footer { 
-  text-align: center; 
-  padding-bottom: env(safe-area-inset-bottom); 
+/*
+ * Castling destination: a wide, low bar rather than a dot, because the king travels two
+ * squares and the rook moves too — the marker should not look like an ordinary step.
+ */
+.hint.castle {
+  width: 62%;
+  height: 16%;
+  border-radius: calc(var(--cell) * 0.04);
+  background: rgba(45, 212, 191, 0.85);
+}
+
+/*
+ * Promotion destination: a diamond, so it differs from every other marker by *shape*.
+ * That matters more here than in chess — this square is where a choice happens, and the
+ * player needs to see it coming before the dialog appears.
+ */
+.hint.promo {
+  width: 40%;
+  height: 40%;
+  border-radius: 12%;
+  transform: rotate(45deg);
+  background: rgba(45, 212, 191, 0.85);
+}
+
+.hint.promo.cap { background: rgba(239, 68, 68, 0.85); }
+
+/*
+ * The promotion picker. A modal over the board, since the move is not finished until a
+ * piece is chosen and no other interaction makes sense in between.
+ */
+.promotionBackdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 20;
+}
+
+.promotionPicker {
+  background: var(--surface-color, #fff);
+  color: var(--text-color, #111);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.promotionPrompt {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.promotionOptions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.promotionOption {
+  font-size: clamp(2rem, 8vw, 3rem);
+  line-height: 1;
+  min-width: 2.2em;
+  min-height: 2.2em;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.12);
+  color: inherit;
+}
+
+.promotionOption:hover { background: rgba(127, 127, 127, 0.25); }
+
+.promotionOption:focus-visible {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.45);
+}
+
+/*
+ * Check presentation. The board squares use fixed wood colours, so these overlays
+ * are drawn with their own opaque tints and read the same in light and dark themes.
+ * Every one of them is mirrored in the square's aria-label (see
+ * `shared/ui/square-presentation.ts`), so none is a colour-only cue.
+ */
+.sq.check,
+.sq.mate,
+.sq.stalemate,
+.sq.checker,
+.sq.check-path { position: relative; }
+
+.sq.check::before,
+.sq.mate::before,
+.sq.stalemate::before,
+.sq.checker::before,
+.sq.check-path::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The checked king: a red wash plus an inset ring. */
+.sq.check::before {
+  background: rgba(239, 68, 68, 0.4);
+  box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95);
+}
+
+/* Checkmate: heavier, and a solid ring so it is not merely "more red". */
+.sq.mate::before {
+  background: rgba(190, 18, 60, 0.6);
+  box-shadow: inset 0 0 0 4px rgba(190, 18, 60, 1);
+}
+
+/* Stalemate: neutral rather than alarming — the game is drawn, not lost. */
+.sq.stalemate::before {
+  background: rgba(100, 116, 139, 0.45);
+  box-shadow: inset 0 0 0 4px rgba(100, 116, 139, 0.95);
+}
+
+/* The piece giving check. */
+.sq.checker::before {
+  box-shadow: inset 0 0 0 3px rgba(249, 115, 22, 0.95);
+}
+
+/* Squares the check travels through, including across the seam. */
+.sq.check-path::before {
+  background: rgba(249, 115, 22, 0.22);
+}
+
+.moveMessage {
+  min-height: 1.25rem;
+  margin: 0 auto 4px;
+  text-align: center;
+  color: var(--danger-color);
+  font-size: 0.9rem;
+}
+
+.footer {
+  text-align: center;
+  padding-bottom: env(safe-area-inset-bottom);
   color: var(--text-primary);
 }
 
@@ -301,3 +456,46 @@ ion-toggle {
 }
 
 
+
+/*
+ * Opponent controls. Laid out in a row that wraps, so a phone gets them stacked without a
+ * media query.
+ */
+.opponent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.opponentField {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.opponentField > span {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.opponentField select {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(127, 127, 127, 0.5);
+  background: transparent;
+  color: inherit;
+}
+
+/*
+ * The engine's live region. It keeps its height whether or not there is text, so the board
+ * does not jump every time the engine starts and stops thinking.
+ */
+.engineStatus {
+  margin: 0;
+  min-height: 1.4em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}

@@ -1,5 +1,21 @@
 # Pawn – Regular En Passant
 
+> **Status: DONE (2026-08-05), delivered by
+> [`../../rules/special-moves.md`](../../rules/special-moves.md).** Specified in
+> [spec §13.2](../../rules/mirror-portal-spec.md).
+>
+> The criteria below are correct for ordinary chess and **incomplete for this game**. The
+> rule as shipped is stated in terms of *attack* — "any pawn that attacks the square the
+> double-pushing pawn passed over" — which is how chess states it, and which means the seam
+> arrives with no clause of its own. The consequence this story could not have anticipated:
+>
+> **A pawn on `a5` may capture one that just played `h7–h5`, landing on `h6`.** The two
+> pawns stand seven files apart.
+>
+> Also settled here, and not mentioned below: the en-passant square is recorded **only when
+> a capture is actually available**, or two positions differing in nothing observable would
+> compare unequal and threefold repetition would quietly stop working.
+
 As a player, I want orthodox en passant to work for pawns so that standard pawn tactics are supported.
 
 ## Acceptance Criteria

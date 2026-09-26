@@ -1,3 +1,15 @@
+> **Status: SUPERSEDED (2026-08-05).** Kept as history, not as guidance.
+>
+> - Its rule framing predates [the spec](../rules/mirror-portal-spec.md) — see the banner
+>   on [`arch.md`](./arch.md) for what was wrong with it. The `Na3 → h5` hop it shows does
+>   happen to be correct (spec §11.4), but for a different reason than this file gives.
+> - The **e2e strategy** it is named for now lives in [`../../../CLAUDE.md`](../../../CLAUDE.md)
+>   §8 (three tiers, colocated `*.e2e.ts`) and in [`../../README.md`](../../README.md) §5.
+> - The download link below points at a sandbox path that no longer exists. The image is
+>   committed beside this file as `mirror_knight_a3_to_h5.png`.
+
+---
+
 Absolutely—this is a perfect knight showcase.
 
 **Diagram (triple-board, with mirror hop A3 → H5):**

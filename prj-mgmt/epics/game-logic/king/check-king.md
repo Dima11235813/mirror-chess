@@ -1,50 +1,31 @@
-# King Check Game Logic Feature
+# King Check — Game Logic Feature
 
----
+> **Engine parts: DONE.** Specified in
+> [the Mirror Portal spec](../../rules/mirror-portal-spec.md) §10 and delivered by
+> [`legality-layer.md`](../../rules/legality-layer.md).
+> **UI parts: carved out** into [`check-highlighting.md`](./check-highlighting.md) —
+> they were never engine work and were blocking this file from being closable.
 
-## **Prevent Moving Into Check** Story
+## Delivered
 
-**As a player,** I want the game to automatically prevent me from making any move that would place my own king into check (including mirror chess rules), **so that** I can only make legal moves according to the rules of chess and avoid accidentally losing due to an illegal self-check.
+- [x] **Prevent moving into check.** A move that would leave the mover's own king
+      attacked is never generated, so it cannot be selected or played (§10.3).
+- [x] **Block illegal moves that cause check.** `reduceMove` returns the state
+      unchanged for an illegal move, and also refuses to move a piece belonging to
+      the side not on turn.
+- [x] **Detect mirror check threats.** Attack generation includes portal rays, so a
+      bishop on `b3` checks a king on `g1` through the seam (§10.1). Verified by
+      `src/game/attacks.test.ts` and `legality.e2e.ts`.
+- [x] **Validate all opponent moves.** The same filter applies to both colors; no
+      side can end its turn with its own king attacked.
+- [x] **Display check state immediately.** The footer is a live region announcing
+      `Turn: white — check`, checkmate (with the winner) or stalemate.
+- [x] **Resolve an existing check.** While in check, only moves that end it are
+      offered — capture the checker, block on either side of the seam, or move the
+      king. This needs no separate rule; it falls out of §10.3.
 
-### Acceptance Criteria
+## Verified by
 
-- When a player makes a move that would put their own king into check, the game should prevent the move from being made.
-- The game should display an error message to the player explaining why the move is illegal.
-- The game should highlight the square that the king is in check from.
-- The game should highlight the piece that is causing the check.
-- The game should highlight the square that the king can move to to get out of check.
-
-
----
-
-## **Detect Mirror Check Threats**
-
-**As a player in mirror chess,** I want the game to detect threats to my king not only from pieces on the same board but also from pieces attacking via mirrored boards, **so that** I can avoid making moves that would place my king in check from a mirror attack.
-
----
-
-## **Block Illegal Moves That Cause Check**
-
-**As a player,** I want the game to stop my move from being executed if it results in my king being under check (normal or mirror), **so that** I never have to manually track whether my move is legal.
-
----
-
-## **Highlight Check-Causing Moves**
-
-**As a player,** I want the interface to highlight attempted moves that would cause my king to be in check, **so that** I get immediate visual feedback explaining why the move is illegal.
-
----
-
-## **Validate All Opponent Moves**
-
-**As a player,** I want the game to ensure that my opponent’s moves never result in their king being in check at the end of their turn, **so that** the rules are consistently enforced for both players.
-
----
-
-## **Display Check State Immediately**
-
-**As a player,** I want the board to visually indicate when my king is in check, including from a mirror threat, **so that** I am aware of the danger and can focus on moves that remove the check.
-
----
-
-If you want, I can also **add acceptance criteria for each user story** so they’re ready for your project management system. That way this “King Check” feature can immediately be turned into test cases for your e2e Playwright suite.
+- Unit: `src/game/attacks.test.ts`, `src/game/legality.test.ts`,
+  `src/game/status.test.ts`
+- E2E: `prj-mgmt/epics/rules/legality.e2e.ts`

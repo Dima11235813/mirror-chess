@@ -1,12 +1,38 @@
-# Bishop – Mirror Move
+# Bishop – Mirror Move (portal)
 
-As a player, when I select a bishop, I want to see the file-mirror destination on the same rank if the rank path is clear so that I can perform a mirror move per the game rules.
+> Rewritten against [the Mirror Portal spec](../../rules/mirror-portal-spec.md) §4–§5.2.
+> The previous version of this story described a *same-rank file mirror*
+> (`b3 → g3`). That rule was never confirmed and is **not** the mirror mechanic.
+
+## Summary
+
+As a player, when I select a bishop, I want each of its diagonals that reaches the
+`a`- or `h`-file with a clear path to continue through the seam onto the far side of
+the board, so that I can use the mirror portal for attack and development.
 
 ## Acceptance Criteria
-- Given a bishop at `(f, r)`, when the squares strictly between `f` and `7 - f` on rank `r` are empty, then the mirror square `(7 - f, r)` is highlighted as a mirror move.
-- Given a piece of my own color on the mirror square, then the mirror move is not highlighted.
-- Given an enemy piece on the mirror square, then the mirror move is highlighted as a capture.
-- Given any blocker on the same rank between the bishop and its mirror file, then the mirror move is not highlighted.
 
-## Notes
-- Knights are exempt from path checks; bishops are not. This story covers bishops only.
+- [x] Given a bishop whose diagonal reaches the `a`-file (or `h`-file) with every
+      square on the way empty, and that edge square is empty, then the ray continues
+      from the mirrored edge square **on the same rank**, and every square it reaches
+      is highlighted as a mirror move.
+- [x] The seam hop does not change rank: leaving via `a4` emerges on `h4`, never `h5`.
+- [x] The far-side walk continues in the **same direction** as the original diagonal.
+- [x] Given a blocker anywhere on the ray before the edge square, no mirror move is
+      highlighted for that ray.
+- [x] Given a piece on the edge square itself, no mirror move is highlighted for that
+      ray (an enemy there is an ordinary capture that stops the ray).
+- [x] A square reachable both normally and through the seam is highlighted once, as a
+      normal move.
+
+## Test Cases
+
+- [x] `w:Bb3` → mirror hints on `h4, g5, f6, e7, d8` (via `a4`) and `h2, g1` (via `a2`).
+- [x] `w:Bc1` → mirror hints on `h3, g4, f5, e6, d7, c8` (via `a3`) and `a6, b7` (via
+      `h6`); `c8` appears once.
+- [x] `w:Bc1,Ng5` → the right-hand portal is gone; the left-hand one is unaffected.
+
+## Verified by
+
+- Unit: `src/game/bishop.test.ts`, `src/game/mirror-portal.test.ts`
+- E2E: `bishop-move.e2e.ts` (this folder), `prj-mgmt/epics/rules/mirror-portal.e2e.ts`
