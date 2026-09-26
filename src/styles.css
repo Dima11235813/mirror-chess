@@ -499,3 +499,47 @@ ion-toggle {
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
 }
+
+/* ---------- Puzzle screen ----------
+   Deliberately plain: the board is the interesting thing on this screen, and the reveal
+   is prose. Colours come from the theme variables so both themes work without a second
+   rule set. */
+.puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.puzzle-prompt p {
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+/* The metadata is secondary to the goal — smaller, but never colour-only, since the
+   distinction is carried by size and position as well. */
+.puzzle-meta {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.puzzle-reveal {
+  max-width: 34rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ion-color-medium, #8c8c8c);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.puzzle-reveal p { margin: 0.35rem 0; }
+
+.puzzle-route { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; }
+
+.puzzle-novelty { font-style: italic; }
+
+.puzzle-actions { margin-bottom: 1.5rem; }
+
+@media (max-width: 480px) {
+  .puzzle-reveal { max-width: 100%; margin: 0 0.5rem; }
+}

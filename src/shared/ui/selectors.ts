@@ -61,3 +61,14 @@ export function promotionOptionTestId(kind: string): string {
 }
 
 
+
+/** The puzzle screen: the prompt, the verdict, the reveal, and its controls. */
+export const PUZZLE_SCREEN_TESTID = 'puzzle-screen'
+export const PUZZLE_PROMPT_TESTID = 'puzzle-prompt'
+export const PUZZLE_VERDICT_TESTID = 'puzzle-verdict'
+export const PUZZLE_REVEAL_TESTID = 'puzzle-reveal'
+export const PUZZLE_NEXT_TESTID = 'puzzle-next'
+export const PUZZLE_MODE_TESTID = 'puzzle-mode'
+
+/** A square on the route the solution travelled, marked only after solving. */
+export const ROUTE_CLASS = 'route'

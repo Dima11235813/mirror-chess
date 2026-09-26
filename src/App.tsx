@@ -5,6 +5,8 @@ import { difficultyById, type DifficultyId } from '@engine/host/levels'
 import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
 import { ThemeToggle } from '@components/ionic/ThemeToggle'
+import { PuzzleScreen } from '@components/PuzzleScreen/PuzzleScreen'
+import { allPuzzles } from '@/puzzles/set'
 import { reduceMove } from '@game/reducer'
 import { fromPiecesSpec, initialPosition } from '@game/setup'
 import { DEFAULT_RULES, type RuleSet } from '@game/rules'
@@ -13,7 +15,7 @@ import { gameStatus } from '@game/status'
 import type { Color, GameState, Move } from '@game/types'
 import { IonButton, IonHeader, IonTitle, IonToolbar } from '@ionic/react'
 import { deleteSavedGame, isValidGameName, listSavedGames, loadSavedGame, renameSavedGame, saveGame } from '@shared/persistence'
-import { GAME_STATUS_TESTID } from '@shared/ui/selectors'
+import { GAME_STATUS_TESTID, PUZZLE_MODE_TESTID } from '@shared/ui/selectors'
 import { describeStatus } from '@shared/ui/status-text'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -60,7 +62,24 @@ function difficultyFromUrl(): DifficultyId {
   return difficultyById(new URL(window.location.href).searchParams.get('level')).id
 }
 
+/**
+ * Which screen to open, from `?mode=puzzles`.
+ *
+ * A URL parameter and a header toggle, for the same reason `?board=` exists: a specific
+ * situation should be reachable by a link, in a test or a bug report.
+ */
+function puzzleModeFromUrl(): boolean {
+  return new URL(window.location.href).searchParams.get('mode') === 'puzzles'
+}
+
+/** Which puzzle to open, from `?puzzle=` (1-based, as the screen numbers them). */
+function puzzleIndexFromUrl(): number {
+  const raw = Number(new URL(window.location.href).searchParams.get('puzzle'))
+  return Number.isInteger(raw) && raw > 0 ? raw - 1 : 0
+}
+
 export default function App() {
+  const [puzzleMode, setPuzzleMode] = useState<boolean>(() => puzzleModeFromUrl())
   const [state, setState] = useState<GameState>(() => loadStateFromUrl())
   const [moveCount, setMoveCount] = useState<number>(0)
   const [savesVersion, setSavesVersion] = useState<number>(0)
@@ -117,30 +136,47 @@ export default function App() {
         <IonToolbar>
           <IonTitle>Mirror Chess v0.1</IonTitle>
           <div className="actions">
-            <IonButton onClick={onReset}>Reset</IonButton>
-            <SaveGameButton disabled={!canSave} onClick={onSave} />
+            <IonButton data-testid={PUZZLE_MODE_TESTID} onClick={() => setPuzzleMode(p => !p)}>
+              {puzzleMode ? 'Play a game' : 'Puzzles'}
+            </IonButton>
+            {/* Reset and Save act on the game, which is not what is on screen in puzzle
+                mode — a button that silently applies to something hidden is a trap. */}
+            {!puzzleMode && <IonButton onClick={onReset}>Reset</IonButton>}
+            {!puzzleMode && <SaveGameButton disabled={!canSave} onClick={onSave} />}
             <ThemeToggle />
           </div>
         </IonToolbar>
       </IonHeader>
-      <BoardView state={state} status={status} onMove={onMove} locked={boardLocked} />
-      <footer className="footer">
-        <p role="status" aria-live="polite" data-testid={GAME_STATUS_TESTID}>
-          <strong>{describeStatus(status, state.turn)}</strong>
-        </p>
-      </footer>
-      <OpponentControls
-        engineSide={engineSide}
-        onEngineSideChange={setEngineSide}
-        difficulty={difficulty}
-        onDifficultyChange={setDifficulty}
-        thinking={engine.thinking}
-        reachedDepth={engine.reachedDepth}
-        error={engine.error}
-      />
-      <section className="saves">
-        <SavedGamesList items={savedGames} onLoad={onLoadSaved} onDelete={onDeleteSaved} onRename={onRenameSaved} />
-      </section>
+
+      {/*
+        Puzzles replace the board rather than sitting beside it: they are a different game
+        with a different goal, and a position from the mined set has nothing to do with the
+        game in progress. Switching back leaves that game untouched.
+      */}
+      {puzzleMode ? (
+        <PuzzleScreen puzzles={allPuzzles()} startIndex={puzzleIndexFromUrl()} />
+      ) : (
+        <>
+          <BoardView state={state} status={status} onMove={onMove} locked={boardLocked} />
+          <footer className="footer">
+            <p role="status" aria-live="polite" data-testid={GAME_STATUS_TESTID}>
+              <strong>{describeStatus(status, state.turn)}</strong>
+            </p>
+          </footer>
+          <OpponentControls
+            engineSide={engineSide}
+            onEngineSideChange={setEngineSide}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            thinking={engine.thinking}
+            reachedDepth={engine.reachedDepth}
+            error={engine.error}
+          />
+          <section className="saves">
+            <SavedGamesList items={savedGames} onLoad={onLoadSaved} onDelete={onDeleteSaved} onRename={onRenameSaved} />
+          </section>
+        </>
+      )}
     </div>
   )
 }

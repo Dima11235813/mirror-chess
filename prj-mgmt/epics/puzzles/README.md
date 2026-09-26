@@ -74,14 +74,15 @@ record rather than trusted from the miner that wrote it.
 | | |
 | --- | --- |
 | [`mine-mate-in-2.md`](./mine-mate-in-2.md) | ✅ the miner, the solver, the criteria and the first committed set |
-| Puzzle player UI | 📋 not started — needs a screen, and the ruleset shown beside the board |
+| [`puzzle-screen.md`](./puzzle-screen.md) | ✅ solve them: `?mode=puzzles`, the move played on the board, the seam route revealed after |
 | Harder goals | 📋 mate in 3 (needs depth 5, ~10–40× the cost); "win material" is **blocked** on evaluation, since it rests on piece values known to be wrong here |
 | Difficulty rating | 📋 no human data exists; the honest proxy is the shallowest engine level that finds the answer |
 
 ## 6. What would make this better, in order
 
-1. **A puzzle screen**, so the set can be judged as a game rather than as JSON.
-2. **Mate in 3**, which is where puzzles get satisfying.
+1. **Mate in 3**, which is where puzzles get satisfying.
+2. **Hints**, which would also give the set its first real difficulty signal — there is no
+   human solve data, so hint usage is the honest proxy.
 3. **Positions from real games** once self-play works, tagged `source: "selfplay"`, so the
    library can be compared: composed puzzles are fine in a puzzle book, but a position that
    demonstrably arose in play is a stronger claim.
