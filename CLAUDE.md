@@ -325,6 +325,20 @@ for the difference between "it passes" and "it can fail". Then put it back.
 that suite were illegal positions: one left White in check from a bishop attacking `e1`
 *through the seam*, the other let White capture a king. Both looked obviously fine.
 
+### Look at the thing
+
+Assertions encode what you thought to check. A screen has a dimension they do not reach.
+
+The first puzzle screen never played the solution: the reveal described a bishop
+travelling `f8 → h6 → a6 → c4` while the bishop sat on `f8` and the knight it had
+supposedly captured sat on `c4`. **Seventeen tests passed** — nine integration, eight e2e —
+because every one of them asserted on *text*: the verdict, the reveal, the prompt. A single
+screenshot caught it in seconds.
+
+So for anything with a UI, take a screenshot and **look at it** before calling it done.
+Then add the assertion the screenshot just taught you (here: the piece is on the
+destination square, and gone from the origin).
+
 ### When a test goes red, suspect the fixture first
 
 The core is perft-verified, so a **newly written** failing test is far more often a bad
