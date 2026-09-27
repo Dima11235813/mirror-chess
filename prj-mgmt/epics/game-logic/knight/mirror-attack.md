@@ -1,38 +1,35 @@
-# [Mirror Attack] Knight Mirror Projection Captures
+# Knight – Mirror Attack (capture across the seam)
 
-**Summary**
-As a Mirror Chess player, I want knights to be able to capture enemy pieces through mirror projection across the file seam, regardless of any pieces blocking the path, so that I can eliminate threats and gain material advantage from unexpected angles.
+> Specified in [the Mirror Portal spec](../../rules/mirror-portal-spec.md) §11 and
+> delivered by [`stepper-portal.md`](../../rules/stepper-portal.md).
+>
+> **The earlier version of this story is rejected.** It had the knight *move* to the
+> same-rank file mirror (`a3 → h3`) but *capture* onto an adjacent rank (`a3 → h4`) —
+> two different rules for one piece, never derived from a spec. Under §11 a knight
+> moves and captures on exactly the same squares, as it does in ordinary chess.
 
-**Acceptance Criteria**
-- [ ] Knight can mirror-capture enemy pieces on the opposite side of the board
-- [ ] Knight mirror capture ignores all path blockers (knights jump)
-- [ ] Knight mirror capture is marked with `special: 'mirror'`
-- [ ] Knight cannot mirror-capture friendly pieces
-- [ ] Knight mirror capture works from edge squares (a3 → h4, h6 → a5)
-- [ ] Mirror capture destination must contain enemy piece
+## Summary
 
-**Test Cases**
-- [ ] Knight on a3 can mirror-capture enemy piece on h4
-- [ ] Knight on h6 can mirror-capture enemy piece on a5
-- [ ] Knight on e4 can mirror-capture enemy piece on d4
-- [ ] Knight mirror capture works regardless of pieces between source and destination
-- [ ] Knight cannot mirror-capture friendly pieces
-- [ ] Knight mirror capture has `special: 'mirror'` property
-- [ ] Knight cannot mirror to empty squares (must be enemy piece for capture)
+As a player, I want a knight's wrapped jump to capture whatever it lands on, so that
+moving and capturing follow one rule.
 
-**Implementation Notes**
-- Use `mirrorFile()` function to calculate destination: `{ f: 7 - from.f, r: from.r }`
-- Check `insideBoard(mirror)` to ensure destination is valid
-- Check destination occupancy: `t && t.color !== piece.color` (must be enemy piece)
-- Mark move with `special: 'mirror'`
-- No path validation needed (knights jump over blockers)
+## Acceptance Criteria
 
-**Related**
-- Regular move: `regular-move.md`
-- Regular attack: `regular-attack.md`
-- Mirror move: `mirror-move.md`
+- [x] A wrapped destination holding an enemy piece is a capture, flagged
+      `special: 'mirror'` — the same squares the knight could move to when empty.
+- [x] A wrapped destination holding an own piece is not offered.
+- [x] A wrapped knight attack gives check: a knight on `a3` checks a king on `h5`.
+- [x] It does **not** give check on `h3` — the rejected same-rank square.
+- [x] A wrapped capture is filtered by king safety like any other move (§10.3).
 
-**Bug Fix Required**
-- Current implementation has issue with edge square mirror capturing (a3 → h4 not working)
-- Need to ensure `mirrorFile()` correctly handles edge cases
-- Need to distinguish between mirror moves (empty) and mirror captures (enemy piece)
+## Test Cases
+
+- [x] `w:Na3; b:Ph5` → `h5` is offered as a mirror capture.
+- [x] `w:Na3,Ph5` → `h5` is not offered.
+- [x] `w:Na3; b:Kh5` → black is in check.
+- [x] `w:Na3; b:Kh3` → black is **not** in check.
+
+## Verified by
+
+- Unit: `src/game/knight.test.ts`, `src/game/attacks.test.ts`
+- E2E: `prj-mgmt/epics/rules/mirror-portal.e2e.ts`

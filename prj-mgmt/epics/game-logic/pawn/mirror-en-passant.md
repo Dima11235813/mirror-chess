@@ -1,19 +1,26 @@
-# Pawn – Mirror En Passant
+# [DEFERRED] Pawn – Mirror En Passant
 
-As a player using Mirror Chess rules, I want en passant to work for mirror-projected pawn interactions across the A↔H seam so that edge-file pawn tactics are valid.
+> **Not in v1 — do not implement from this file.**
+> [Mirror Portal spec](../../rules/mirror-portal-spec.md) §8.4 defers en passant, and
+> explicitly calls for a *real* en passant rather than the old projection. §8.2 also
+> defers pawn portal behavior, which this story presupposes.
 
-## Acceptance Criteria
-- When a pawn advances two squares on the A or H file (e.g., h7→h5 or a2→a4), record an en-passant (EP) opportunity for the immediate next move only.
-- If h7→h5 and an enemy pawn is on a5, highlight a red capture landing on h7 (mirror EP) that removes the pawn from h5 upon execution.
-- If a2→a4 and an enemy pawn is on h4, highlight a red capture landing on a2 that removes the pawn from a4 upon execution.
-- EP is available only immediately after the triggering double advance; any other move clears the EP state.
-- Orthodox inner-file EP remains supported (e.g., b7→b5 captured from a5 or c5, landing on b6).
+The acceptance criteria previously in this file (a pawn on `a5` capturing onto `h7`
+after `h7→h5`) were built on the superseded pawn-projection rule — see
+[`mirror-attack.md`](./mirror-attack.md). They are not a valid target.
 
-## Notes
-- Mirror EP lands on the mirror destination square rather than the orthodox intermediary square.
-- UI should show EP destinations using the capture (red) hint even if the destination appears empty (orthodox behavior).
-- Requires EP state in `GameState` and support in move generation and reducer.
+## Prerequisites before this can be written properly
+
+1. **En-passant state in `GameState`.** There is none today; the engine cannot know
+   the previous move. This blocks orthodox en passant too.
+2. **A confirmed pawn portal rule** (spec §8.2) — a mirror en passant cannot be
+   specified before ordinary mirror pawn movement is.
+3. **The legality layer** (spec §8.3), since en passant interacts with pins.
+
+Orthodox en passant is the separate, unblocked-by-rules story:
+[`regular-en-passant.md`](./regular-en-passant.md). Its unit test
+(`src/game/pawn.enpassant.regular.test.ts`) and e2e are skipped pending (1).
 
 ## Related
-- Bug report: `prj-mgmt/epics/game-logic/pawn/bug.md` (Mirror En Passant not offered for Pawn @ A5)
-- Tests: unit tests in `src/game/` and Playwright e2e specs in this folder.
+
+- Old bug writeup: [`bug.md`](./bug.md) — also superseded.

@@ -1,3 +1,35 @@
+> # ⚠️ SUPERSEDED — this describes a rule that was never adopted
+>
+> **Status: SUPERSEDED (2026-08-05) by
+> [the Mirror Portal spec](../rules/mirror-portal-spec.md).** Do not implement anything
+> below. It is kept because it is the clearest surviving record of the mental model the
+> spec replaced, and because *this file is the reason the reboot happened*.
+>
+> **What it claims:** three boards side by side; a piece "path-checks" on a side board and
+> then **teleports** to the corresponding centre square. Complete with implementation-ready
+> pseudocode, which is exactly what makes it dangerous — it reads like an authority and
+> is not one.
+>
+> **What is actually true** (spec §4, §11):
+>
+> - There is **one** 8×8 board. The `a`- and `h`-files are linked at **equal rank**.
+> - **Sliders cross by transit**: a ray reaching an empty edge square with a clear path
+>   hops horizontally to the mirrored file — *same rank* — and continues in the same
+>   direction. A bishop leaving `a4` emerges on `h4`, never `h5`.
+> - **Steppers cross by wrapping the file** of the square they land on, keeping the rank
+>   their own move dictates. A knight on `a3` reaches `h5, g4, g2, h1` — never `h3`, which
+>   is the "same-rank file mirror" this document implies and the spec explicitly rejects.
+> - Whether a piece crosses at all is **per piece and per right** (move across, capture
+>   across) — spec §12. This document assumes one universal rule.
+>
+> The engine below also has no concept of check, and its "teleport if the centre square is
+> blocked" fallback has no counterpart in the real rules.
+>
+> If you want the real thing, read the spec. If you want to know why this project writes
+> rules down before code, read this and then read the spec.
+
+---
+
 Think of three boards in a row (Left–Center–Right). They all show the *same* position, but only the center is “real.”
 
 When a piece on the center could make a legal chess move on the left or right copy (even if that move crosses the seam between boards), the piece **uses that side board to path-check** but **teleports to the corresponding square on the center**. So your b1 knight can “reach” **h2** by hopping on the left board; if center h2 is blocked by your pawn, move it to h3 and the knight’s mirror move becomes legal. That’s the core rule.

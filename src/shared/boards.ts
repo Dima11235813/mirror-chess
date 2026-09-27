@@ -15,8 +15,21 @@ export interface BoardScenario {
   readonly mustNotHints?: readonly string[]
 }
 
-export function urlForSpec(spec: string, turn: Turn = 'white'): string {
-  const q = new URLSearchParams({ board: spec, turn }).toString()
+/**
+ * A board URL for a position.
+ *
+ * @param rules Optional ruleset token or registered alias (`'BRQ---'`, `'sliders'`).
+ *   Omitted means the default ruleset, which is what most tests want.
+ * @param clock Optional starting value for the 50-move counter. The only practical way
+ *   to reach that rule in a test — playing a hundred halfmoves through the UI is not one.
+ */
+export function urlForSpec(spec: string, turn: Turn = 'white', rules?: string, clock?: number): string {
+  const q = new URLSearchParams({
+    board: spec,
+    turn,
+    ...(rules ? { rules } : {}),
+    ...(clock !== undefined ? { clock: String(clock) } : {}),
+  }).toString()
   return `/?${q}`
 }
 

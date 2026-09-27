@@ -1,29 +1,26 @@
-  2) [chromium] › prj-mgmt\epics\game-logic\knight\board.e2e.ts:6:3 › mirror-chess: knight moves from a3 › Knight A3: Regular moves (b1, b5, c1, c3) + Mirror move (h3)
+# [VOID] Knight a3 did not hint c1 / c3
 
-    Error: Timed out 5000ms waiting for expect(locator).toHaveCount(expected)
+## Summary
 
-    Locator: getByTestId('hint-c1')
-    Expected: 1
-    Received: 0
-    Call log:
-      - Expect "toHaveCount" with timeout 5000ms
-      - waiting for getByTestId('hint-c1')
-        9 × locator resolved to 0 elements
-          - unexpected value "0"
+The knight e2e failed waiting for a hint on `c1`, and the scenario also expected `c3`
+and a mirror hint on `h3`.
 
+## Resolution: the test was wrong, not the code
 
-      12 |     // Validate that required move hints are displayed
-      13 |     for (const sq of KNIGHT_MIRROR_A3_SCENARIO.mustHints) {
-    > 14 |       await expect(page.getByTestId(`hint-${sq}`)).toHaveCount(1)
-         |                                                    ^
-      15 |     }
-      16 |
-      17 |     // Validate that invalid move hints are NOT displayed
-        at C:\Dev\mirror-chess\prj-mgmt\epics\game-logic\knight\board.e2e.ts:14:52
+`c1` and `c3` are **not** knight moves from `a3` — the L-moves from `a3` are `b1`,
+`c2`, `c4` and `b5`. The scenario's `mustHints` list (`b1, b5, c1, c3, g4`) contained
+three squares a knight can never reach from `a3`, and its expected hint total was
+computed from a knight mirror move that
+[the Mirror Portal spec](../../rules/mirror-portal-spec.md) §2 does not grant.
 
-    Error Context: test-results\prj-mgmt-epics-game-logic--caaad-b1-b5-c1-c3-Mirror-move-h3--chromium\error-context.md
+No engine defect existed. Closed by
+[`reconcile-core-to-spec.md`](../../rules/reconcile-core-to-spec.md), which replaced
+the scenario with a correct one (`src/mocks/mock-knight-moves.ts`) covering the four
+real L-moves, an own-piece block and a capture, and asserting that nothing appears
+across the seam.
 
-  2 failed
-    [chromium] › prj-mgmt\epics\game-logic\bishop\bishop-move.e2e.ts:17:3 › mirror-chess: bishop moves › Regular attack: Bc1 captures e3 and stops beyond (no f4,g5,h6)
-    [chromium] › prj-mgmt\epics\game-logic\knight\board.e2e.ts:6:3 › mirror-chess: knight moves from a3 › Knight A3: Regular moves (b1, b5, c1, c3) + Mirror move (h3)
-  4 skipped
+## Note for future debugging
+
+This failure sat unnoticed because a stray `test.only` in
+`prj-mgmt/epics/game-logic/pawn/pawn-regular-move.e2e.ts` had silently reduced the
+whole Playwright run to two tests. That `.only` has been removed.

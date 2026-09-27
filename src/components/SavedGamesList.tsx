@@ -25,8 +25,8 @@ import {
   saveOutline,
   cloudUploadOutline
 } from 'ionicons/icons';
-import { getAllSavedGames, generateGamesExportFilename, saveGame } from '@shared/persistence';
-import type { GameState } from '@game/types';
+import { getAllSavedGames, generateGamesExportFilename, parseSavedGame, saveGame } from '@shared/persistence';
+import { IMPORT_MESSAGE_TESTID } from '@shared/ui/selectors';
 
 export interface SavedGamesListProps {
   readonly items: readonly SavedGameMeta[];
@@ -39,6 +39,8 @@ export interface SavedGamesListProps {
 /** Pure list: renders provided items, delegates interactions via callbacks. */
 export function SavedGamesList({ items, onLoad, onDelete, onRename, onRefresh }: SavedGamesListProps) {
   const [isVisible, setIsVisible] = useState(false);
+  /** What the last import did, announced rather than left to the console. */
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   if (items.length === 0) {
     return (
@@ -85,28 +87,38 @@ export function SavedGamesList({ items, onLoad, onDelete, onRename, onRefresh }:
         try {
           const content = e.target?.result as string;
           const gamesData = JSON.parse(content) as unknown;
-          
+
           if (Array.isArray(gamesData)) {
             let importedCount = 0;
-            
-            for (const game of gamesData) {
-              if (game && typeof game === 'object' && 'state' in game && 'name' in game) {
-                try {
-                  saveGame(game.state as GameState, game.name as string);
-                  importedCount++;
-                } catch (error) {
-                  console.warn('Failed to import game:', game.name, error);
-                }
-              }
+            let refusedCount = 0;
+
+            for (const entry of gamesData) {
+              // Parse, never cast. A file is data this build did not produce, so
+              // `as GameState` would be a claim with nothing behind it — see
+              // `parseSavedGame` and prj-mgmt/epics/quality/untrusted-save-import.md.
+              const parsed = parseSavedGame(entry);
+              if (!parsed) { refusedCount++; continue; }
+              saveGame(parsed.state, parsed.name);
+              importedCount++;
             }
-            
+
+            // Say what was refused. Silently importing 3 of 5 games looks like data loss.
+            setImportMessage(
+              refusedCount === 0
+                ? `Imported ${importedCount} game${importedCount === 1 ? '' : 's'}.`
+                : `Imported ${importedCount}; ${refusedCount} entr${refusedCount === 1 ? 'y was' : 'ies were'} not a valid saved game.`,
+            );
+
             if (importedCount > 0) {
               // Refresh the list to show imported games
               onRefresh?.();
             }
+          } else {
+            setImportMessage('That file is not a list of saved games.');
           }
         } catch (error) {
           console.error('Failed to parse uploaded file:', error);
+          setImportMessage('That file could not be read as JSON.');
         }
       };
       
@@ -118,6 +130,13 @@ export function SavedGamesList({ items, onLoad, onDelete, onRename, onRefresh }:
 
   return (
     <div className="saved-games-section" data-testid="saved-games-list">
+      {/* An import that silently drops entries looks like data loss, so it says what it
+          refused — and says it in a live region, because it happens after an action. */}
+      {importMessage && (
+        <p role="status" aria-live="polite" data-testid={IMPORT_MESSAGE_TESTID} className="import-message">
+          {importMessage}
+        </p>
+      )}
       {/* Header with toggle for visibility */}
       <IonItem className="saved-games-header">
         <IonIcon icon={saveOutline} slot="start" />

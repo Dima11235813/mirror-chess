@@ -1,36 +1,41 @@
-# [Mirror Move] Knight Mirror Projection Movement
+# Knight – Mirror Move (L measured across the seam)
 
-**Summary**
-As a Mirror Chess player, I want knights to be able to mirror across the file seam to the opposite side of the board, regardless of any pieces blocking the path, so that I can access strategic positions that would be impossible in standard chess.
+> Specified in [the Mirror Portal spec](../../rules/mirror-portal-spec.md) §11 and
+> delivered by [`stepper-portal.md`](../../rules/stepper-portal.md).
+>
+> **The earlier version of this story is rejected, not implemented.** It described a
+> *file mirror on the same rank* (`a3 → h3`) that ignored blockers. The owner instead
+> chose the L measured across the seam, which sends `a3` to `h5, g4, g2, h1` and
+> never to `h3`.
 
-**Acceptance Criteria**
-- [ ] Knight can mirror from any square to its file-mirror on the same rank
-- [ ] Knight mirror move ignores all path blockers (knights jump)
-- [ ] Knight can mirror to empty squares
-- [ ] Knight mirror move is marked with `special: 'mirror'`
-- [ ] Knight cannot mirror to squares occupied by friendly pieces
-- [ ] Knight mirror works from edge squares (a3 → h3, h6 → a6)
+## Summary
 
-**Test Cases**
-- [ ] Knight on a3 can mirror to h3 (empty square)
-- [ ] Knight on h6 can mirror to a6 (empty square)
-- [ ] Knight on e4 can mirror to d4 (empty square)
-- [ ] Knight mirror works regardless of pieces between source and destination
-- [ ] Knight cannot mirror to squares occupied by friendly pieces
-- [ ] Knight mirror move has `special: 'mirror'` property
+As a player, I want a knight's L-shaped jump to continue through the seam, so that a
+knight on the edge files keeps all eight of its moves instead of losing half of them
+to the board edge.
 
-**Implementation Notes**
-- Use `mirrorFile()` function to calculate destination: `{ f: 7 - from.f, r: from.r }`
-- Check `insideBoard(mirror)` to ensure destination is valid
-- Check destination occupancy: `!t || t.color !== piece.color`
-- Mark move with `special: 'mirror'`
-- No path validation needed (knights jump over blockers)
+## Acceptance Criteria
 
-**Related**
-- Regular move: `regular-move.md`
-- Regular attack: `regular-attack.md`
-- Mirror attack: `mirror-attack.md`
+- [x] A knight's destination file wraps across the seam:
+      `newFile = (file + df + 8) mod 8`; its rank is whatever the L dictates.
+- [x] Ranks never wrap — an L that needs a rank off the board yields no move.
+- [x] A destination reached by wrapping is flagged `special: 'mirror'`.
+- [x] Blockers are irrelevant, as ever: a knight jumps, and a wrapped jump has no
+      intervening squares either.
+- [x] The destination must be empty or hold an enemy; an own piece blocks it.
+- [x] A knight away from the edge files is completely unaffected.
 
-**Bug Fix Required**
-- Current implementation has issue with edge square mirroring (a3 → h3 not working)
-- Need to ensure `mirrorFile()` correctly handles edge cases
+## Test Cases
+
+- [x] `w:Na3` → `b5, c4, c2, b1` (standard) and `h5, g4, g2, h1` (mirror) — 8 moves.
+- [x] `w:Nh6` → `g8, f7, f5, g4` and `a8, b7, b5, a4`.
+- [x] `w:Na1` → `b3, c2` and `g2, h3` — the corner knight gains two moves it would not
+      have in standard chess.
+- [x] `w:Na3` never offers `h3`.
+- [x] `w:Na3,Ph5` → `h5` is blocked by the own pawn.
+- [x] `w:Na3; b:Ph5` → `h5` is a mirror capture.
+
+## Verified by
+
+- Unit: `src/game/knight.test.ts`, `src/game/mirror-portal.test.ts`
+- E2E: `board.e2e.ts` (this folder), `prj-mgmt/epics/rules/mirror-portal.e2e.ts`

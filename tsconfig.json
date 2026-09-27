@@ -17,6 +17,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@game/*": ["src/game/*"],
+      "@engine/*": ["src/engine/*"],
       "@components/*": ["src/components/*"],
       "@mocks/*": ["src/mocks/*"],
       "@shared/*": ["src/shared/*"]

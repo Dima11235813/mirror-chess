@@ -49,7 +49,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid type values', () => {
-    const validTypes: IonicInputProps['type'][] = [
+    const validTypes: NonNullable<IonicInputProps['type']>[] = [
       "text", "password", "email", "number", "search", "tel", "url"
     ]
     
@@ -60,7 +60,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid color values', () => {
-    const validColors: IonicInputProps['color'][] = [
+    const validColors: NonNullable<IonicInputProps['color']>[] = [
       "primary", "secondary", "tertiary", "success", 
       "warning", "danger", "light", "medium", "dark"
     ]
@@ -72,7 +72,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid fill values', () => {
-    const validFills: IonicInputProps['fill'][] = [
+    const validFills: NonNullable<IonicInputProps['fill']>[] = [
       "outline", "solid"
     ]
     
@@ -83,7 +83,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid size values', () => {
-    const validSizes: IonicInputProps['size'][] = [
+    const validSizes: NonNullable<IonicInputProps['size']>[] = [
       "small", "default", "large"
     ]
     
@@ -94,7 +94,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid labelPlacement values', () => {
-    const validPlacements: IonicInputProps['labelPlacement'][] = [
+    const validPlacements: NonNullable<IonicInputProps['labelPlacement']>[] = [
       "start", "end", "floating", "stacked"
     ]
     
@@ -105,7 +105,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid mode values', () => {
-    const validModes: IonicInputProps['mode'][] = [
+    const validModes: NonNullable<IonicInputProps['mode']>[] = [
       "ios", "md"
     ]
     
@@ -116,7 +116,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid autocomplete values', () => {
-    const validAutocomplete: IonicInputProps['autocomplete'][] = [
+    const validAutocomplete: NonNullable<IonicInputProps['autocomplete']>[] = [
       "on", "off", "name", "email", "username", 
       "current-password", "new-password", "tel", "url"
     ]
@@ -128,7 +128,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid autocorrect values', () => {
-    const validAutocorrect: IonicInputProps['autocorrect'][] = [
+    const validAutocorrect: NonNullable<IonicInputProps['autocorrect']>[] = [
       "on", "off"
     ]
     
@@ -139,7 +139,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid autocapitalize values', () => {
-    const validAutocapitalize: IonicInputProps['autocapitalize'][] = [
+    const validAutocapitalize: NonNullable<IonicInputProps['autocapitalize']>[] = [
       "off", "none", "sentences", "words", "characters"
     ]
     
@@ -150,7 +150,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid inputmode values', () => {
-    const validInputModes: IonicInputProps['inputmode'][] = [
+    const validInputModes: NonNullable<IonicInputProps['inputmode']>[] = [
       "none", "text", "tel", "url", "email", "numeric", "decimal", "search"
     ]
     
@@ -161,7 +161,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid enterkeyhint values', () => {
-    const validEnterKeyHints: IonicInputProps['enterkeyhint'][] = [
+    const validEnterKeyHints: NonNullable<IonicInputProps['enterkeyhint']>[] = [
       "enter", "done", "go", "next", "previous", "search", "send"
     ]
     
@@ -172,7 +172,7 @@ describe('IonicInput Types and Defaults', () => {
   })
 
   it('allows valid shape values', () => {
-    const validShapes: IonicInputProps['shape'][] = [
+    const validShapes: NonNullable<IonicInputProps['shape']>[] = [
       'round'
     ]
     
