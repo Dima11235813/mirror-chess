@@ -52,6 +52,25 @@ describe('PuzzleScreen', () => {
     expect(reveal.textContent).not.toContain('depends on it')
   })
 
+  it('announces the reveal, so the payoff is not silent to a screen reader', () => {
+    // The verdict was announced from the start; this was not, so a screen-reader user
+    // heard that they had solved it and never heard what they had solved.
+    render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
+    play(SEAM_PUZZLE.solution.from, SEAM_PUZZLE.solution.to)
+
+    const reveal = screen.getByTestId(PUZZLE_REVEAL_TESTID)
+    expect(reveal.getAttribute('aria-live')).toBe('polite')
+    expect(reveal.getAttribute('role')).toBe('status')
+  })
+
+  it('titles the section with a real heading, so the page can be navigated', () => {
+    // The document had no headings at all: `ion-title` renders in a shadow root with no
+    // heading role, so a screen reader had nothing to navigate by.
+    render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
+
+    expect(screen.getByTestId(PUZZLE_PROMPT_TESTID).tagName).toBe('H2')
+  })
+
   it('hides the answer until it is solved', () => {
     render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
 

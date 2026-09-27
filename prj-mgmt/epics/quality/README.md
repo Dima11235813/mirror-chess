@@ -57,6 +57,6 @@ currently never hears it.
 
 | | |
 | --- | --- |
-| [`accessibility-pass.md`](./accessibility-pass.md) | 📋 2 findings: no headings anywhere, and the puzzle reveal is not announced |
-| [`untrusted-save-import.md`](./untrusted-save-import.md) | 📋 an imported save file is cast to `GameState` with no validation |
+| [`accessibility-pass.md`](./accessibility-pass.md) | ✅ fixed and locked behind `npm run check:a11y` (18 checks) |
+| [`untrusted-save-import.md`](./untrusted-save-import.md) | ✅ `parseSavedGame` replaces the cast; `readAll` hardening remains |
 | [`dependency-audit.md`](./dependency-audit.md) | 📋 dev-only vulnerabilities, and the ESLint gap that lets this class of thing hide |

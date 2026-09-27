@@ -72,5 +72,8 @@ export const PUZZLE_MODE_TESTID = 'puzzle-mode'
 /** The difficulty band — a coarse label, never a rating. See `src/puzzles/difficulty.ts`. */
 export const PUZZLE_BAND_TESTID = 'puzzle-band'
 
+/** What the last save-file import did — announced, not left to the console. */
+export const IMPORT_MESSAGE_TESTID = 'import-message'
+
 /** A square on the route the solution travelled, marked only after solving. */
 export const ROUTE_CLASS = 'route'

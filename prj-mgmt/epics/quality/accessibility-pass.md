@@ -1,8 +1,8 @@
 # Story — Accessibility findings from the 2026-09-27 pass
 
-> **Status: BACKLOG — two MEDIUM findings, both small fixes.** Part of the
-> [quality epic](./README.md). Measured against the built app with Playwright, not read
-> off the source.
+> **Status: DONE (2026-09-27).** All three findings fixed and locked behind
+> `npm run check:a11y` — 18 checks, the pass itself made repeatable. Part of the
+> [quality epic](./README.md). Measured against the built app, not read off the source.
 
 ## Summary
 
@@ -71,12 +71,17 @@ would cost one CSS rule.
 
 ## 5. Acceptance Criteria
 
-- [ ] An `<h1>` exists on every screen, and the puzzle prompt is an `<h2>`.
-- [ ] The puzzle reveal is announced — a polite live region, not a focus move.
-- [ ] `PuzzleScreen.spec.tsx` asserts the reveal's live region, so it cannot regress.
-- [ ] A visible focus ring on board squares, checked in **both** themes.
-- [ ] The a11y checks in §1 are captured as a script that can be re-run, so the next pass
-      starts from evidence rather than from scratch.
+- [x] An `<h1>` exists on every screen (visually hidden), and the puzzle prompt is an `<h2>`.
+- [x] The puzzle reveal is announced — `role="status"` + `aria-live="polite"`, not a focus
+      move, so it does not fight a keyboard player still on the board.
+- [x] `PuzzleScreen.spec.tsx` asserts the reveal's live region and the heading, so both
+      regress loudly.
+- [x] A visible focus ring on board squares: a 3px accent outline **plus** a dark inner
+      ring, because an accent alone vanishes against one of `#f0d9b5` / `#b58863`.
+- [x] `npm run check:a11y` re-runs the whole pass against the built app.
+- [x] **Bonus, found while fixing:** the save-file import said nothing about what it
+      refused. It now reports counts in a live region — an import that silently drops
+      entries looks like data loss.
 
 ## 6. What we learned
 

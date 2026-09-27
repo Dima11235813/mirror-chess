@@ -12,6 +12,7 @@
     "check:layers": "node scripts/check-layer-boundaries.js",
     "check:naming": "node scripts/validate-test-naming.js",
     "check:docs": "node scripts/check-docs-links.js",
+    "check:a11y": "node scripts/check-a11y.mjs",
     "mine:puzzles": "vite-node scripts/mine-puzzles.ts",
     "test:watch": "vitest --config vitest.unit.config.ts",
     "test:coverage": "vitest run --coverage --config vitest.unit.config.ts",

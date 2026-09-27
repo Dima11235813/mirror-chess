@@ -95,13 +95,16 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
   return (
     <section className="puzzle" data-testid={PUZZLE_SCREEN_TESTID}>
       <header className="puzzle-prompt">
-        <p data-testid={PUZZLE_PROMPT_TESTID}>
-          <strong>White to play. {GOAL_TEXT[puzzle.goal]}.</strong>{' '}
+        {/* A heading, not a paragraph: it is this section's title, and the document had no
+            headings at all before — `ion-title` renders in a shadow root with no role, so
+            a screen reader had nothing to navigate by. */}
+        <h2 data-testid={PUZZLE_PROMPT_TESTID}>
+          White to play. {GOAL_TEXT[puzzle.goal]}.{' '}
           <span className="puzzle-meta">
             Puzzle {index + 1} of {puzzles.length} · {puzzle.material} ·{' '}
             <span data-testid={PUZZLE_BAND_TESTID}>{puzzle.difficulty}</span> · rules {puzzle.ruleset}
           </span>
-        </p>
+        </h2>
       </header>
 
       {/*
@@ -119,8 +122,20 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
         {solveState === 'thinking' && <span>Find the move that forces mate next turn.</span>}
       </p>
 
+      {/*
+        The reveal is announced, because this is the part worth hearing. The verdict
+        ("Solved") was a live region from the start; the explanation of why the puzzle is
+        impossible in chess was not, so a screen-reader user learned that they had solved it
+        and never learned what they had solved. `polite` rather than a focus move: moving
+        focus would fight a keyboard player who is still on the board.
+      */}
       {solveState === 'solved' && (
-        <div className="puzzle-reveal" data-testid={PUZZLE_REVEAL_TESTID}>
+        <div
+          className="puzzle-reveal"
+          data-testid={PUZZLE_REVEAL_TESTID}
+          role="status"
+          aria-live="polite"
+        >
           <p>
             <strong>{puzzle.solution.coordinate}</strong>
             {/*

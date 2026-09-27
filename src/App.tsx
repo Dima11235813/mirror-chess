@@ -142,6 +142,9 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* The document's only h1. `ion-title` below renders inside a shadow root with no
+          heading role, so without this there is nothing to navigate by. */}
+      <h1 className="visually-hidden">Mirror Chess</h1>
       <IonHeader>
         <IonToolbar>
           <IonTitle>Mirror Chess v0.1</IonTitle>

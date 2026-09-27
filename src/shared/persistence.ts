@@ -1,4 +1,4 @@
-import type { Board, CastlingRights, Color, Coord, GameState } from '@game/types'
+import type { Board, CastlingRights, Color, Coord, GameState, Piece } from '@game/types'
 import { DEFAULT_RULESET_TOKEN, rulesOf, tokenOf, type RuleSetToken } from '@game/rules'
 import { tryResolveRuleSet } from '@game/ruleset-registry'
 import { positionKey, type PositionKey } from '@game/position-key'
@@ -89,6 +89,97 @@ function fromStored(raw: StoredState & { readonly rules?: unknown }): GameState 
     halfmoveClock: raw.halfmoveClock ?? 0,
     history,
     plies: raw.plies ?? 0,
+  }
+}
+
+
+/**
+ * PARSING AN UNTRUSTED SAVE — the boundary between a file and a game.
+ *
+ * **Why this exists.** An imported file is data this build did not produce, and
+ * `as GameState` on it is a claim with nothing behind it: the compiler stops checking
+ * exactly where the risk starts. The import path used to check that two *keys existed* and
+ * cast the rest, so a malformed file became game state and corrupted the board renderer.
+ *
+ * Not exploitable today — no code execution (React escapes; nothing uses
+ * `dangerouslySetInnerHTML`), no exfiltration (there is no server), and the owner chooses
+ * the file. But it is the shape of a future bug: accounts and telemetry will add a server,
+ * and an unvalidated cast then becomes input to someone else's system
+ * (`prj-mgmt/epics/quality/untrusted-save-import.md`).
+ *
+ * This is `parse, don't validate` (`docs/design-patterns/parse-dont-validate.md`), the
+ * same pattern `parseRuleSetToken` uses: the only way to obtain the type is to parse.
+ */
+
+const PIECE_KINDS: ReadonlySet<string> = new Set(['K', 'Q', 'R', 'B', 'N', 'P'])
+const COLORS: ReadonlySet<string> = new Set(['white', 'black'])
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/** A board is 64 squares, each empty or a piece of a known kind and colour. */
+function parseBoard(value: unknown): Board | null {
+  if (!Array.isArray(value) || value.length !== 64) return null
+  const squares: (Piece | null)[] = []
+  for (const square of value) {
+    if (square === null || square === undefined) { squares.push(null); continue }
+    if (!isRecord(square)) return null
+    const { kind, color } = square
+    if (typeof kind !== 'string' || !PIECE_KINDS.has(kind)) return null
+    if (typeof color !== 'string' || !COLORS.has(color)) return null
+    squares.push({ kind: kind as Piece['kind'], color: color as Color })
+  }
+  return squares
+}
+
+/** A finite, non-negative integer, or the fallback when the field is simply absent. */
+function parseCount(value: unknown, fallback: number): number | null {
+  if (value === undefined || value === null) return fallback
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null
+}
+
+/**
+ * Turn an untrusted object into a save, or refuse it.
+ *
+ * Deliberately strict about what decides a game — the board, whose turn it is, the clock —
+ * and deliberately tolerant about what an older build may simply not have written, which
+ * {@link fromStored} already knows how to fill in. A missing field is an old save; a
+ * *wrong* field is a bad one.
+ *
+ * @param value Anything at all: a parsed file, a storage entry, one day a network payload.
+ * @returns The save, or `null` if it is not one. Never throws.
+ */
+export function parseSavedGame(value: unknown): SavedGame | null {
+  if (!isRecord(value)) return null
+  const state = isRecord(value.state) ? value.state : null
+  if (!state) return null
+
+  const board = parseBoard(state.board)
+  if (!board) return null
+
+  const turn = state.turn
+  if (typeof turn !== 'string' || !COLORS.has(turn)) return null
+
+  const halfmoveClock = parseCount(state.halfmoveClock, 0)
+  const plies = parseCount(state.plies, 0)
+  if (halfmoveClock === null || plies === null) return null
+
+  if (state.history !== undefined && !Array.isArray(state.history)) return null
+  if (state.enPassant !== undefined && state.enPassant !== null && !isRecord(state.enPassant)) return null
+  if (state.castling !== undefined && !isRecord(state.castling)) return null
+
+  // A name is optional, but a present one must be a usable name — the rename path enforces
+  // this already, and an import must not be the way round it.
+  const name = value.name
+  if (name !== undefined && (typeof name !== 'string' || !isValidGameName(name))) return null
+
+  const stored = { ...state, board, turn, halfmoveClock, plies } as unknown as StoredState
+  return {
+    id: typeof value.id === 'string' && value.id ? value.id : generateId(),
+    savedAt: typeof value.savedAt === 'number' && Number.isFinite(value.savedAt) ? value.savedAt : Date.now(),
+    state: fromStored(stored),
+    ...(typeof name === 'string' ? { name } : {}),
   }
 }
 

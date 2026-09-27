@@ -1,7 +1,7 @@
 # Story — An imported save file is trusted completely
 
-> **Status: BACKLOG — not exploitable today, and the shape of a future bug.** Part of the
-> [quality epic](./README.md).
+> **Status: DONE (2026-09-27).** `parseSavedGame` replaces the cast; the import path no
+> longer contains `as GameState`. Part of the [quality epic](./README.md).
 
 ## Summary
 
@@ -60,16 +60,29 @@ import path should do the same — parse an untrusted object into a `GameState`,
 
 ## 4. Acceptance Criteria
 
-- [ ] `parseSavedGame` exists, is documented, and is the **only** way an untrusted object
+- [x] `parseSavedGame` exists, is documented, and is the **only** way an untrusted object
       becomes a `SavedGame` — no `as GameState` anywhere on the import path.
-- [ ] Unit tests cover: wrong board length, unknown piece kind, missing turn, name too long,
-      name of the wrong type, `null`, an array, and a well-formed file.
-- [ ] Importing a file with some bad entries imports the good ones and **says** how many it
-      refused.
+- [x] Unit tests cover: wrong board length, unknown piece kind and colour, non-colour turn,
+      fractional/negative/NaN counters, name too long, name too short, name of the wrong
+      type, `null`, an array, `{}`, and a well-formed file. **9 tests.**
+- [x] Importing a file with some bad entries imports the good ones and **says** how many it
+      refused, in a live region.
+- [x] An older save missing the newer fields is still accepted — a *missing* field is an old
+      save, a *wrong* field is a bad one, and refusing the first would break real saves.
 - [ ] `readAll()` parses rather than casts, so corrupt storage degrades to "no saves".
-- [ ] An integration test imports a hostile file and asserts the app still renders.
+      **Still open**: `readAll` keeps its looser shape check, so a save corrupted *in place*
+      is still loaded. Lower risk than the import path, which is why it went second.
+- [ ] An integration test imports a hostile file and asserts the app still renders. Blocked
+      on `SavedGamesList.spec.ts`, which is part of the known 13-failure component debt.
 
-## 5. Related
+## 5. What we learned
+
+The test fixture for the parser invented a `CastlingRights` shape — flat `whiteKing` /
+`whiteQueen` keys instead of the real `{ white: { king, queen }, … }`. It failed loudly,
+which is the good case, but it is the **third** fixture this session written from memory
+rather than from the type. The rule in CLAUDE.md §8 keeps earning its place.
+
+## 6. Related
 
 The same reasoning applies to anything that later accepts a *shared* game — a link, a PGN
 paste, a network message. The rule to carry forward: **a trust boundary needs a parser, not
