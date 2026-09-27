@@ -1,8 +1,8 @@
 /**
  * THE MATE SOLVER — exact, exhaustive, and deliberately stupid.
  *
- * **What is this?** A brute-force answer to "which first moves force mate in two?", built
- * on nothing but the rules layer: `allLegalMoves`, `reduceMove` and `gameStatus`.
+ * **What is this?** A brute-force answer to "which first moves force mate in N?", built on
+ * nothing but the rules layer: `allLegalMoves`, `reduceMove` and `gameStatus`.
  *
  * **Why is it here?** A puzzle is a claim a player will be scored against, so it must be
  * *proved*, not believed. The engine could find these mates faster, but then every puzzle
@@ -12,19 +12,23 @@
  * wrong. This module is also how the engine's search gets checked on mate suites: two
  * implementations, one oracle, applied to puzzles.
  *
- * **How does it work?** The definition, written out:
+ * **How does it work?** The definition, written out recursively:
  *
  * - *mate in one* — a move after which the opponent is checkmated.
- * - *mate in two* — a move after which **every** opponent reply allows a mate in one.
+ * - *mate in n* — a move after which **every** opponent reply allows a mate in n−1.
  *
  * Search all first moves rather than stopping at the first success, because the puzzle
  * needs to know whether the answer is **unique**. A position with two solutions is
  * unusable: the UI would reject a correct answer.
  *
  * **What is subtle?** The opponent having *no* reply after the first move is not a mate in
- * two — it is either mate already (so mate in one, a different puzzle) or stalemate (a
+ * n — it is either mate already (a shorter mate, so a different puzzle) or stalemate (a
  * draw, and no puzzle at all). Both are rejected here rather than counted, because
  * "forced" has to mean the opponent moved and still lost.
+ *
+ * Cost grows sharply with n, and the expensive case is the common one: proving that *no*
+ * mate exists needs the full enumeration. Mate in 3 measured ~15× mate in 2 per candidate,
+ * which is why the miner screens with the engine before asking this module to prove one.
  *
  * **What does the mirror seam change about this?** Nothing in the logic, and a great deal
  * in the answers. Mates are *rarer* here — a king cannot be cornered against the edge
@@ -121,11 +125,6 @@ export function forcedMateMoves(state: GameState, moves: number): Move[] {
 /** Every first move that forces mate on the mover's next turn. */
 export function mateInTwoMoves(state: GameState): Move[] {
   return forcedMateMoves(state, 2)
-}
-
-/** Every first move that forces mate within three of the mover's turns. */
-export function mateInThreeMoves(state: GameState): Move[] {
-  return forcedMateMoves(state, 3)
 }
 
 /**

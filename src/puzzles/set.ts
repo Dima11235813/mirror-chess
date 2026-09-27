@@ -56,11 +56,3 @@ export function indexOfPuzzleId(id: string): number {
   return puzzlesInPlayOrder().findIndex(p => p.id === id)
 }
 
-/** How many there are, and what they were mined from. */
-export function puzzleSetSummary(): { readonly count: number; readonly seam: number; readonly seed: number } {
-  return {
-    count: SET.puzzles.length,
-    seam: SET.puzzles.filter(p => p.solution.crossedSeam).length,
-    seed: SET.seed,
-  }
-}

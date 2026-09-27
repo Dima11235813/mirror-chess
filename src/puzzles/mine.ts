@@ -58,16 +58,11 @@ export const CRITERIA = [
   'no faster mate exists, so the unique answer is also the best answer',
 ] as const
 
-/**
- * What is **no longer** a criterion, and why.
- *
- * Until 2026-09-26 a candidate was rejected unless it was impossible in chess. That made
- * every puzzle a seam puzzle, which makes the library predictable: a player learns in an
- * evening that the seam is always involved, and the interesting question — *does it matter
- * here?* — is answered before they look. The chess differential is now recorded as a label
- * ({@link ChessDifferential}) and ordinary chess tactics are welcome in the set.
- */
-export const NOT_A_CRITERION = 'being impossible in chess — now a label, see ChessDifferential' as const
+// What is no longer a criterion: until 2026-09-26 a candidate was rejected unless it was
+// impossible in chess. That made every puzzle a seam puzzle, which makes the library
+// predictable — a player learns in an evening that the seam is always involved, and the
+// interesting question, *does it matter here?*, is answered before they look. The
+// differential is now recorded as a label; ordinary chess tactics are welcome in the set.
 
 /** A material set to mine, as piece kinds per side. */
 export interface MaterialSet {
@@ -191,6 +186,7 @@ export interface MineStats {
   kept: number
 }
 
+/** A zeroed tally, for a caller that aggregates several runs. */
 export function emptyStats(): MineStats {
   return { candidates: 0, illegalOrOver: 0, notUniqueMate: 0, fasterMateExists: 0, keptAlsoMateInChess: 0, kept: 0 }
 }
@@ -284,6 +280,7 @@ function gradeDifferential(spec: string, solution: Move, goalMoves: number): Che
   return sameMove ? 'same-mate-in-chess' : 'different-mate-in-chess'
 }
 
+/** What to mine, and how much of it. */
 export interface MineOptions {
   readonly ruleset: RuleSetToken
   readonly seed: number

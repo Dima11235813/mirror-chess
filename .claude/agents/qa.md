@@ -47,10 +47,19 @@ it as a regression.
    canary**: if a published chess count moved, move generation changed, and that is a
    blocker regardless of what the story says.
 3. **A11y & themes** (UI changes) — aria-labels present; no visual-only cues (capture
-   vs move must be distinguishable non-visually); renders in light and dark.
+   vs move must be distinguishable non-visually); renders in light and dark. Also:
+   **anything that appears in response to an action must be announced** (a live region or
+   a deliberate focus move), and the change must stay keyboard-operable end to end.
+   Reproduce a keyboard claim deliberately before making it — a 2026-09-27 pass nearly
+   filed "the board is not keyboard-operable" when the tab had simply landed on an *empty*
+   square.
 4. **Spec fidelity** — no invented rules. Every rule is now specified; if the change
    implements behaviour the spec does not describe, that is a blocker, not a feature.
-5. **Suspect the fixture before the implementation.** The core is verified against
+5. **Look at the thing.** For any UI change, take a screenshot and *look* at it before
+   reporting PASS. Assertions encode what someone thought to check: seventeen tests passed
+   while the puzzle screen described a bishop's journey that the board never made, because
+   every assertion was on text. A screenshot caught it in seconds.
+6. **Suspect the fixture before the implementation.** The core is verified against
    published perft counts, so a *new* failing test is far more often a bad test position
    than a broken engine. Check the position is legal and the move is actually available
    before reporting a defect. (`state.inCheck` describes whoever is to move **now** — after

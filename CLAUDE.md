@@ -246,6 +246,11 @@ Ported from `.cursorrules`. Priorities: **correctness > performance > DX > style
   notes). Update `readme.md` on user-visible changes.
 - **A11y:** board is the primary interaction; `aria-label` on squares; no
   visual-only cues (capture vs move must be distinguishable non-visually).
+  **And anything that appears *in response to an action* must be announced** — a live
+  region, or a deliberate focus move. The 2026-09-27 pass found the puzzle reveal silent
+  to a screen reader: the verdict was announced, the explanation that makes the puzzle
+  worth solving was not. "Every cue has a text counterpart" was a rule and it held;
+  "everything new is announced" was not, and that is exactly where the miss was.
 
 ---
 
@@ -272,6 +277,20 @@ this repo at all, because a legacy `.eslintrc.cjs` meets ESLint 9's flat config:
 | `npm run check:docs` | every local link in every `.md` resolves |
 | `npm run check:naming` | the 3-tier test naming convention |
 | `PERFT_DEEP=1 npm run test` | the deep published perft counts (~1 min). After **any** change to move generation, `applyMoveToBoard`, or castling / en-passant bookkeeping. |
+
+### A trust boundary needs a parser, not a cast
+
+Data this build did not produce — an imported file, a URL parameter, a pasted game, one day
+a network message — is untrusted at the point it arrives. `as GameState` is a claim with
+nothing behind it, and the compiler stops checking exactly where the risk starts.
+
+The repo already has the pattern (`docs/design-patterns/parse-dont-validate.md`) and the
+example (`parseRuleSetToken`: a branded type obtainable only by parsing). Use them. The URL
+side does; the save-file import does not, which is
+`prj-mgmt/epics/quality/untrusted-save-import.md`.
+
+This matters more the moment a server exists: today a bad file corrupts local state, and
+after accounts and telemetry it becomes input to someone else's system.
 
 ### Prove, don't assert
 

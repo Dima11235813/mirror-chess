@@ -139,6 +139,14 @@ adopted** and are kept only as a record. Two files here are current:
 [`king/check-highlighting.md`](./epics/game-logic/king/check-highlighting.md) ✅ and the
 e2e files, which run.
 
+### `quality/` — security, accessibility and robustness  🆕 2026-09-27
+[`README.md`](./epics/quality/README.md) holds what a consolidation pass found: the
+findings that belong to no feature. **Production dependencies are clean and the board is
+keyboard-operable with contrast far above AA** — the gaps are structural (no headings
+anywhere) and one silent announcement (the puzzle reveal). The security model is written
+down there too, including the line that matters: it changes the day accounts and telemetry
+introduce a server.
+
 ### `components/` — Ionic wrappers
 Shipped, and carrying the project's only real test debt: `SavedGamesList.spec.ts` fails the
 naming validator and, with the Ionic input/button specs, accounts for the 13 failing

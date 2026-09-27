@@ -51,6 +51,22 @@ Review the uncommitted change. Get it with `git diff` and `git status` (and
 - **Docs must not claim tests that do not exist.** If a story or comment cites a test file,
   check the path resolves. One claimed a regression net that had never existed.
 
+
+## Three failure modes this repo keeps producing
+
+Check these explicitly; each has shipped at least once.
+
+- **A green test that proves nothing.** A test asserting an *absence* in a fixture that
+  renders nothing passes for free — four e2e tests did, because two lone kings are
+  insufficient material and the drawn game drew no hints. Ask of each new test: what would
+  have to break for this to fail?
+- **A fixture invented rather than measured.** Mock data hand-written to match the
+  implementation tests the implementation against itself. A mock's numbers should come from
+  the code that produces them; a position should be verified against the engine before
+  assertions are written on it.
+- **A cast at a trust boundary.** `as SomeType` on data this build did not produce is a
+  claim with nothing behind it. The repo's answer is `parse-dont-validate`.
+
 ## Output (final message)
 - **Verdict:** APPROVE / REQUEST CHANGES.
 - **Findings** — ranked most-severe first, each as:
