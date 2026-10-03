@@ -1,6 +1,8 @@
 # Bug — the board is clipped and off-centre on a phone
 
-> **Status: BACKLOG — root cause found and measured 2026-10-03.** Part of the
+> **Status: DONE (2026-10-03)** for the clipping and centring; two cosmetic follow-ups in
+> §6. Fixed by letting the header wrap, and locked behind `npm run check:a11y`, which now
+> measures the **board's** box rather than the document's. Part of the
 > [quality epic](./README.md). Reported by the owner from a real phone; reproduced and
 > diagnosed against the running app.
 
@@ -49,17 +51,39 @@ the second time a **screenshot** was what found it. The lesson is already in CLA
 
 ## 4. Acceptance Criteria
 
-- [ ] At 320, 360, 390 and 412px the **whole board is visible** — `h1`'s right edge is
-      inside the viewport and `a1`'s left edge is at or after 0.
-- [ ] The board is **centred**: left and right gaps equal within 2px. ("Everything
-      symmetrical", in the owner's words.)
-- [ ] The header actions wrap rather than setting a minimum width — or collapse to icons /
-      a menu at narrow widths.
-- [ ] `check:a11y` gains a **board-visibility** check that compares the board's own bounding
-      box to the viewport, at each width above. The existing document-overflow check stays;
-      it was not wrong, it was answering a different question.
-- [ ] Verified by **screenshot** at 360px, in both themes, not only by assertion.
-- [ ] No regression at desktop widths, where the layout is currently fine.
+- [x] At 320, 360, 390 and 412px the **whole board is visible**. Measured after the fix:
+      `34..286`, `38..322`, `41..349`, `43..369` — every one inside its viewport.
+- [x] The board is **centred**: gaps equal to the pixel at all four widths (34/34, 38/38,
+      41/41, 43/43), against 85/−9 before.
+- [x] The header actions wrap (`flex-wrap`), plus `min-width: 0` on `.app > *` so no child
+      can force the column wider than the screen again.
+- [x] `check:a11y` measures the **board's** bounding box against the viewport at each width
+      — 8 new checks, 26 in total. The document-overflow check stays; it was not wrong, it
+      was answering a different question.
+- [x] Verified by screenshot at 360px, not only by assertion.
+- [x] No desktop regression — the full e2e suite passes at its usual viewport.
+
+## 5. One more thing the fix exposed
+
+`check:a11y` defaulted to `localhost:5173`, and on this machine another project now serves
+that port. The first run after the fix spent 30 seconds hunting for a chessboard inside a
+maze app before timing out. It now checks what is actually there and says so:
+
+```
+No Mirror Chess board at http://localhost:5173 — the page there is titled "Maze Lab".
+```
+
+A check that fails for an environment reason should say which, or the next person debugs
+the wrong thing.
+
+## 6. Cosmetic follow-ups, seen in the screenshot and not fixed
+
+Neither affects usability; both were visible once the board fitted.
+
+- **A tall dead gap** between the board and the status line on a phone: `.app` is a grid
+  with a `1fr` middle row, so the footer is pushed to the bottom of a tall viewport.
+- **File labels overlap the rank-1 pieces.** The `A`–`H` labels are drawn inside the
+  bottom row of squares, so they sit under the white pieces.
 
 ## 5. Notes for whoever picks this up
 

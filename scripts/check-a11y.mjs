@@ -89,6 +89,19 @@ const browser = await chromium.launch()
 try {
   const page = await browser.newPage({ viewport: { width: 900, height: 1000 } })
 
+  // Fail fast and legibly if something else is serving this port. On this machine another
+  // project also uses 5173, and the first symptom was a 30-second timeout hunting for a
+  // chessboard in a maze app. Say what is actually there.
+  await page.goto(`${BASE}/`)
+  const title = await page.title()
+  const hasBoard = await page.locator('[data-testid="square-e2"]').count()
+  if (!hasBoard) {
+    console.error(`No Mirror Chess board at ${BASE} — the page there is titled "${title}".`)
+    console.error('Start it with:  npm run preview -- --port 4173')
+    console.error('and re-run with: A11Y_BASE=http://localhost:4173 npm run check:a11y')
+    process.exit(2)
+  }
+
   await auditScreen(page, `${BASE}/`, 'game')
   await auditScreen(page, `${BASE}/?mode=puzzles`, 'puzzles')
 
@@ -122,6 +135,31 @@ try {
   const narrowOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth > document.documentElement.clientWidth + 1)
   check(!narrowOverflow, 'puzzles: no horizontal overflow at 360px')
+
+  /*
+   * The whole board is visible, and centred.
+   *
+   * The document-overflow check above is NOT enough and once passed while a rank of the
+   * board was cut off: `.board` has `overflow: hidden`, so the page never grew and never
+   * scrolled sideways while the h-file sat outside the viewport. "Does the page scroll?"
+   * and "can I see the board?" are different questions, and only the second matters to a
+   * player. Measure the element, not the document.
+   */
+  for (const width of [320, 360, 390, 412]) {
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto(`${BASE}/`)
+    await page.waitForSelector('[data-testid="square-a1"]')
+    const box = await page.evaluate(() => {
+      const a1 = document.querySelector('[data-testid="square-a1"]').getBoundingClientRect()
+      const h1 = document.querySelector('[data-testid="square-h1"]').getBoundingClientRect()
+      const viewport = document.documentElement.clientWidth
+      return { left: Math.round(a1.left), right: Math.round(h1.right), rightGap: Math.round(viewport - h1.right) }
+    })
+    check(box.left >= 0 && box.rightGap >= 0, `board fully visible at ${width}px`,
+      `spans ${box.left}..${box.right}`)
+    check(Math.abs(box.left - box.rightGap) <= 2, `board centred at ${width}px`,
+      `gaps ${box.left} / ${box.rightGap}`)
+  }
 } finally {
   await browser.close()
 }

@@ -294,10 +294,36 @@ body, html, #root {
 .coordLabel.rank { top: 4px; left: 6px; }
 
 /* Theme toggle styling */
+/*
+ * The header controls, which must never set the page's minimum width.
+ *
+ * They used to: four controls in a non-wrapping row measured **454px**, so on a 360px
+ * phone `.app`, the footer and the move message all stretched to 454px, and the board —
+ * correctly sized at 288px — was centred inside *that* box rather than the viewport. The
+ * result was a board pushed 85px right with its h-file cut off
+ * (`prj-mgmt/epics/quality/mobile-layout.md`).
+ *
+ * `flex-wrap` is the fix; `min-width: 0` is what stops a long row forcing its container
+ * wider than the screen in the first place.
+ */
 .actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
+  min-width: 0;
+}
+
+/*
+ * Nothing in the app may be wider than the screen.
+ *
+ * Belt and braces behind `.actions`: a grid child's default `min-width: auto` lets a wide
+ * row push the whole column past the viewport, which is exactly how this bug worked.
+ */
+.app > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Ionic theme overrides */
