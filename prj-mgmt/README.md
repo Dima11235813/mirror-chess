@@ -78,6 +78,7 @@ Notation was adopted the same day (§8.5, the `*` seam tag).
 | [`adjacent-kings.md`](./epics/rules/adjacent-kings.md) | ✅ a piece attacks exactly where it can move — `isStandardRuleSet`, the 64 rulesets, the invariant as a property test, and [11 e2e tests](./epics/rules/adjacent-kings.e2e.ts). **The generator needed no change**: the rule was already obeyed, only unclassified |
 | [`piece-capabilities.md`](./epics/rules/piece-capabilities.md) | ✅ the capability matrix: [40 e2e tests](./epics/rules/piece-capabilities.e2e.ts), six pieces × move / seam move / capture / seam capture, each with a flag-off control. Found the rook and queen almost untested |
 | [`move-capture-split.md`](./epics/rules/move-capture-split.md) | ⚠️ superseded as the default (2026-09-22); kept, and still the best account of why move and attack must be generated separately |
+| [`diagonal-crossing.md`](./epics/rules/diagonal-crossing.md) | ⚠️ **open and blocking**: a diagonal crossing should continue the diagonal and preserve square colour. Reverses §4 — and with it "a lone bishop mates", "bishops are not colour-bound" and the board's geometry |
 | [`task-e2e-parallelism.md`](./epics/rules/task-e2e-parallelism.md) | 🔧 open housekeeping: `page.goto` flakiness; use `--workers=1` |
 | [`task-lint-does-not-run.md`](./epics/rules/task-lint-does-not-run.md) | 🔧 open housekeeping: **ESLint has never run in this repo** |
 

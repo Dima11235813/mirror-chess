@@ -16,6 +16,13 @@ the mirrored file at the same rank and continue its line on the far side.**
 Landing squares are ordinary board squares (there is no separate "side board"). The
 "mirror board" is a mental model for how the piece got there.
 
+> ⚠️ **§3, §4 and §5 are under challenge (2026-10-03).** The owner reports that a diagonal
+> crossing should *continue the diagonal* — `b3` via `a4` should reach `h5, g6, f7, e8`,
+> preserving square colour — rather than hop to `h4` at the same rank. That reverses what
+> §4 states and what §5.1 records as the owner's own headline example, so it needs an
+> explicit decision before any code moves.
+> → [`diagonal-crossing.md`](./diagonal-crossing.md)
+
 ## 2. Scope (confirmed decisions)
 
 | Decision | Choice |
