@@ -75,3 +75,21 @@ Check these explicitly; each has shipped at least once.
 
 Prefer a few real, verified findings over a long speculative list. Every finding must
 have a concrete failure scenario or a cited rule/standard it violates.
+
+## Extra checks after a rule or architecture change
+
+- **Every measurement states the rule it was taken under.** "A lone bishop mates" is not a
+  fact about this game; it is a fact about this game *under the crossing of 2026-07*. A
+  number without its rule is a number nobody can re-find when the rule moves.
+- **Superseded text is struck through in place, not deleted** — in the spec, the stories,
+  the memories and the doc comments. Flag a silent replacement as a finding: the old
+  wording is how the next reader learns that a careful person got it wrong.
+- **A claim that reversed must have reversed its *test*, not just its prose.** Prose cannot
+  be re-run. If a story says a rule changed and no enumeration or property test changed
+  with it, the claim is unverified.
+- **Fixtures carry material.** A two-king position is insufficient material and therefore
+  drawn, which makes "this square is not offered" vacuously true. Any assertion of an
+  **absence** should sit next to an assertion of a **presence** in the same position.
+- **New invariants should explain rather than restate.** An invariant transcribed from the
+  implementation can only ever confirm it — and one of those passed for two months while
+  encoding a bug.

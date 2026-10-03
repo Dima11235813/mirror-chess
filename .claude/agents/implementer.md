@@ -79,3 +79,26 @@ comment so nobody deletes it later for being slow.
 - **Follow-ups / blocking questions** — anything unresolved.
 
 Do not run `git commit`/`push`. Leave changes in the working tree for review.
+
+## Three habits that paid on 2026-10-03
+
+- **Verify every fixture against the engine before writing assertions on it.** Not after.
+  That day produced a check fixture testing the opposite of its name (a bishop on `b3`
+  "checking through the seam" a king on `f7`, which it actually checks along an *ordinary*
+  diagonal — dedupe keeps the standard route), a "blocker removes the attack" fixture where
+  the blocker itself gave check through the seam, and two e2e fixtures that were
+  **insufficient material**, so the game was drawn, no hints rendered, and every absence
+  assertion passed for free.
+- **Break a new or heavily-edited suite on purpose, once.** Re-introducing the old
+  behaviour in one function failed exactly 11 of 37 oracle tests — and, just as usefully,
+  *did not* fail the rook, knight and all-flags-off tests, which proved the suite
+  discriminates rather than just reacting. Then put it back.
+- **When a rule changes, supersede in place — never delete.** Strike through the old
+  expectation with a dated note saying what it used to assert and what is true now. The
+  diff of a test file is the clearest description of a rule change this repo produces, and
+  the replaced text is usually more instructive than the replacement.
+
+**If the correct implementation is turning out *larger* than the one it replaces, stop and
+re-read the rule.** The crossing revision deleted a precondition, a second ray walk, a
+bound and a prohibition, and replaced them with one loop. Wrong rules accrete clauses to
+stay coherent; that is often the first visible symptom.

@@ -71,3 +71,21 @@ it as a regression.
 - **Acceptance criteria:** table criterion → PASS/FAIL → evidence.
 - **Defects:** concrete repro → expected → actual for each failure.
 - **Notes:** flakiness, environment problems, coverage gaps.
+
+## Environment traps, before you report a failure
+
+A check that fails for an **environment** reason must say which, or the next person debugs
+the wrong thing. Two that have bitten this repo, both on 2026-10-03:
+
+- **Port 5173 belongs to another project on this machine** ("Maze Lab"). Playwright and
+  `check:a11y` both reused it and spent 30 seconds per test hunting for a chessboard inside
+  a maze app. The e2e config defaults to **4173** and honours `E2E_PORT`; `check:a11y`
+  honours `A11Y_BASE` and prints the title of whatever page it found. If every test fails
+  with "waiting for `square-b3`", check *what* is being served before reading a line of
+  product code.
+- **`vite preview` serves `dist`.** If the build is stale, you are testing yesterday's app.
+  Build first.
+
+Report the **known-failing baseline as a count, not as news**: 13 integration tests across
+three files (`SavedGamesList.spec.ts` plus the Ionic input and button specs), and
+`check:naming` flags the first. Confirm the count is unchanged; a 14th is a regression.

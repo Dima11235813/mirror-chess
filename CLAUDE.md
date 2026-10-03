@@ -27,13 +27,13 @@ Writing the rules down was necessary and **not sufficient**, because the rules t
 most were the ones nobody thought to write down — the ones *inherited from chess without
 noticing*. Every one of these was believed, and every one was wrong:
 
-| Inherited belief | What the seam actually does |
-| --- | --- |
-| "King and minor piece cannot mate" | A bishop that captures across the seam **mates a lone king alone** |
-| "En passant is a local rule between adjacent files" | It happens between pawns **seven files apart** |
-| "A castle can only be stopped by pieces near the king" | A bishop forbids it **from the opposite corner** |
-| "A bishop is colour-bound, so the pair is valuable" | A seam hop flips square colour; the pair is near worthless |
-| "Piece-square tables reward central pieces" | A knight on `a4` attacks as many squares as one on `d4` |
+| Inherited belief | What the seam actually does | Still true? |
+| --- | --- | --- |
+| "En passant is a local rule between adjacent files" | It happens between pawns **seven files apart** | yes |
+| "A castle can only be stopped by pieces near the king" | A bishop on `a3` forbids kingside castling by attacking **`g1`** through the seam | yes (the square moved from `f1` to `g1`) |
+| "Piece-square tables reward central pieces" | A knight on `a4` attacks as many squares as one on `d4` | yes |
+| "King and minor piece cannot mate" | ~~A bishop that captures across the seam **mates a lone king alone**~~ | **no — reverted 2026-10-03** |
+| "A bishop is colour-bound, so the pair is valuable" | ~~A seam hop flips square colour; the pair is near worthless~~ | **no — reverted 2026-10-03** |
 
 None was found by thinking harder. Each was found by **measuring** — a throwaway probe, an
 exhaustive enumeration, a benchmark. So the rule that follows the rule:
@@ -41,6 +41,55 @@ exhaustive enumeration, a benchmark. So the rule that follows the rule:
 > **Don't inherit a chess fact. Check it.** If a plan rests on something true of chess,
 > the plan owes a measurement (§8, "probe before you specify"). A spec is only as good as
 > its authors' imagination; a perft count and an enumeration are not.
+
+### The third lesson: a measurement is only as durable as the rule it was taken under
+
+The last two rows reverted on 2026-10-03, and not because the measurements were sloppy.
+Both were exhaustive enumerations over every placement and every flag setting; both were
+correct; both are now false. They measured a **wrong rule** faithfully — the seam crossing
+used to preserve rank, which flipped a bishop's square colour, and
+[`prj-mgmt/epics/rules/diagonal-crossing.md`](./prj-mgmt/epics/rules/diagonal-crossing.md)
+is the story of the owner finding that on a phone and reversing it. Re-running the same
+enumerations under the revised crossing took one command and inverted both answers.
+
+So the habit needs one more turn of the screw:
+
+> **Record the rule a measurement was taken under, next to the number.** "A lone bishop
+> mates" is not a fact about Mirror Chess; it is a fact about Mirror Chess *under the
+> crossing of 2026-07*. Write the second half down, because when the rule moves — and here
+> the rules are explicitly experimental (§11.5) — the numbers that depended on it have to
+> be found, and an unlabelled number cannot be found.
+
+What saved the migration was that **the enumerations were kept as code rather than written
+up as conclusions**: `draw-rules.test.ts` re-derives the whole insufficient-material table
+from scratch, so the re-measurement was `npm run test`, not a research project. Prefer a
+slow test that proves a claim to a fast paragraph that asserts it (§8, "prove, don't
+assert") — the paragraph cannot be re-run.
+
+### Four more, from the same day
+
+Each of these cost something, and none of them is about chess:
+
+- **"Contradictory" is not the same as "all wrong".** The reboot found five incompatible
+  notions of "mirror" in `moves.ts` and deleted all five. One of them — `diagonalPortalWrap`
+  — computed *exactly* what the owner meant, fourteen months before it was reported as
+  missing (spec §9.1). Deleting the code was right; deleting the **evidence of what each
+  branch computed** was not. When a reconciliation removes competing implementations,
+  record a worked example of each in the story first. It costs a paragraph.
+- **A rule that needs a prohibition to stay coherent should probably collapse.** Spec §11.1
+  used to say *"do not generalize one rule to the other"*, and invented a principle
+  (*transit is not a step*) to justify a behaviour that already existed in code. The simpler
+  rule it forbade was the correct one. Treat "do not generalise this" **in our own
+  documents** as a smell, not as guidance.
+- **An invariant should explain, not restate.** "No rank change on the hop" was precise,
+  property-tested and passing for two months — and it encoded the bug, because it was a
+  transcription of the implementation. Its replacement derives the behaviour from parity,
+  which a reader can check in their head. An invariant that only restates the code can
+  never do more than confirm it.
+- **What a spec calls intentional, a player calls a bug.** The divergence between the two
+  crossings was documented as *"intentional, not an inconsistency to 'fix'"* — and was found
+  in an afternoon by someone who had never read the spec, playing on a phone. When the
+  document and the board disagree in front of a user, the document moves.
 
 ---
 
@@ -173,6 +222,7 @@ two skills orchestrate them.
 | Review | `reviewer` agent | `.claude/agents/reviewer.md` | Review the diff vs spec + standards; ranked findings + verdict. Read-only. |
 | Orchestrate | `deliver-story` skill | `.claude/skills/deliver-story/` | Run plan→implement→QA→review with an **owner-review gate** at each step. |
 | Ship | `ship` skill | `.claude/skills/ship/` | Branch off `dev`, conventional commit, PR into `dev`. Only when asked. |
+| Consolidate | `consolidate-session` skill | `.claude/skills/consolidate-session/` | Fold what a session taught into memory, CLAUDE.md, stories, agent prompts — and leave the next session a hand-off. |
 
 **How to run:** the owner invokes `deliver-story` (e.g. "run the harness on
 `<prj-mgmt path>`"). The orchestrator delegates to the agents and pauses for owner
@@ -190,11 +240,12 @@ be.
 Default to doing the work directly and say so. Reach for `deliver-story` when the owner
 asks for it, or when a story is genuinely mechanical.
 
-**Session introspection.** At the end of a working session, capture what would make
-the *next* session smoother — sharper rules, missing tests, harness gaps — into
-persistent memory and/or a `prj-mgmt` task, and refine this file and the agent
-prompts. The harness is meant to compound: after each `deliver-story` run, fold what
-was rough back into the relevant `.claude/agents/*.md` or `.claude/skills/*`.
+**Session introspection — run `consolidate-session`.** The harness only compounds if
+each session pays back into it. At the end of a working session, after a milestone, or
+whenever something turned out to be false, invoke the **`consolidate-session`** skill: it
+sweeps the session for findings, routes each one to exactly one home, and writes the
+hand-off described in §13. Do it on the day. The lesson is cheapest to record while the
+evidence is still in front of you and nearly impossible to reconstruct later.
 
 > Do not spawn subagents unless the owner asks or invokes `deliver-story`. Prefer
 > doing a phase inline with your own tools for small changes.
@@ -431,10 +482,18 @@ Bump the pinned commit to update Serena.
 
 ## 11. Open decisions (blocking)
 
-1. ~~**The mirror rules.**~~ **Settled and complete.** `mirror-portal-spec.md` now covers
-   §4 slider transit, §10 legality, §11 stepper wrap, §12 the quiet/capture split and §13
-   promotion, castling and en passant. If the spec is silent on a case, still stop and ask
-   — that rule has not changed, and it has paid off every time it was followed.
+1. ~~**The mirror rules.**~~ **Settled and complete — and revised once, on 2026-10-03.**
+   `mirror-portal-spec.md` covers §4 slider crossing, §10 legality, §11 stepper wrap, §12 the
+   quiet/capture split and §13 promotion, castling and en passant. If the spec is silent on
+   a case, still stop and ask — that rule has not changed, and it has paid off every time it
+   was followed.
+
+   **The revision is worth knowing about before reading any older document here.** A
+   crossing now *continues the ray*: the file wraps and the rank advances as the direction
+   dictates, so a bishop leaving `a4` emerges on `h5` and **square colour is preserved**.
+   It used to hop to `h4` at the same rank, which flipped colour. Sliders and steppers now
+   share one crossing rule. The migration, its milestones and everything it reversed are in
+   [`prj-mgmt/epics/rules/diagonal-crossing.md`](./prj-mgmt/epics/rules/diagonal-crossing.md).
 2. ~~**[decision] Notation.**~~ **Settled 2026-09-22: spec §8.5**, standard SAN with `*`
    marking a seam crossing (`Bb3–h4*`, `Bxh4*+`, `axb6 e.p.*`). An all-flags-off game
    notates as ordinary chess, so a record degrades to valid PGN. This unblocked the move
@@ -517,3 +576,58 @@ Because the rules are feature-flagged, one engine plays 64 games, **including or
 chess with every flag off**. Treat that as the gift it is: it forces a real boundary
 between "what the game is" and "how we search it", and it gives us published chess perft
 numbers as an external correctness oracle.
+
+---
+
+## 13. Context engineering — how a session starts, and how it ends
+
+A session's context window is **the least durable thing in this project**. It is gone at
+the end of the day, and it is partly gone the moment the conversation is compacted. Every
+other surface here outlives it, and the job of this section is to say which surface holds
+what, so that nothing load-bearing is left in the one place that evaporates.
+
+| Surface | Lives for | Holds |
+| --- | --- | --- |
+| The conversation | this session, minus compaction | Working state. **Assume it is lost.** |
+| Persistent memory (`memory/`, indexed by `MEMORY.md`) | forever, across context wipes | Decisions, owner preferences, measured facts that contradict the obvious, and **the hand-off** |
+| `CLAUDE.md` | forever, loaded every session | How we work. Rules, not findings |
+| `prj-mgmt/` | forever, in the repo | What state the work is in, and why |
+| Code, tests, `docs/` | forever, and **continuously verified** | What is true of the system. The only surface that can disprove itself |
+
+### Start a session by front-loading, not by exploring
+
+`MEMORY.md` is loaded for you. It is an index, so **follow it**: read the hand-off memory
+first, then the two or three documents it names, in the order it names them. That is
+deliberately a short list — the point is to make the first five minutes cheap, not to
+reconstruct the whole project. `prj-mgmt/README.md` is the map when the hand-off does not
+cover what you have been asked to do.
+
+If the session was compacted mid-task, the summary carries *what* you were doing and rarely
+*why it was decided that way*. Before re-litigating a choice, check memory and the story —
+the reasoning is usually written down, and re-deriving it is how a settled decision quietly
+becomes an open one again.
+
+### End a session by writing the hand-off
+
+**Leave yourself a memory of what comes next.** Not a diary — an entry point:
+
+- where we left off, and whether it is committed;
+- what to do next, concrete enough to start without re-deriving the plan (name files,
+  commands, the story path);
+- what to read first, in order;
+- what is in flight, unverified, or green for a suspicious reason;
+- the traps that cost this session an hour.
+
+Keep one per active front rather than one growing file, point `MEMORY.md` at each, and
+**rewrite it rather than appending** — a hand-off describing work finished three sessions
+ago is noise in the one file guaranteed to be read.
+
+`consolidate-session` (§5) does this as its step 5, along with routing the session's other
+lessons. Running it is how the harness compounds instead of resetting.
+
+### The principle
+
+**Write each thing where it will be read at the moment it is needed** — and only there. A
+rule nobody reads before acting is not a rule; a fact in three files is a fact that will
+disagree with itself. When in doubt, put the substance in one place and a one-line pointer
+in the other.

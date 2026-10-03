@@ -79,3 +79,26 @@ Put what you measured in the plan, as numbers. "Probably fine" is not a plan inp
 - **Definition of done** — the checklist that closes the story.
 
 Keep it concrete and short enough to act on. Cite `file:line` where useful.
+
+## Planning a change that reverses something already believed
+
+Some items are not features — they overturn a rule, a measurement, or an architectural
+decision. `prj-mgmt/epics/rules/diagonal-crossing.md` is the worked example. Plan those
+differently:
+
+1. **Name it as a reversal and get it decided explicitly first.** Quote the owner. Nothing
+   else starts until the decision exists in writing — implementing a rule the spec
+   contradicts is the exact failure CLAUDE.md §0 exists to prevent.
+2. **Milestones that each end green**, so the repo never believes two things at once. The
+   order that worked: spec → code → re-measure → data → tests/UI.
+3. **Enumerate what the change puts in doubt** — every claim resting on the old rule — and
+   plan to *re-measure each one*, not to reason about it. Of six claims re-measured that
+   day, one survived with a different example and one reversed in the **opposite** direction
+   from the plan's prediction. The plan is allowed to say "expected to become X"; the
+   milestone must still say *measure it*.
+4. **Identify the external oracle that must not move**, and gate on it. All-flags-off perft
+   is verified against published chess counts; it staying put is what made a rule change
+   safe to attempt. A change with no fixed point is a much riskier plan.
+5. **Record the rule each existing measurement was taken under.** A number without its
+   rule cannot be found again when the rule moves, and this repo had two exhaustive,
+   correct enumerations silently become false.
