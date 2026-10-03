@@ -59,8 +59,10 @@ portal flag off the game *is* chess, so published perft numbers apply.
 counting **up**. Confusing `ply` with `depth` is the mistake everyone makes once.
 
 **Portal / seam** — This variant's one rule. The `a`- and `h`-files are linked at equal
-rank. Sliders cross *by transit* (a ray reaches an empty edge square and continues on the
-far side at the same rank); steppers cross *by wrapping the file* of their landing square.
+rank. **One crossing rule since 2026-10-03:** the file wraps `a ↔ h` and the rank advances
+as the move dictates, so a slider's ray continues in the same direction (and keeps its
+square colour) while a stepper lands by the same arithmetic. Before that date sliders hopped
+at equal rank, which flipped a bishop's colour — see `diagonal-crossing.md`.
 Two different crossings — conflating them is the biggest trap in the codebase.
 
 **Principal variation (PV)** — The line the engine expects: its move, the reply it expects,

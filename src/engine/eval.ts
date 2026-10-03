@@ -28,14 +28,22 @@ import { type Centipawns, cp, PAWN_VALUE } from './types'
  * king-safety term about pawn shelters. Every one of those encodes an assumption the seam
  * breaks:
  *
- * - **Piece-square tables are near-meaningless.** A knight on `a4` attacks eight squares,
- *   exactly as many as one on `d4`. The centre is not special, because the edge is not a
- *   wall — it is a door.
- * - **The bishop pair is close to worthless.** A seam hop preserves rank and swaps file
- *   `f` for `7 - f`, and since `0` and `7` differ in parity the square colour *flips*. A
- *   lone bishop reaches all 64 squares, so "one of each colour" stops being a thing you
- *   can lack. It is worse than worthless as a term: `draw-rules.ts` proves a single
- *   bishop that captures across the seam is **mating material by itself**.
+ * - **A piece-square table may depend on rank only — and this one is provable.** With
+ *   every flag on there is one crossing and it is a file wrap (spec §4, revised
+ *   2026-10-03), so the files form a cycle and **rotating every file by `k` is a symmetry
+ *   of the whole move generator**: measured, k = 1..7, for every material tried, in
+ *   `prj-mgmt/epics/balance/readiness-probe.md` §4. Any file-dependent term is therefore
+ *   wrong there by symmetry, and no amount of self-play can teach a correct one. A knight
+ *   on `a4` attacks eight squares, exactly as many as one on `d4`: the centre is not
+ *   special, because the edge is not a wall — it is a door. **This holds per ruleset**;
+ *   mixed rulesets, where some pieces cross and others do not, can tell the files apart.
+ * - **The bishop pair is worth roughly what chess says — reverted 2026-10-03.** This
+ *   comment used to read "close to worthless", because a seam hop preserved rank and
+ *   flipped square colour, so a lone bishop reached all 64 squares. The revised crossing
+ *   advances the rank with the direction, `±7` has the same parity as `±1`, and colour is
+ *   preserved (spec §7): **bishops are colour-bound exactly as in chess**, and
+ *   `draw-rules.ts` re-enumerated K+B vs K to no mate under any of the 64 rulesets. The
+ *   term is an ordinary chess hypothesis again, to be tested like the rest.
  * - **A rank is a cycle.** A rook attacks along it in both directions at once, and a
  *   king's rank cannot be walled off with one blocker — so pawn-shelter king safety, as
  *   chess understands it, does not apply.
@@ -82,10 +90,15 @@ export interface EvalOptions {
  * Piece values, in centipawns.
  *
  * **Provenance: inherited from chess, and explicitly flagged for tuning.** These are the
- * conventional values every chess primer gives. They are almost certainly *wrong* for this
- * variant — a bishop that crosses the seam reaches every square on the board and can mate
- * alone, which is not a 330-centipawn piece — but a wrong number we can name beats a
- * guessed number we cannot.
+ * conventional values every chess primer gives, and they are still almost certainly wrong
+ * for this variant — but for different reasons than this comment used to give. It argued
+ * that a bishop was badly underpriced because it reached every square and mated alone;
+ * both facts went away with the 2026-10-03 crossing revision. What is measured instead:
+ * a bishop on `b3` has **13 destinations on an empty board against 16 under the old rule**,
+ * and a bishop on `d4` gains **nothing at all** from the seam, while every rank-moving
+ * piece is untouched. So the seam's gift is unevenly distributed and the bishop may now be
+ * *over*priced relative to a rook. Still a wrong number we can name, which beats a guessed
+ * number we cannot.
  *
  * The plan is to **derive** them from self-play rather than assert them
  * (`prj-mgmt/epics/engine/evaluation.md`). Until then, treat every value below as a
@@ -232,9 +245,12 @@ export function evaluate(
  * Does this ruleset make the inherited piece values especially suspect?
  *
  * Not used by the evaluation — it is a signal for the study and for anyone reading a
- * score and wondering how much to trust it. A bishop that crosses the seam is a
- * qualitatively different piece from a chess bishop, and `PIECE_VALUES.B` does not know
- * that yet.
+ * score and wondering how much to trust it. A bishop that crosses the seam is still a
+ * different piece from a chess bishop, and `PIECE_VALUES.B` does not know that yet — but
+ * since the 2026-10-03 crossing revision the difference is *smaller and oddly shaped*
+ * rather than enormous: colour-bound as in chess, 13 destinations from `b3` against a
+ * chess bishop's 9, and none at all gained on `d4`. The flag is kept because the value is
+ * still untuned, not because the piece is unrecognisable.
  */
 export function pieceValuesAreSuspect(position: MovePosition): boolean {
   return portalEnabled(position.rules, 'B')

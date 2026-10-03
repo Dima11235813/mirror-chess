@@ -1,6 +1,7 @@
 # Mirror Portal — authoritative rules spec (v1)
 
-> **Status: CONFIRMED by the owner (2026-07).** This document is the single source
+> **Status: CONFIRMED by the owner (2026-07); §4's crossing REVISED by the owner
+> (2026-10-03).** This document is the single source
 > of truth for the mirror mechanic. All move-generation code and tests derive from
 > it. If code disagrees with this file, the code is wrong. If this file is silent on
 > a case, **stop and get a decision** — do not invent behavior (that is the mistake
@@ -9,19 +10,28 @@
 ## 1. Concept
 
 Mirror Chess is standard chess on **one 8×8 board**. The **left edge (`a`-file) and
-right edge (`h`-file) are mirror portals**: for every rank `r`, the squares `a{r}`
-and `h{r}` are linked. A piece sliding into an edge may **step through the portal to
-the mirrored file at the same rank and continue its line on the far side.**
+right edge (`h`-file) are mirror portals**: a move that would leave the board across one
+edge **re-enters on the other and carries on.** The file wraps (`a ↔ h`); the rank does
+whatever the move was already doing. A slider's ray continues in the same direction; a
+stepper lands where its own offset puts it.
 
 Landing squares are ordinary board squares (there is no separate "side board"). The
 "mirror board" is a mental model for how the piece got there.
 
-> ⚠️ **§3, §4 and §5 are under challenge (2026-10-03).** The owner reports that a diagonal
-> crossing should *continue the diagonal* — `b3` via `a4` should reach `h5, g6, f7, e8`,
-> preserving square colour — rather than hop to `h4` at the same rank. That reverses what
-> §4 states and what §5.1 records as the owner's own headline example, so it needs an
-> explicit decision before any code moves.
-> → [`diagonal-crossing.md`](./diagonal-crossing.md)
+> **REVISED 2026-10-03 — the crossing changed, and there is now only one of them.**
+> A ray that crosses the seam *continues in the same direction*: the file wraps `a ↔ h` and
+> the rank advances exactly as the direction already said it would. A bishop on `b3` reaches
+> `a4` and continues **`h5, g6, f7, e8`** — not `h4, g5, f6, e7, d8`. This reverses §3, §4,
+> §5, §6, §7 and §11.1, each of which now carries its old wording **struck through rather
+> than deleted**, because the replaced model is the most instructive thing in this file.
+> Decided by the owner; reported, measured and argued in
+> [`diagonal-crossing.md`](./diagonal-crossing.md).
+>
+> ⚠️ **Specified but not yet implemented (M1 done, M2 next).** The spec deliberately leads
+> the code. Until M2 lands, `src/game/*` still implements the old rank-preserving hop and
+> ~20 test files still assert it; **the code is wrong, not this file** (see the banner at the
+> top). Findings marked **[to be re-measured — M3]** in §10.4 are the ones this reversal puts
+> in doubt, and they are to be *enumerated again*, not reasoned about.
 
 ## 2. Scope (confirmed decisions)
 
@@ -29,15 +39,18 @@ Landing squares are ordinary board squares (there is no separate "side board"). 
 | --- | --- |
 | Board model | **Single 8×8** with edge portals (not a literal tri-board) |
 | Portal depth | **Keep sliding** through the portal until blocked / edge |
-| Sliders — Bishop, Rook, Queen | **Portal by transit** — §4 |
-| Steppers — Knight, King, Pawn | **Portal by file wrap** — §11 (confirmed 2026-07-30) |
+| Sliders — Bishop, Rook, Queen | **Cross by file wrap, one step at a time** — §4 (revised 2026-10-03) |
+| Steppers — Knight, King, Pawn | **Cross by file wrap** — §11 (confirmed 2026-07-30) |
 | Check / checkmate / pins | **Specified** — §10 |
 | Move and attack | **One right per piece** — a piece attacks exactly where it can move, the pawn excepted as in chess (§12, revised 2026-09-22) |
 | Notation | **Adopted** — the `*` seam tag, §8.5 |
 
-> §4 and §11 are two different crossings, because a slider *passes through* the seam
-> mid-ray while a stepper simply *lands* somewhere. Read §11's opening note before
-> assuming one generalizes to the other.
+> **There is one crossing.** §4 and §11 are the same rule — the file wraps, the rank does
+> what the move dictates — applied to a ray and to a jump. One sentence covers every piece.
+>
+> ~~"§4 and §11 are two different crossings, because a slider *passes through* the seam
+> mid-ray while a stepper simply *lands* somewhere. Read §11's opening note before assuming
+> one generalizes to the other."~~ **Superseded 2026-10-03** (§11.1).
 
 ### 2.1 The governing principle (owner, 2026-09-22)
 
@@ -60,102 +73,223 @@ reason §12's four-mode model was retired — see §12's banner.
 ## 3. Coordinates & terms
 
 - Files `a..h` → `f ∈ 0..7`. Ranks `1..8` → `r ∈ 0..7`. Square index `r*8 + f`.
-- **`mirrorFile(f) = 7 - f`** (`a↔h, b↔g, c↔f, d↔e`). The portal maps `(0, r) ↔ (7, r)` — **same rank**.
+- **`mirrorFile(f) = 7 - f`** (`a↔h, b↔g, c↔f, d↔e`) — the *file* pairing the seam creates.
+  It says which files are adjacent across the seam. It is **not** the crossing rule, and
+  reading it as one is what produced the bug this section was revised to fix.
 - **Ray**: a straight line of squares from the origin in a fixed direction `(df, dr)`.
-- **Edge square of a ray**: the on-board square where a ray with `df < 0` reaches the
-  `a`-file (`f = 0`), or a ray with `df > 0` reaches the `h`-file (`f = 7`).
+- **Wrap**: a step whose file would leave the board instead lands on `(f + df + 8) mod 8`
+  — `a ↔ h` — with the rank advancing by `dr` as usual. **Ranks never wrap**; there is no
+  top or bottom seam.
+- **Seam crossing**: a wrap. One word, one rule, for sliders (§4) and steppers (§11) alike.
+  A move that wrapped is flagged `special: 'mirror'`; nothing else about it is special.
 
-## 4. The portal rule (precise)
+> ~~"The portal maps `(0, r) ↔ (7, r)` — **same rank**."~~ **Superseded 2026-10-03.** The
+> crossing advances the rank with the direction of travel: on a ray `(df, dr)`, `(0, r)`
+> leads to `(7, r + dr)`. With `dr = 0` — a rook along a rank — that *is* the old mapping,
+> which is exactly why rooks are unaffected by this revision and bishops are not.
 
-For each of a slider's directions `(df, dr)`:
+## 4. The crossing rule for sliders (precise) — revised 2026-10-03
 
-1. **Walk the standard ray** from the origin: each empty square is a normal
-   destination; the first enemy square is a capturing destination and stops the ray;
-   an own piece stops the ray just before it. (Standard chess sliding.)
-2. **Portal extension.** If the ray has a horizontal component (`df ≠ 0`) **and**
-   reaches its **edge square with a clear path and that edge square is empty**, then:
-   - Compute the mirror edge `M = (7 - edge.f, edge.r)` — **horizontal hop, same rank.**
-   - **Continue the same direction `(df, dr)` starting at `M`**, applying standard
-     sliding semantics: empty → mirror destination + keep going; enemy → mirror
-     capture + stop; own piece → stop before it; the origin square → stop.
-   - Every square emitted on the far side is flagged **`special: 'mirror'`**.
-3. **At most one portal crossing per ray** (a ray never crosses a second seam; this
-   is automatic — diagonals exit top/bottom and rank rays return to the origin — but
-   is stated to keep implementations finite).
+**A slider's ray is an ordinary chess ray, walked on a board whose files wrap.** That is
+the entire rule. What follows only spells it out.
 
-**Trap to avoid:** the portal hop `edge → M` does **not** change rank and does **not**
-consume a diagonal step. A bishop leaving `a4` emerges at `h4` (same rank) and *then*
-resumes the diagonal (`g5, f6, …`). Advancing the rank on the hop (a cylinder wrap)
-is **wrong** and yields `h5` instead of `h4`.
+For each of a slider's directions `(df, dr)`, start at the origin and step repeatedly:
+
+1. **Advance.** `r += dr`; if the rank leaves the board the ray **ends** (ranks never wrap).
+   `f = (f + df + 8) mod 8`, so a file leaving the board re-enters on the other side. From
+   the first wrapping step onward, every square the ray emits is flagged
+   **`special: 'mirror'`** — the ray crossed to get there, whether or not that square is
+   itself next to the seam.
+2. **Resolve the square, exactly as in chess.** Empty → a destination, keep going. Enemy →
+   a capturing destination, **stop**. Own piece → **stop** before it.
+3. **Stop at the origin.** A wrapped rank ray comes back to the square it started from;
+   that square ends the ray — no self-capture, no infinite loop.
+
+There is no precondition to check, no "edge square", and no hop. **The seam is not a place
+a piece visits; it is a direction in which the board continues.**
+
+**At most one crossing per ray — now provable rather than imposed.** A crossing needs eight
+file steps in one direction, and no ray gets more than seven: a diagonal runs out of ranks
+first, and a rank ray meets its own origin. So **a ray is at most 7 squares, the same bound
+as chess.** The seam makes rays no longer, only differently shaped.
+
+**A diagonal crossing preserves square colour.** A wrapping step changes the file by `±7`,
+which has the same parity as `±1`, so `(f + r) mod 2` changes exactly as it would on an
+unbounded board. A bishop is therefore **colour-bound exactly as in chess**: the seam
+expands where a piece can travel, not what it is (§2.1). The precise form of this, and the
+case where it does *not* read the way you expect, is §7.
+
+> ### What this replaces
+> ~~"**Portal extension.** If the ray reaches its **edge square with a clear path and that
+> edge square is empty**, compute the mirror edge `M = (7 - edge.f, edge.r)` — **horizontal
+> hop, same rank** — and continue the same direction from `M`."~~
+>
+> ~~"**Trap to avoid:** the portal hop does **not** change rank and does **not** consume a
+> diagonal step. A bishop leaving `a4` emerges at `h4` (same rank) and *then* resumes the
+> diagonal (`g5, f6, …`). Advancing the rank on the hop (a cylinder wrap) is **wrong** and
+> yields `h5` instead of `h4`."~~
+>
+> **Superseded 2026-10-03.** `h5` is right; `h4` was wrong. The rank-preserving hop is what
+> made every crossing flip square colour, and it is what the owner's mirror model never
+> meant. Note what else leaves with it: a precondition that the edge square be empty, a
+> second ray walk on the far side, a 15-square bound, and a standing instruction not to
+> generalise §4 to §11. **The correct rule is strictly less machinery than the wrong one** —
+> which is the signal worth remembering, because the wrong rule had to keep adding clauses
+> to stay coherent.
 
 ### Classification / dedupe
 If a square is reachable both as a standard move and as a mirror move, **keep the
 standard one** (do not emit a second `mirror` hint for the same square). Otherwise
 dedupe by `(to, special)`.
 
+This still earns its place, and on rank rays it is now unavoidable: a rook's two horizontal
+rays sweep the same rank in opposite directions, so on an empty rank **every** square is
+reached both ways — once standard, once after a crossing (§5.4). Dedupe is what keeps the
+seam from decorating ordinary rook moves with a `*`.
+
 ### Reference pseudocode
 ```text
 for (df, dr) in piece.slideDirections:
-    # standard ray
-    f, r = origin.f + df, origin.r + dr
-    while inBoard(f, r):
-        if empty(f, r): emit move(origin → (f,r))
-        else: if enemy(f,r): emit capture(origin → (f,r)); break else break
-        f += df; r += dr
+    f, r = origin.f, origin.r
+    crossed = false
+    loop:
+        r += dr
+        if r < 0 or r > 7: break            # ranks never wrap — the ray ends
+        if f + df < 0 or f + df > 7: crossed = true
+        f = (f + df + 8) mod 8              # the file wraps; a ↔ h
+        if (f, r) == (origin.f, origin.r): break   # a wrapped rank ray meets itself
 
-    # portal extension (sliders, df != 0)
-    if df != 0 and rayReachesEmptyEdge(origin, df, dr) as edge:
-        m = (7 - edge.f, edge.r)               # same rank
-        f, r = m.f, m.r
-        while inBoard(f, r) and (f,r) != origin:
-            if empty(f, r): emit move(origin → (f,r), special='mirror')
-            else: if enemy(f,r): emit capture(origin → (f,r), special='mirror'); break else break
-            f += df; r += dr
+        special = crossed ? 'mirror' : none
+        if empty(f, r):  emit move(origin → (f,r), special); continue
+        if enemy(f, r):  emit capture(origin → (f,r), special); break
+        break                               # own piece
 ```
 
-## 5. Worked examples (the acceptance oracle)
+One loop, not two. The only line that is not ordinary chess sliding is the `mod 8`, and
+`crossed` exists purely to label the move for the UI and the notation — **the geometry does
+not branch on it.** That is what makes this cheap to implement as a precomputed ray table
+(ADR 0003): the paths are built once per ruleset and the hot loop never asks about the seam.
 
-Standard moves listed for completeness; **mirror** moves are the portal outputs.
-Verified by hand from §4.
+## 5. Worked examples (the acceptance oracle) — revised 2026-10-03
 
-### 5.1 Bishop on `b3` (otherwise empty board)  ← owner's headline example
-- Standard: `a4, c4, d5, e6, f7, g8, a2, c2, d1`
-- **Mirror:** via `a4`→ **`h4, g5, f6, e7, d8`**; via `a2`→ **`h2, g1`**
-- Headline check: the two portal mouths are **`h4` and `h2`** ✓
+Rays are listed **whole**, in walk order, with the crossing marked `|`. Squares after the
+`|` carry `special: 'mirror'`.
+
+**These were measured, not written by hand.** The old §5 said "verified by hand from §4"
+and its headline example was wrong for two months, so this revision implemented the
+proposed rule as a throwaway probe (`src/game/zz-probe-newray.test.ts`, deleted after use)
+and transcribed what it printed. A worked example that an author derived from the same
+mental model as the rule cannot catch an error in the model — it just restates it.
+
+### 5.1 Bishop on `b3` (otherwise empty board)  ← the owner's headline example, corrected
+`b3` is **light**, and so is every square in every ray below. That is the point.
+
+| Direction | Ray |
+| --- | --- |
+| north-west | `a4` **\|** `h5, g6, f7, e8` |
+| north-east | `c4, d5, e6, f7, g8` (leaves by rank 8 — no crossing) |
+| south-west | `a2` **\|** `h1` |
+| south-east | `c2, d1` |
+
+- **13 distinct destinations.** `f7` is reached two ways, so dedupe keeps it as a standard
+  move; the squares that exist *only* because of the seam are **`h5, g6, e8`** and **`h1`**.
+- Headline check: the two seam mouths are **`h5` and `h1`**. Under the old rule they were
+  `h4` and `h2`, and the seven far-side squares were all **dark** — the colour flip that
+  made this a bug (see [`diagonal-crossing.md`](./diagonal-crossing.md) §2).
+- Worth noticing: the seam now adds **four** squares here where it used to add seven. The
+  revision makes a bishop *less* mobile as well as colour-bound, which is a fact the
+  evaluation's piece values will have to be re-derived against, not patched around.
 
 ### 5.2 Bishop on `c1` (otherwise empty)
-- Standard: `d2, e3, f4, g5, h6, b2, a3`
-- **Mirror:** via `a3` (left)→ `h3, g4, f5, e6, d7, c8`; via `h6` (right)→ `a6, b7, c8`
-- Note: `c8` is reachable via both portals → emitted **once**.
+`c1` is **dark**; every square below is dark.
+
+| Direction | Ray |
+| --- | --- |
+| north-west | `b2, a3` **\|** `h4, g5, f6, e7, d8` |
+| north-east | `d2, e3, f4, g5, h6` **\|** `a7, b8` |
+
+Both rays are exactly **7 squares** — the §4 bound, reached from a corner-ish square in two
+different directions. `g5` is reached both ways; dedupe keeps the standard one.
 
 ### 5.3 Rook on `a4`, enemy on `c4` (otherwise empty)
-- Standard: right `b4, c4(capture)`; up `a5, a6, a7, a8`; down `a3, a2, a1`
-- **Mirror:** left portal from `a4`→ **`h4, g4, f4, e4, d4`** (stops before `c4`,
-  already a standard capture). This is the point of the portal: reach the far side of
-  a blocker. On an *empty* rank the portal adds nothing new (all squares dedupe).
 
-### 5.4 Queen
-Queen rays = Rook rays ∪ Bishop rays; the portal applies to each horizontal-component
-ray exactly as above. (E.g. a queen on `b3` gets the bishop mirror set from §5.1 plus
-its rook-line portals.)
+| Direction | Ray |
+| --- | --- |
+| east | `b4, c4`(capture, stops) |
+| west | **\|** `h4, g4, f4, e4, d4,` then `c4` — which dedupes to the standard capture above |
+| north | `a5, a6, a7, a8` |
+| south | `a3, a2, a1` |
 
-## 6. Occupancy & capture summary
+**A rook is unchanged by this revision.** With `dr = 0` the rank does not advance, so the
+wrap *is* the old same-rank hop. The west ray still reaches the far side of the blocker on
+`c4`, which remains the clearest demonstration of what the seam buys a slider. On an
+**empty** rank the seam adds nothing: both rays cover all seven other squares and everything
+dedupes.
 
-- Portaling requires the **edge square reached with a clear path and empty** (you
-  pass through it). An enemy on the edge square is a normal capture that **stops** the
-  ray — no portal past it.
-- On the far side, standard sliding: stop at first piece; capture if enemy; the
-  **origin square stops the ray** (no self-capture, no infinite loop).
-- Vertical rook/queen rays (`df = 0`) never portal.
+### 5.4 Queen on `b3` (otherwise empty)
+Queen rays = rook rays ∪ bishop rays, each walked by §4. **27 destinations**, of which four
+— `h5, g6, e8, h1` — exist only because of the seam, all of them from the diagonals and all
+of them light.
+
+The rank rays are where dedupe becomes load-bearing: west gives `a3` **\|** `h3, g3, f3,
+e3, d3, c3` and east gives `c3, d3, e3, f3, g3, h3` **\|** `a3`, so **every square on rank
+3 is reached both ways** and all of them keep their standard form. A queen on `b3` therefore
+shows no `*` on its rank at all, and four `*` moves on its diagonals.
+
+## 6. Occupancy & capture summary — revised 2026-10-03
+
+- **Nothing special happens at the seam.** A ray stops at the first occupied square,
+  wherever that square is. If it happens to sit on the `a`- or `h`-file, the ray stops there
+  and nothing continues on the far side — for exactly the same reason it would stop anywhere
+  else, not because of a rule about the seam.
+- A piece on the far side is reached, captured or blocking by the ordinary rule.
+- The **origin square stops the ray** (no self-capture, no infinite loop).
+- Vertical rook/queen rays (`df = 0`) never cross. Horizontal rays (`dr = 0`) cross exactly
+  as they did before this revision.
+
+> ~~"Portaling requires the **edge square reached with a clear path and empty** (you pass
+> through it). An enemy on the edge square is a normal capture that **stops** the ray — no
+> portal past it."~~
+>
+> **Superseded 2026-10-03** — and note *why*. The behaviour it describes is still correct: a
+> blocked `a`-file square still stops the ray. What changed is that this is no longer a
+> **rule**; it is what ordinary sliding already does, so stating it separately invited the
+> reader (and the implementation) to treat the seam as a special case with its own
+> preconditions. One fewer thing to state is one fewer thing to get wrong.
 
 ## 7. Invariants (for property tests)
 
 - **Symmetry:** the rule is left/right symmetric — mirroring a position across the
   center file mirrors the legal move set.
 - **Superset:** every standard legal move remains legal; mirror moves are additive.
-- **No rank change on the hop:** for any mirror destination `d` reached via edge `e`,
-  the hop `e → mirror(e)` preserves rank; subsequent squares follow `(df, dr)`.
-- **Finite:** each ray yields ≤ 15 squares (≤ one seam crossing).
+- **Parity is unbroken** *(new 2026-10-03; replaces "no rank change on the hop")*. A
+  wrapping step changes the file by `±7`, which has the same parity as `±1`, so
+  `(f + r) mod 2` changes **exactly as it would on an unbounded board**. Every piece
+  therefore keeps its chess relationship to square colour, and each of these is a property
+  test:
+  - **A bishop's destinations are all its own square colour**, under every one of the 64
+    rulesets. Bishops are colour-bound, as in chess.
+  - **A knight always changes square colour**, crossing or not.
+  - A **rook's** rank crossing *does* change colour (file `±7`, `dr = 0`) — which is why
+    this invariant is stated as *parity behaves as it would off-board* and **not** as "a
+    crossing never changes square colour". The looser sentence is true of the diagonals that
+    motivated the revision and false of a rook. It matters nowhere in play, because a rook
+    is not colour-bound; it matters here, because a property test written from the loose
+    sentence fails and whoever hits it will not know which of the two statements was wrong.
+- **Ray length ≤ 7 squares** — the same bound as chess *(was: ≤ 15)*.
+- **At most one crossing per ray**, which now *follows* from the bound above instead of
+  being imposed as a clause (§4).
+
+> ~~"**No rank change on the hop:** for any mirror destination `d` reached via edge `e`, the
+> hop `e → mirror(e)` preserves rank; subsequent squares follow `(df, dr)`."~~ and
+> ~~"**Finite:** each ray yields ≤ 15 squares."~~
+>
+> **Superseded 2026-10-03, and worth a paragraph.** The first was the invariant that
+> *encoded* the bug, and a property test asserting it passed for two months. An invariant
+> can be precisely stated, genuinely tested, and still wrong. What makes the replacement
+> better is not that it is also tested — it is that it **explains**: it derives a bishop's
+> behaviour from a fact about parity that a reader can check in their head. An invariant
+> that only restates the implementation can never do more than confirm it.
 
 ## 8. Deferred (explicitly out of v1 — separate stories, do not implement yet)
 
@@ -171,7 +305,10 @@ its rook-line portals.)
    a pawn's capture diagonals wrap, so en passant can happen between pawns seven files
    apart.
 5. ~~**Notation**~~ **Adopted 2026-09-22 — see §8.5 below.**
-6. **Multi-crossing** — v1 caps at one seam per ray; revisit only if desired.
+6. **Multi-crossing** — ~~v1 caps at one seam per ray; revisit only if desired.~~
+   **Not a decision any more (2026-10-03):** a ray is at most 7 squares and a crossing needs
+   8 file steps, so a second crossing is unreachable rather than forbidden (§4). There is
+   nothing here to revisit unless rays themselves change.
 
 ### 8.5 Notation (adopted 2026-09-22)
 
@@ -181,9 +318,10 @@ always did and the mirror only ever *adds* a character.
 
 | Move | Written |
 | --- | --- |
-| Bishop crosses to `h4` | `Bb3–h4*` (or `Bh4*` when unambiguous) |
-| …capturing there | `Bxh4*` |
-| …with check | `Bxh4*+` — and `#` for mate |
+| Bishop crosses to `h5` | `Bb3–h5*` (or `Bh5*` when unambiguous) |
+| …capturing there | `Bxh5*` |
+| …with check | `Bxh5*+` — and `#` for mate |
+| …continuing past the crossing | `Bb3–g6*` — the tag marks *the ray crossed*, not *the square is next to the seam* (§4) |
 | Promotion (never crosses; §13.1) | `e8=Q` |
 | Promotion **by capturing through the seam** | `axh8=Q*` |
 | En passant across the seam (§13.2) | `axb6 e.p.*` |
@@ -193,6 +331,12 @@ always did and the mirror only ever *adds* a character.
 bite more often, because two pieces can now reach one square by different routes. When a
 square is reachable by a standard move *and* a crossing, dedupe keeps the standard move
 (§4), so the `*` form never competes with a non-`*` form for the same destination.
+
+> **Revised 2026-10-03 — the squares, not the notation.** The examples above used to read
+> `Bb3–h4*`. **Nothing about the notation changes with §4's reversal**: a crossing is still
+> a crossing and `*` still marks exactly that, which is the strongest evidence that §8.5
+> chose the right thing to encode. A format that had named the geometry — "the hop", "the
+> mirrored file" — would have had to be reissued, and every token and game record with it.
 
 A game record carries the **ruleset token** alongside the moves; the same move text under
 a different ruleset is a different game.
@@ -211,6 +355,27 @@ encoded as the unit-test oracle (`src/game/mirror-portal.test.ts`). The
 `prj-mgmt/epics/game-logic/*` stories that predated this file are reconciled or
 marked superseded. Story: [`reconcile-core-to-spec.md`](./reconcile-core-to-spec.md).
 
+> ### 9.1 One of the five was right — found 2026-10-03
+>
+> While revising §4 the deleted branches were read out of git (`git show
+> 04aa980:src/game/moves.ts`, 2025-08-09). **`diagonalPortalWrap` computed what §4-as-revised
+> specifies.** It advanced the rank through the wrap, blocked on a piece before the seam,
+> allowed one crossing, and for a bishop on `b3` emitted exactly **`h5, g6, f7, e8`** and
+> **`h1`** — square for square, the owner's rule, in code, fourteen months before it was
+> reported as missing.
+>
+> The reboot's premise was that ambiguity broke the first engine, and that was true. What it
+> missed is that **"contradictory" is not the same as "all wrong"**: five interpretations
+> disagreed, one of them was the intent, and reconciling by writing a fresh spec and deleting
+> every branch discarded it along with the other four. The spec was then marked CONFIRMED
+> without anyone enumerating a bishop's destinations and showing the owner the squares.
+>
+> Two habits in CLAUDE.md come straight from this and did not exist then: **probe before you
+> specify** (§5 now carries measured examples, not hand-derived ones) and **look at the
+> thing**. A third is proposed by it: when a reconciliation deletes competing
+> implementations, **record what each one computed** before deleting it. Deleting the code
+> was correct; deleting the evidence was not, and it cost a diff in git history to recover.
+
 ## 10. Legality (v2)
 
 > **Status: derived, not invented.** Everything here is either standard chess or
@@ -228,14 +393,13 @@ A square `s` is **attacked by color `c`** if any piece of color `c` could captur
   piece stands there, and regardless of whether the pawn could legally push. Pawn
   *pushes* are not attacks.
 - **Knight and king attack every square in their step set**, occupancy irrelevant.
-- **Sliders (B/R/Q) attack along their rays exactly as they move, portal included.**
-  A ray stops at the first occupied square, and that square is attacked. **A portal
-  ray attacks the far side of the seam**: a bishop on `b3` attacks `h4, g5, f6, e7,
-  d8` and `h2, g1` (§5.1), so a king on any of those squares is in check.
-- The portal preconditions from §4 apply unchanged to attacks: the edge square must
-  be reached with a clear path and be **empty**. An enemy king standing *on* the edge
-  square is attacked as an ordinary capture that stops the ray (§6) — there is no
-  portal past it.
+- **Sliders (B/R/Q) attack along their rays exactly as they move, crossing included.**
+  A ray stops at the first occupied square, and that square is attacked. **A ray attacks
+  through the seam**: a bishop on `b3` attacks `h5, g6, f7, e8` and `h1` (§5.1, revised
+  2026-10-03), so a king on any of those squares is in check.
+- **There are no crossing preconditions to apply** (§6). A ray stops at the first occupied
+  square and attacks it wherever it is; an enemy king standing on the `a`-file is attacked
+  as an ordinary capture and nothing continues past it.
 
 ### 10.2 Check
 
@@ -276,15 +440,25 @@ are now **specified and implemented** — see
 this spec; **insufficient material is not**, and is the one place where a chess rule had
 to be re-derived rather than inherited:
 
-- A bishop that may **capture** across the seam can checkmate a lone king by itself
-  (`Ka1, Bd4` vs `Kh8`), because its second diagonal re-enters through the seam and
-  covers the flight squares. So `K+B vs K` is a dead position only when the bishop's
-  capture right at the seam is off.
-- A bishop that may cross the seam by **either** right changes square colour when it does
-  (the hop preserves rank and swaps `f` for `7 - f`, and `0` and `7` differ in parity).
-  So `K+B vs K+B on one colour` stops being a closed material class, and is a dead
-  position only when the bishop cannot cross at all.
-- `K vs K` and `K+N vs K` are unchanged under every flag setting.
+- **[to be re-measured — M3]** A bishop that may **capture** across the seam can checkmate a
+  lone king by itself (`Ka1, Bd4` vs `Kh8`), because its second diagonal re-enters through
+  the seam and covers the flight squares. So `K+B vs K` is a dead position only when the
+  bishop's capture right at the seam is off.
+  → This was established by **exhaustive enumeration** under the old rank-preserving
+  crossing, where a bishop reached both square colours. Under §4 as revised the bishop is
+  colour-bound, so the mate is *expected* to disappear — and an expectation is precisely
+  what CLAUDE.md §0 says not to trust here. **Enumerate it again** (seconds of compute);
+  `draw-rules.ts` must follow the enumeration, not this paragraph.
+- **[to be re-measured — M3]** ~~A bishop that may cross the seam by **either** right
+  changes square colour when it does (the hop preserves rank and swaps `f` for `7 - f`, and
+  `0` and `7` differ in parity). So `K+B vs K+B on one colour` stops being a closed material
+  class.~~
+  → **False under the revised §4** — §7: a diagonal crossing preserves colour, because the
+  wrap changes rank as well as file. `K+B vs K+B on one colour` is expected to be a closed
+  material class again. Note that the struck-through reasoning was *correct about the old
+  rule*: it is the rule that moved, not the arithmetic.
+- `K vs K` and `K+N vs K` are unchanged under every flag setting — and unaffected by the
+  2026-10-03 revision, since neither involves a slider.
 
 Checkmate is decided **before** any draw: a mate on the hundredth halfmove is a mate.
 
@@ -303,19 +477,29 @@ Notation for check/mate (`+` / `#`) still depends on §8.5.
 > **Status: CONFIRMED by the owner (2026-07-30).** Chosen from explicit options:
 > the knight crosses by *L measured across the seam*, and king and pawn cross too.
 
-### 11.1 Why this is not the same crossing as §4
+### 11.1 This is the same crossing as §4 — revised 2026-10-03
 
-A slider **passes through** the seam in the middle of a ray, so §4 gives it a *free*
-horizontal hop — `a4 → h4`, rank unchanged — and the ray then continues. The rank is
-untouched by the crossing because the crossing is transit, not a step.
+A stepper crosses by **wrapping the file of its landing square**, keeping the rank its own
+move dictates. Since 2026-10-03 that is also exactly what a slider does, one step at a time
+(§4). **This spec has one crossing rule**, and §4 and §11 are the same sentence applied to
+a ray and to a jump.
 
-A stepper has no transit. It jumps from one square to another, and there is nothing
-for a "free hop" to attach to. So a stepper crosses by **wrapping the file of its
-landing square**, keeping the rank its own move dictates.
-
-**Do not generalize one rule to the other.** They agree wherever the movement is
-purely horizontal (a king stepping `a4 → h4` matches a rook's `a4 → h4`) and diverge
-on diagonals, deliberately — see §11.5.
+> ~~"**Why this is not the same crossing as §4.** A slider **passes through** the seam in
+> the middle of a ray, so §4 gives it a *free* horizontal hop — `a4 → h4`, rank unchanged —
+> and the ray then continues. The rank is untouched by the crossing because the crossing is
+> transit, not a step. A stepper has no transit… **Do not generalize one rule to the
+> other.** They agree wherever the movement is purely horizontal and diverge on diagonals,
+> deliberately."~~
+>
+> **Superseded 2026-10-03.** The divergence was the bug, and this section is kept because
+> it is the most useful thing in the file for a reader who wants to know how that happens.
+> It is not a careless passage: it is careful, confident, and built on a distinction —
+> *transit is not a step* — invented to justify a behaviour that already existed in code.
+> CLAUDE.md §0 describes a spec being written too late; this is the same failure happening
+> **after** the spec, where an implementation detail is promoted to a principle and the
+> principle then forbids anyone from noticing. The instruction "do not generalize one rule
+> to the other" is the tell. A rule that needs a prohibition to keep it from collapsing into
+> a simpler one usually should collapse.
 
 ### 11.2 The rule
 
@@ -366,12 +550,21 @@ once. The §4.3 cap holds here for free.
 **Black pawn `h5`:**
 - Push: `h4`. Captures: `g4` (standard), **`a4`** (mirror).
 
-### 11.5 Consequence worth stating plainly
+### 11.5 Consequence worth stating plainly — revised 2026-10-03
 
 A **king** on `a4` stepping north-west lands on `h5`. A **bishop** on `a4` moving
-north-west emerges on `h4` and continues to `g5` — it never lands on `h5`. Both are
-correct under their own rule. This is the visible edge of §11.1 and is intentional,
-not an inconsistency to "fix".
+north-west lands on `h5` too, and continues `g6, f7, e8`. **They agree** — as do all six
+pieces, because there is one crossing and each piece applies it to the move it already had.
+
+> ~~"A **bishop** on `a4` moving north-west emerges on `h4` and continues to `g5` — it never
+> lands on `h5`. Both are correct under their own rule. This is the visible edge of §11.1
+> and is intentional, not an inconsistency to 'fix'."~~
+>
+> **Superseded 2026-10-03.** It was an inconsistency, and the quotation marks around "fix"
+> are the most expensive punctuation in this repository: a player found the divergence in an
+> afternoon, having never read the spec. **What a spec calls intentional, a user calls a
+> bug** — and when the two disagree about a rule the user can see on the board, the spec is
+> the one that has to move.
 
 ### 11.6 Interaction with the rest of the spec
 
@@ -427,7 +620,9 @@ Each piece has **two independent portal rights**:
 - **quiet** — may it move across the seam onto an **empty** square?
 - **capture** — may it **capture** across the seam?
 
-Both crossings are covered: slider transit (§4) and stepper wrap (§11).
+Every crossing is covered — which since 2026-10-03 is a single rule, the file wrap, applied
+to a slider's ray (§4) and to a stepper's jump (§11). ~~"Both crossings: slider transit (§4)
+and stepper wrap (§11)."~~
 
 ### 12.2 Attack follows capture
 
@@ -481,17 +676,26 @@ unchanged. Narrower modes are opened for study, not adopted by fiat.
 
 ### 12.6 Worked examples
 
-A **bishop on `b3`, quiet on / capture off**, with a black rook on `h4`:
+A **bishop on `b3`** whose north-west ray is `a4` **|** `h5, g6, f7, e8` (§5.1), with a
+black rook on **`e8`** — the far end of that ray
+*(squares revised 2026-10-03 for §4's crossing; the rule being illustrated is unchanged)*:
 
-- `h4, g5, f6, e7, d8` and `h2, g1` remain *quiet* destinations where empty.
-- `h4` is **not** offered — it is occupied by an enemy, and capture is off.
-- A black king on `g1` is **not** in check.
+**Quiet on / capture off:**
+- `h5, g6, f7` are offered — empty squares past the crossing.
+- `e8` is **not** offered: it holds an enemy, and capture is off.
+- A black king on `e8` is **not** in check.
 
-The same bishop, **quiet off / capture on**:
+**Quiet off / capture on:**
+- `h5, g6, f7` are **not** offered — empty, and quiet movement is off.
+- `e8` **is** offered, as a capture.
+- A black king on `e8` **is** in check.
 
-- Empty far-side squares are **not** offered.
-- `h4` **is** offered, as a capture.
-- A black king on `g1` **is** in check.
+> The old version of this example put the enemy on the first square past the seam and still
+> listed the squares behind it as destinations — which the ray cannot reach, because it stops
+> at the occupied square. The rule it illustrates was right; the position was not. Picking
+> the ray's **far end** for the enemy is what makes the two modes differ in exactly one
+> square. (See CLAUDE.md: *"when a test goes red, suspect the fixture first"* — the same
+> applies to a worked example, which is a fixture nobody runs.)
 
 ### 12.7 The invariant this creates
 
@@ -530,10 +734,16 @@ wrap (§11.2), so a White pawn on `a7` may capture onto `h8`, and one on `h7` on
 Both promote. This follows from §11.2 with no new clause; it is called out only because
 it is startling to see.
 
-> **Consequence worth stating.** Promoting to a Bishop is a real choice here rather than a
+> ~~**Consequence worth stating.** Promoting to a Bishop is a real choice here rather than a
 > curiosity. A Bishop that may capture across the seam is **mating material on its own**
 > (see [`draw-rules.md`](./draw-rules.md)), so under-promotion to a Bishop can win a game
-> that under-promotion to a Knight cannot.
+> that under-promotion to a Knight cannot.~~
+>
+> **Superseded 2026-10-03.** The lone-bishop mate went away with the crossing revision
+> (§10.4, re-enumerated), so under-promotion to a Bishop is the curiosity it is in chess
+> again. What survives is the geometry: the new Bishop attacks the far side of the board
+> immediately — from `b8` it covers `a7 | h6, g5, f4, e3, d2, c1` — which is still a reason
+> to look at it before promoting on autopilot.
 
 ### 13.2 En passant
 

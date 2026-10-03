@@ -35,18 +35,20 @@ test.describe('mirror-chess: legality (spec §10)', () => {
   })
 
   test('§10.1 check through the seam restricts the king and is announced', async ({ page }) => {
-    // The bishop on b3 portals via a2 → h2 → g1; no standard diagonal reaches g1.
-    await page.goto(urlForSpec('w:Bb3; b:Kg1', 'black'))
+    // The bishop on b3 runs a4 | h5, g6, f7, e8 (spec §5.1 as revised), so it checks a
+    // king on g6 with no standard diagonal reaching it.
+    await page.goto(urlForSpec('w:Bb3; b:Kg6', 'black'))
 
     await expect(page.getByTestId(GAME_STATUS_TESTID)).toHaveText('Turn: black — check')
 
-    await page.getByTestId(squareTestId('g1')).click()
+    await page.getByTestId(squareTestId('g6')).click()
 
-    for (const sq of ['f1', 'h1', 'f2', 'g2']) {
+    for (const sq of ['f5', 'f6', 'g5', 'g7', 'h6', 'h7']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(1)
     }
-    // h2 lies on the portal ray.
-    await expect(page.getByTestId(hintTestId('h2'))).toHaveCount(0)
+    // h5 and f7 are the ray's own squares either side of the king.
+    await expect(page.getByTestId(hintTestId('h5'))).toHaveCount(0)
+    await expect(page.getByTestId(hintTestId('f7'))).toHaveCount(0)
   })
 
   test('§10.4 checkmate is announced and no move can be made', async ({ page }) => {

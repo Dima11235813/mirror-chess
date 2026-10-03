@@ -38,38 +38,39 @@ describe('bishop: regular moves and captures', () => {
 })
 
 describe('bishop: mirror portal', () => {
-  it('Bc1 portals left through a3 and right through h6 (spec §5.2)', () => {
+  it('Bc1 crosses both seams, continuing each diagonal (spec §5.2)', () => {
     const s = fromPiecesSpec('w:Bc1', 'white')
 
-    expect(mirrorDestinations(s, 'c1')).toEqual(
-      sorted(['h3', 'g4', 'f5', 'e6', 'd7', 'c8', 'a6', 'b7']),
-    )
+    // NW: b2, a3 | h4, g5, f6, e7, d8   —   NE: d2, e3, f4, g5, h6 | a7, b8
+    // g5 is on both rays, so its crossing copy dedupes against the standard one.
+    expect(mirrorDestinations(s, 'c1')).toEqual(sorted(['h4', 'f6', 'e7', 'd8', 'a7', 'b8']))
   })
 
-  it('Bc1 can capture an enemy on the far side of a seam', () => {
-    // The NE ray reaches the h-file at h6 and re-enters at a6, where the knight sits.
-    const s = fromPiecesSpec('w:Bc1; b:Na6', 'white')
+  it('Bc1 can capture an enemy past the seam', () => {
+    // The NE ray runs d2, e3, f4, g5, h6 and wraps onto a7, where the knight sits.
+    const s = fromPiecesSpec('w:Bc1; b:Na7', 'white')
     const mirrors = mirrorDestinations(s, 'c1')
 
-    expect(mirrors).toContain('a6')
-    // The far-side walk stops on the capture, so b7 and c8 beyond it are unreachable.
-    expect(mirrors).not.toContain('b7')
+    expect(mirrors).toContain('a7')
+    // The walk stops on the capture, so b8 beyond it is unreachable.
+    expect(mirrors).not.toContain('b8')
   })
 
-  it('Bc1 cannot portal when a blocker sits on the ray before the seam', () => {
-    const s = fromPiecesSpec('w:Bc1,Ng5', 'white')
+  it('Bc1 cannot cross when a blocker sits on the ray before the seam', () => {
+    const s = fromPiecesSpec('w:Bc1,Nf4', 'white')
     const mirrors = mirrorDestinations(s, 'c1')
 
-    // The NE ray is blocked at g5, so the right-hand portal (a6,b7,c8) is gone;
-    // the NW ray still portals through a3.
-    expect(mirrors).not.toContain('a6')
-    expect(mirrors).not.toContain('b7')
-    expect(mirrors).toEqual(sorted(['h3', 'g4', 'f5', 'e6', 'd7', 'c8']))
+    // The NE ray stops at its own knight on f4, so a7 and b8 are gone. The NW ray still
+    // crosses — and g5 is now a crossing destination rather than a standard one, because
+    // the ray that used to reach it normally no longer gets there.
+    expect(mirrors).not.toContain('a7')
+    expect(mirrors).not.toContain('b8')
+    expect(mirrors).toEqual(sorted(['h4', 'g5', 'f6', 'e7', 'd8']))
   })
 
-  it('Bc1 cannot portal onto its own piece', () => {
-    const s = fromPiecesSpec('w:Bc1,Pa6', 'white')
+  it('Bc1 cannot cross onto its own piece', () => {
+    const s = fromPiecesSpec('w:Bc1,Pa7', 'white')
 
-    expect(mirrorDestinations(s, 'c1')).not.toContain('a6')
+    expect(mirrorDestinations(s, 'c1')).not.toContain('a7')
   })
 })

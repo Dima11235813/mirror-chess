@@ -14,7 +14,7 @@ import { reduceMove } from './reducer'
 import { isInCheck } from './attacks'
 import { legalMovesFor } from './moves'
 import { allLegalMoves } from './status'
-import { parseAlgebraic } from './coord'
+import { algebraic, parseAlgebraic } from './coord'
 import {
   FIFTY_MOVE_HALFMOVES,
   isFiftyMoveRule,
@@ -182,16 +182,22 @@ describe('insufficient material — the rule', () => {
     }
   })
 
-  it('a lone bishop is drawn in chess but NOT once it can capture through the seam', () => {
-    expect(isInsufficientMaterial(fromPiecesSpec('w:Ke1,Bc1; b:Ke8', 'white', RULES_STANDARD_CHESS))).toBe(true)
-    expect(isInsufficientMaterial(fromPiecesSpec('w:Ke1,Bc1; b:Ke8', 'white', RULES_ALL_ON))).toBe(false)
-    expect(isInsufficientMaterial(fromPiecesSpec('w:Ke1,Bc1; b:Ke8', 'white', RULES_SLIDERS_ONLY))).toBe(false)
+  it('a lone bishop is drawn under every ruleset, as it is in chess', () => {
+    // Inverted 2026-10-03. The seam no longer rescues a lone bishop, because it no longer
+    // gives it the other square colour — see the enumeration below, which is the proof.
+    for (const rules of [RULES_STANDARD_CHESS, RULES_ALL_ON, RULES_SLIDERS_ONLY]) {
+      expect(isInsufficientMaterial(fromPiecesSpec('w:Ke1,Bc1; b:Ke8', 'white', rules))).toBe(true)
+    }
   })
 
-  it('same-coloured bishops are drawn in chess but not when a bishop can cross', () => {
+  it('same-coloured bishops are drawn under every ruleset, as they are in chess', () => {
     const sameColour = 'w:Ke1,Bc1; b:Ke8,Bf8' // c1 and f8 are both dark
-    expect(isInsufficientMaterial(fromPiecesSpec(sameColour, 'white', RULES_STANDARD_CHESS))).toBe(true)
-    expect(isInsufficientMaterial(fromPiecesSpec(sameColour, 'white', RULES_ALL_ON))).toBe(false)
+    for (const rules of [RULES_STANDARD_CHESS, RULES_ALL_ON, RULES_SLIDERS_ONLY]) {
+      expect(isInsufficientMaterial(fromPiecesSpec(sameColour, 'white', rules))).toBe(true)
+    }
+    // Opposite colours still play on — the class the rule actually turns on.
+    expect(isInsufficientMaterial(fromPiecesSpec('w:Ke1,Bc1; b:Ke8,Bg8', 'white', RULES_ALL_ON)))
+      .toBe(false)
   })
 
   it('opposite-coloured bishops are never insufficient', () => {
@@ -215,15 +221,20 @@ describe('insufficient material — the rule', () => {
     }
   })
 
-  it('the headline mirror mate: king and bishop alone deliver checkmate', () => {
-    // Bd4 checks along d4–h8. Its other diagonal runs c5, b6, a7, steps through the seam
-    // onto h7 and continues to g8 — covering both flight squares. This position is why
-    // a lone bishop is no longer insufficient material.
+  it('the former headline mate is only a check now — the bishop cannot reach the flights', () => {
+    // Kept, and inverted, because it is the clearest single position for what the
+    // 2026-10-03 crossing changed. Bd4 still checks along d4–h8. Its other diagonal used
+    // to hop the seam at a7 onto h7 and continue to g8, covering both flight squares;
+    // now it runs c5, b6, a7 | h8 — the king's own square — while g8 and h7 are light,
+    // which a dark bishop can never attack (spec §7). The king walks out.
     const s = fromPiecesSpec('w:Ka1,Bd4; b:Kh8', 'black', RULES_ALL_ON)
 
     expect(isInCheck(s, 'black')).toBe(true)
-    expect(allLegalMoves(s, 'black')).toHaveLength(0)
-    expect(isInsufficientMaterial(s)).toBe(false)
+    // Three flights, and the first of them is the point: the *king* still crosses the
+    // seam (spec §11), so h8 escapes to a8 as well as to g8 and h7.
+    expect(allLegalMoves(s, 'black').map(m => algebraic(m.to)).sort())
+      .toEqual(['a8', 'g8', 'h7'])
+    expect(isInsufficientMaterial(s)).toBe(true)
   })
 })
 
@@ -380,17 +391,23 @@ describe('insufficient material — the enumeration that proves it', () => {
     }
   }, 120_000)
 
-  it('K+B vs K: mate exists exactly when the bishop may capture through the seam', () => {
+  it('K+B vs K: no mate exists under any of the 16 bishop/king flag settings', () => {
+    // **Re-measured 2026-10-03.** This test used to assert `mate !== null` exactly when
+    // the bishop could capture across the seam, and under the crossing of the time it was
+    // right: a crossing flipped square colour, so a lone bishop reached all 64 squares and
+    // could mate. The revised crossing preserves colour, and re-running the *same*
+    // enumeration finds no mate anywhere. Nothing about the enumeration changed — only
+    // its answer, which is the whole reason this is settled by exhaustion and not argument.
     for (const [bishopLabel, bishop] of MODES) {
       for (const [kingLabel, king] of MODES) {
         const rules = ruleSetFrom({ B: bishop, K: king })
         const mate = findAnyMate(rules, [piece('K', 'white'), piece('B', 'white'), piece('K', 'black')])
         const label = `B=${bishopLabel} K=${kingLabel}`
 
-        expect(mate !== null, `${label}: mate ${mate ?? 'absent'}`).toBe(bishop.capture)
-        // ...which is exactly the gate the rule uses.
+        expect(mate, `${label}: unexpected mate ${mate ?? ''}`).toBeNull()
+        // ...so the rule is unconditional, and identical to chess.
         const position = fromPiecesSpec('w:Ke1,Bc1; b:Ke8', 'white', rules)
-        expect(isInsufficientMaterial(position), label).toBe(!bishop.capture)
+        expect(isInsufficientMaterial(position), label).toBe(true)
       }
     }
   }, 120_000)
@@ -399,35 +416,39 @@ describe('insufficient material — the enumeration that proves it', () => {
     for (const [, bishop] of MODES) {
       const rules = ruleSetFrom({ B: bishop })
       const mate = findAnyMate(rules, [piece('K', 'white'), piece('B', 'black'), piece('K', 'black')])
-      expect(mate !== null).toBe(bishop.capture)
+      expect(mate).toBeNull()
     }
   }, 60_000)
 
-  it('K+B vs K+B on one colour: mate exists exactly when a bishop may capture across', () => {
-    // The *position* class is decided by the capture right, as row three is. The rule
-    // nonetheless gates this row on the wider `portalEnabled`, because a bishop with only
-    // the quiet right can hop the seam and change square colour — at which point the
-    // material is no longer "same colour" and the class this enumeration covers no longer
-    // describes the game. The next test pins that distinction down.
+  it('K+B vs K+B on one colour: a closed class again, with no mate in it', () => {
+    // **Re-measured 2026-10-03**, and the stronger of the two reversals: this row used to
+    // need the *wider* `portalEnabled` gate, because a bishop changed square colour merely
+    // by arriving on the far side, so "same colour" stopped describing the material at
+    // all. A crossing now preserves colour, the class is closed, and the enumeration finds
+    // no mate under any flag setting.
     for (const [label, rules] of flagMatrix('B', 'K')) {
-      const bishopCaptures = rules.portal.B.capture
       const mate = findSameColourBishopMate(rules)
-      expect(mate !== null, `${label}: mate ${mate ?? 'absent'}`).toBe(bishopCaptures)
+      expect(mate, `${label}: unexpected mate ${mate ?? ''}`).toBeNull()
     }
   }, 300_000)
 
-  it('a quiet-only bishop still changes square colour, which is why the gate is wider', () => {
-    // Bc1 is dark. Crossing the seam preserves rank and swaps file f for 7-f, and since
-    // 0 and 7 differ in parity the square colour flips. Two same-coloured bishops can
-    // therefore become opposite-coloured, and opposite-coloured bishops mate even in
-    // chess — so the position was never dead.
+  it('a bishop cannot change square colour by crossing, which is what closes the class', () => {
+    // The inverse of the test that used to live here. `b2` is dark; under the old crossing
+    // `Bb2` reached `h1` — light — so two same-coloured bishops could become
+    // opposite-coloured. The ray now continues the diagonal, so `b2` reaches `a3 | h4`,
+    // all dark, and `h1` is not available to it at all.
     const rules = ruleSetFrom({ B: { quiet: true, capture: false } })
-    const before = fromPiecesSpec('w:Ke1,Bb2; b:Ke8,Bg7', 'white', rules)
-    expect(isInsufficientMaterial(before)).toBe(false)
+    const position = fromPiecesSpec('w:Ke1,Bb2; b:Ke8,Bg7', 'white', rules)
+    const squareParity = (square: string): number =>
+      parityOf(parseAlgebraic(square).r * 8 + parseAlgebraic(square).f)
 
-    const crossed = reduceMove(before, move('b2', 'h1'))
-    expect(crossed).not.toBe(before)
-    expect(parityOf(parseAlgebraic('b2').r * 8 + parseAlgebraic('b2').f))
-      .not.toBe(parityOf(parseAlgebraic('h1').r * 8 + parseAlgebraic('h1').f))
+    const reachable = legalMovesFor(position, parseAlgebraic('b2')).map(m => algebraic(m.to))
+    expect(reachable).not.toContain('h1')
+    expect(reachable.length).toBeGreaterThan(0)
+    for (const square of reachable) {
+      expect(squareParity(square), square).toBe(squareParity('b2'))
+    }
+    // Two bishops on one colour, and therefore dead material — as in chess.
+    expect(isInsufficientMaterial(position)).toBe(true)
   }, 30_000)
 })

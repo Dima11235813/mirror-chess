@@ -91,12 +91,13 @@ describe('PuzzleScreen', () => {
     // The first version of this screen left the piece where it started while the reveal
     // described a route it never took. Every test still passed; a screenshot caught it.
     render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
-    expect(screen.getByTestId(squareTestId('c4')).textContent).toContain('♞')
+    expect(screen.getByTestId(squareTestId('a1')).textContent).toContain('♗')
+    expect(screen.getByTestId(squareTestId('d6')).textContent?.trim()).toBe('')
 
     play(SEAM_PUZZLE.solution.from, SEAM_PUZZLE.solution.to)
 
-    expect(screen.getByTestId(squareTestId('c4')).textContent).toContain('♗')
-    expect(screen.getByTestId(squareTestId('f8')).textContent).not.toContain('♗')
+    expect(screen.getByTestId(squareTestId('d6')).textContent).toContain('♗')
+    expect(screen.getByTestId(squareTestId('a1')).textContent).not.toContain('♗')
   })
 
   it('resets the board when moving on, rather than carrying the last answer over', () => {
@@ -105,9 +106,12 @@ describe('PuzzleScreen', () => {
     play(SEAM_PUZZLE.solution.from, SEAM_PUZZLE.solution.to)
     fireEvent.click(screen.getByTestId(PUZZLE_NEXT_TESTID))
 
-    // Puzzle 2 has its own position: a white bishop on f1, and nothing on c4.
-    expect(screen.getByTestId(squareTestId('f1')).textContent).toContain('♗')
-    expect(screen.getByTestId(squareTestId('c4')).textContent?.trim()).toBe('')
+    // Puzzle 2 has its own position: a white queen on d2, and nothing on d6 — which is
+    // exactly where puzzle 1's answer left a bishop, so a carried-over board would fail.
+    // (Not a rank-1 square: the board draws its file labels inside those, so `a1` reads
+    // as "A1" even when empty — the cosmetic overlap logged in `quality/mobile-layout.md`.)
+    expect(screen.getByTestId(squareTestId('d2')).textContent).toContain('♕')
+    expect(screen.getByTestId(squareTestId('d6')).textContent?.trim()).toBe('')
   })
 
   it('reveals the seam route and the claim that makes the puzzle novel', () => {
@@ -116,32 +120,34 @@ describe('PuzzleScreen', () => {
     play(SEAM_PUZZLE.solution.from, SEAM_PUZZLE.solution.to)
     const reveal = screen.getByTestId(PUZZLE_REVEAL_TESTID)
 
-    expect(reveal.textContent).toContain('f8-c4*')
+    expect(reveal.textContent).toContain('a1-d6*')
     expect(reveal.textContent).toContain('crosses the seam')
     expect(reveal.textContent).toContain('Impossible in chess')
-    // The journey, not just the destination: the bishop leaves via h6 and returns on the
-    // far side. This is what a player cannot see for themselves.
-    expect(reveal.textContent).toContain('h6')
-    expect(reveal.textContent).toContain('a6')
+    // The journey, not just the destination: the bishop's ray leaves the board at a1 and
+    // re-enters on h2 before running up to d6. This is what a player cannot see for
+    // themselves — and the squares it names are the ones the 2026-10-03 revision moved.
+    expect(reveal.textContent).toContain('h2')
+    expect(reveal.textContent).toContain('e5')
   })
 
   it('refuses a wrong move, keeps the position, and invites another try', () => {
     render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
 
-    // A legal bishop move that does not force mate.
-    play('c3', 'd4')
+    // A legal rook move that does not force mate. (The puzzle's mate in two is unique and
+    // it has no mate in one, so any other legal move is a wrong answer by construction.)
+    play('g7', 'g8')
 
     expect(screen.getByTestId(PUZZLE_VERDICT_TESTID).textContent).toContain('Not the move')
     expect(screen.queryByTestId(PUZZLE_REVEAL_TESTID)).toBeNull()
     // The board did not move on: the piece is still where the puzzle put it.
-    expect(screen.getByTestId(squareTestId('c3')).textContent).toContain('♗')
-    expect(screen.getByTestId(squareTestId('d4')).textContent).not.toContain('♗')
+    expect(screen.getByTestId(squareTestId('g7')).textContent).toContain('♖')
+    expect(screen.getByTestId(squareTestId('g8')).textContent).not.toContain('♖')
   })
 
   it('lets a wrong guess be followed by the right one', () => {
     render(<PuzzleScreen puzzles={TWO_PUZZLES} />)
 
-    play('c3', 'd4')
+    play('g7', 'g8')
     play(SEAM_PUZZLE.solution.from, SEAM_PUZZLE.solution.to)
 
     expect(screen.getByTestId(PUZZLE_VERDICT_TESTID).textContent).toContain('Solved')

@@ -15,7 +15,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { TOKEN_ALL_ON } from '../src/game/rules'
-import { DEFAULT_MATERIAL, materialLabel, minePuzzles } from '../src/puzzles/mine'
+import { DEFAULT_MATERIAL, emptyStats, materialLabel, minePuzzles } from '../src/puzzles/mine'
 import { PUZZLE_SCHEMA, type Puzzle, type PuzzleGoal, type PuzzleSet } from '../src/puzzles/types'
 
 function arg(name: string, fallback: string): string {
@@ -27,7 +27,7 @@ const perSet = Number(arg('per-set', '400'))
 /** Mate in 3 costs ~15x more per candidate (measured), so it gets its own, smaller budget. */
 const perSet3 = Number(arg('per-set-3', String(Math.max(1, Math.round(perSet / 2)))))
 const seed = Number(arg('seed', '20260925'))
-const out = arg('out', 'puzzles/puzzles.v2.json')
+const out = arg('out', 'puzzles/puzzles.v3.json')
 const goals = arg('goals', 'both')
 
 if (!Number.isInteger(perSet) || perSet <= 0) throw new Error(`--per-set must be a positive integer, got ${perSet}`)
@@ -40,7 +40,7 @@ console.log(`mining ${wanted.join(' + ')}: ${DEFAULT_MATERIAL.length} material s
 const startedAt = Date.now()
 
 const puzzles: Puzzle[] = []
-const stats = { candidates: 0, illegalOrOver: 0, notUniqueMate: 0, fasterMateExists: 0, keptAlsoMateInChess: 0, kept: 0 }
+const stats = emptyStats()
 const seen = new Set<string>()
 
 for (const goal of wanted) {
@@ -74,6 +74,7 @@ const pct = (n: number) => `${((100 * n) / Math.max(1, stats.candidates)).toFixe
 console.log(`
 candidates          ${stats.candidates}
   already over      ${stats.illegalOrOver} (${pct(stats.illegalOrOver)})
+  illegal position  ${stats.blackAlreadyInCheck} (${pct(stats.blackAlreadyInCheck)}) — black already in check
   no unique mate    ${stats.notUniqueMate} (${pct(stats.notUniqueMate)})
   faster mate       ${stats.fasterMateExists} (${pct(stats.fasterMateExists)})
   kept              ${stats.kept} (${pct(stats.kept)})

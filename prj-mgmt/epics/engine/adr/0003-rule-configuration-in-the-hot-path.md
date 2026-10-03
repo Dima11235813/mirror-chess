@@ -49,7 +49,7 @@ collapses most of the difficulty:
 > behaviour — including "an enemy on the edge square is a normal capture with no portal
 > past it", which falls out for free.
 
-So the bishop on `b3` gets the path `[a4, h4, g5, f6, e7, d8]` for its north-west
+So the bishop on `b3` gets the path `[a4, h5, g6, f7, e8]` for its north-west
 direction, and the generator walks it exactly as a chess generator walks `[a4]`. Paths
 terminate before revisiting the origin, which is where the "a rank ray cannot loop" rule
 is enforced — once, at construction, rather than on every iteration.

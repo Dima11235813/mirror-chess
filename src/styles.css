@@ -97,7 +97,8 @@ body, html, #root {
   border: 0;
 }
 
-.glyph { pointer-events: none; }
+/* The piece sits above the coordinate labels drawn inside the edge squares. */
+.glyph { pointer-events: none; position: relative; z-index: 1; }
 
 .hint { 
   position: absolute; 
@@ -281,17 +282,30 @@ body, html, #root {
   color: var(--text-primary);
 }
 
-/* Coordinate labels */
-.coordLabel { 
-  position: absolute; 
-  color: var(--text-secondary); 
-  font-size: 12px; 
-  font-weight: 600; 
-  pointer-events: none; 
+/*
+ * Coordinate labels, drawn **inside** the edge squares.
+ *
+ * They sit under the piece glyph, so a piece on rank 1 or the a-file used to be drawn on
+ * top of a letter at full strength — on a phone the bishop on `a1` of a puzzle was genuinely
+ * hard to make out, which is a label obscuring the thing the label is there to help you find
+ * (`prj-mgmt/epics/quality/mobile-layout.md` §6).
+ *
+ * The fix is to make them recede rather than to move them: a lower opacity and a `z-index`
+ * below the piece. Keeping them inside the squares is what lets the board stay square and
+ * centred at 320px, which is the constraint that produced this layout in the first place.
+ */
+.coordLabel {
+  position: absolute;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.55;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.coordLabel.file { bottom: 4px; right: 6px; }
-.coordLabel.rank { top: 4px; left: 6px; }
+.coordLabel.file { bottom: 2px; right: 4px; }
+.coordLabel.rank { top: 2px; left: 4px; }
 
 /* Theme toggle styling */
 /*

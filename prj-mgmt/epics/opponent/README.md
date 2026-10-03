@@ -58,7 +58,10 @@ Three consequences, each of which breaks a load-bearing piece of every chess eng
 
 2. **Bishops are not colour-bound.** Every seam hop flips square colour — the parity
    of `f + r` changes by `7 - 2f`, which is always odd. Verified by flood fill: **a
-   lone bishop starting on `a4` can reach all 64 squares.** So the bishop-pair bonus
+   lone bishop starting on `a4` can reach all 64 squares.** ~~So the bishop-pair bonus~~
+   **⚠️ Reversed 2026-10-03** — a crossing now preserves square colour, so a bishop reaches
+   32 squares like any other, and the reasoning below holds only for the old rule
+   (`../rules/diagonal-crossing.md`). So the bishop-pair bonus
    is close to meaningless, opposite-coloured-bishop endgames are not drawish, and
    `K+B vs K+B` insufficient-material logic must be re-derived (already flagged in
    [`../rules/draw-rules.md`](../rules/draw-rules.md) — now confirmed rather than

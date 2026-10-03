@@ -1,8 +1,8 @@
 import type { Color, Coord, Move, MovePosition, Piece, Position, PromotionKind } from './types'
-import { toIndex, insideBoard, mirrorFile, sameCoord } from './coord'
+import { toIndex, insideBoard, sameCoord } from './coord'
 import { applyMoveToBoard } from './board'
 import { isInCheck, isSquareAttacked } from './attacks'
-import { portalCaptures, portalEnabled, portalQuiet } from './rules'
+import { portalCaptures, portalQuiet } from './rules'
 import {
   PROMOTION_KINDS,
   makeMove,
@@ -16,8 +16,8 @@ import {
   KNIGHT_DELTAS,
   QUEEN_DIRECTIONS,
   ROOK_DIRECTIONS,
-  portalMouth,
   stepAcrossSeam,
+  walkRay,
   type Direction,
 } from './rays'
 
@@ -112,30 +112,19 @@ export function pseudoLegalMovesFor(position: MovePosition, from: Coord): Move[]
       pushAll(acc, castlingMoves(position, from, piece))
       break
     case 'B':
-      pushAll(acc, sliderMoves(position, from, piece, BISHOP_DIRECTIONS))
+      pushAll(acc, slideMoves(position, from, piece, BISHOP_DIRECTIONS))
       break
     case 'R':
-      pushAll(acc, sliderMoves(position, from, piece, ROOK_DIRECTIONS))
+      pushAll(acc, slideMoves(position, from, piece, ROOK_DIRECTIONS))
       break
     case 'Q':
-      pushAll(acc, sliderMoves(position, from, piece, QUEEN_DIRECTIONS))
+      pushAll(acc, slideMoves(position, from, piece, QUEEN_DIRECTIONS))
       break
   }
   return dedupeMoves(acc)
 }
 
 function pushAll<T>(out: T[], xs: readonly T[]): void { for (const x of xs) out.push(x) }
-
-/**
- * A slider's moves: its ordinary rays, plus the portal extension when this piece crosses
- * the seam at all. Keeping the check here rather than in each `case` is what stops
- * bishop, rook and queen from drifting apart.
- */
-function sliderMoves(position: Position, from: Coord, p: Piece, dirs: readonly Direction[]): Move[] {
-  const res = slideMoves(position, from, p, dirs)
-  if (portalEnabled(position.rules, p.kind)) pushAll(res, portalMoves(position, from, p, dirs))
-  return res
-}
 
 /**
  * Pawn pushes, double pushes, diagonal captures, promotion and en passant (§13.1, §13.2).
@@ -276,65 +265,31 @@ function castlingMoves(position: MovePosition, from: Coord, king: Piece): Move[]
   return res
 }
 
-/** Standard sliding along each direction: stop at the first piece, capture if enemy. */
-function slideMoves(position: Position, from: Coord, p: Piece, dirs: readonly Direction[]): Move[] {
-  const res: Move[] = []
-  for (const [df, dr] of dirs) {
-    let f = from.f + df
-    let r = from.r + dr
-    while (insideBoard({ f, r })) {
-      const to: Coord = { f, r }
-      const target = position.board[toIndex(to)]
-      if (!target) res.push(makeMove(from, to, 'quiet'))
-      else {
-        if (target.color !== p.color) res.push(makeMove(from, to, 'capture'))
-        break
-      }
-      f += df
-      r += dr
-    }
-  }
-  return res
-}
-
 /**
- * The mirror portal (spec §4): for every ray with a horizontal component that
- * reaches an empty edge square with a clear path, hop across the seam — same rank —
- * and keep sliding in the same direction.
+ * A slider's moves: walk each direction, stop at the first piece, capture it if it is an
+ * enemy. The walk wraps the seam when this piece may cross (spec §4, `walkRay`).
  *
- * @returns Destinations on the far side of the seam, each marked `crossedSeam`.
- *   At most one seam crossing per ray, and the origin square terminates the far-side
- *   walk so a rank ray can never loop.
+ * Collapsed from two walks into one on 2026-10-03, when the crossing became a step that
+ * *continues* the ray rather than a hop onto the mirrored file. Bishop, rook and queen
+ * cannot drift apart here for the simplest possible reason: there is one code path.
  */
-function portalMoves(position: Position, from: Coord, p: Piece, dirs: readonly Direction[]): Move[] {
-  const res: Move[] = []
+function slideMoves(position: Position, from: Coord, p: Piece, dirs: readonly Direction[]): Move[] {
   const quietAcross = portalQuiet(position.rules, p.kind)
   const captureAcross = portalCaptures(position.rules, p.kind)
-  for (const [df, dr] of dirs) {
-    if (df === 0) continue // vertical rays never portal (spec §6)
-    const edge = portalMouth(position.board, from, df, dr)
-    if (!edge) continue
+  // The ray may wrap if *either* right is on; the rights then decide, square by square,
+  // what may be done there. Being unable to land somewhere does not stop a piece passing
+  // through it, so the walk is one question and the rights are another (spec §12.1).
+  const canCross = quietAcross || captureAcross
 
-    // The hop is horizontal only: rank is preserved (spec §4, "trap to avoid").
-    const entry = mirrorFile(edge)
-    let f = entry.f
-    let r = entry.r
-    while (insideBoard({ f, r })) {
-      const to: Coord = { f, r }
-      if (sameCoord(to, from)) break // the ray came back around to ourselves
+  const res: Move[] = []
+  for (const [df, dr] of dirs) {
+    for (const { to, crossed } of walkRay(position.board, from, df, dr, canCross)) {
       const target = position.board[toIndex(to)]
       if (!target) {
-        // An empty far-side square needs the quiet right; the ray walks on regardless,
-        // since being unable to *land* there does not stop the piece passing through.
-        if (quietAcross) res.push(makeMove(from, to, 'quiet', { crossedSeam: true }))
-      } else {
-        if (target.color !== p.color && captureAcross) {
-          res.push(makeMove(from, to, 'capture', { crossedSeam: true }))
-        }
-        break
+        if (!crossed || quietAcross) res.push(makeMove(from, to, 'quiet', { crossedSeam: crossed }))
+      } else if (target.color !== p.color && (!crossed || captureAcross)) {
+        res.push(makeMove(from, to, 'capture', { crossedSeam: crossed }))
       }
-      f += df
-      r += dr
     }
   }
   return res

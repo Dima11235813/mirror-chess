@@ -5,6 +5,7 @@ import { reduceMove } from '../game/reducer'
 import { allLegalMoves, gameStatus, isGameOver } from '../game/status'
 import { algebraic } from '../game/coord'
 import { RULES_STANDARD_CHESS, isRuleSetToken, rulesOf } from '../game/rules'
+import { isInCheck } from '../game/attacks'
 import { fastestMateIn, forcedMateMoves } from './mate'
 import { bandOf, measureDifficulty } from './difficulty'
 import { PUZZLE_SCHEMA } from './types'
@@ -21,7 +22,7 @@ import type { Puzzle, PuzzleSet } from './types'
  * proving one costs ~50 ms and the set is meant to grow. `PUZZLES_DEEP=1 npm run test`
  * proves every one of them — the same gate the deep perft counts use, for the same reason.
  */
-const SET_PATH = 'puzzles/puzzles.v2.json'
+const SET_PATH = 'puzzles/puzzles.v3.json'
 const DEEP = process.env.PUZZLES_DEEP === '1'
 const SAMPLE_EVERY = 5
 
@@ -53,6 +54,16 @@ describe('the committed puzzle set', () => {
       expect(p.solution.coordinate).toBe(`${p.solution.from}-${p.solution.to}${p.solution.crossedSeam ? '*' : ''}`)
       expect(ids.has(p.id)).toBe(false)
       ids.add(p.id)
+    }
+  })
+
+  it('never ships a position where the side not to move is already in check', () => {
+    // An illegal position is not a hard puzzle. Both earlier sets were about 42% these
+    // (`mine.ts`, `MineStats.blackAlreadyInCheck`), so this guards the artifact as well as
+    // the miner — a hand-edited file or an older miner would slip past the unit test.
+    for (const p of set.puzzles) {
+      const state = parseFen(p.fen, rulesOf(p.ruleset))
+      expect(isInCheck(state, 'black'), `${p.id} has black already in check: ${p.fen}`).toBe(false)
     }
   })
 

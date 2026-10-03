@@ -12,7 +12,7 @@ test.describe('mirror-chess: rule flags in the URL', () => {
 
     await page.getByTestId(squareTestId('b3')).click()
 
-    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(1)
+    await expect(page.getByTestId(hintTestId('h5'))).toHaveCount(1)
   })
 
   test('------ is ordinary chess: the same bishop stays on its own side', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('mirror-chess: rule flags in the URL', () => {
 
     // Ordinary diagonals remain; every seam crossing is gone.
     await expect(page.getByTestId(hintTestId('a4'))).toHaveCount(1)
-    for (const sq of ['h4', 'g5', 'f6', 'e7', 'd8', 'h2', 'g1']) {
+    for (const sq of ['h5', 'g6', 'e8', 'h1']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(0)
     }
   })
@@ -31,7 +31,7 @@ test.describe('mirror-chess: rule flags in the URL', () => {
     await page.goto(urlForSpec('w:Bb3,Na3', 'white', 'BRQ---'))
 
     await page.getByTestId(squareTestId('b3')).click()
-    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(1)
+    await expect(page.getByTestId(hintTestId('h5'))).toHaveCount(1)
 
     await page.getByTestId(squareTestId('a3')).click()
     // The knight's wrapped L-moves are switched off under this ruleset.
@@ -55,6 +55,6 @@ test.describe('mirror-chess: rule flags in the URL', () => {
 
     await page.getByTestId(squareTestId('b3')).click()
 
-    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(1)
+    await expect(page.getByTestId(hintTestId('h5'))).toHaveCount(1)
   })
 })

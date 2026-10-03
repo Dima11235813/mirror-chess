@@ -121,21 +121,21 @@ describe('§12 quiet and capture are separate powers', () => {
   it('a quiet-only bishop reaches empty far-side squares', () => {
     const rules = ruleSetFrom({ B: QUIET_ONLY })
 
-    expect(mirrorDestinations('w:Bb3', 'b3', rules))
-      .toEqual(['d8', 'e7', 'f6', 'g1', 'g5', 'h2', 'h4'])
+    // Spec §5.1 as revised: the ray continues, so these are b3's own light squares.
+    expect(mirrorDestinations('w:Bb3', 'b3', rules)).toEqual(['e8', 'g6', 'h1', 'h5'])
   })
 
   it('a quiet-only bishop cannot take what it can reach', () => {
     const rules = ruleSetFrom({ B: QUIET_ONLY })
 
-    // h4 is the portal mouth's first square and holds an enemy — reachable, not takeable.
-    expect(mirrorDestinations('w:Bb3; b:Rh4', 'b3', rules)).not.toContain('h4')
+    // h5 is the first square past the crossing and holds an enemy — reachable, not takeable.
+    expect(mirrorDestinations('w:Bb3; b:Rh5', 'b3', rules)).not.toContain('h5')
   })
 
   it('a capture-only bishop takes what it cannot otherwise reach', () => {
     const rules = ruleSetFrom({ B: CAPTURE_ONLY })
 
-    expect(mirrorDestinations('w:Bb3; b:Rh4', 'b3', rules)).toEqual(['h4'])
+    expect(mirrorDestinations('w:Bb3; b:Rh5', 'b3', rules)).toEqual(['h5'])
     // ...and offers nothing on an empty board, having no landing right.
     expect(mirrorDestinations('w:Bb3', 'b3', rules)).toEqual([])
   })
@@ -145,8 +145,8 @@ describe('§12 quiet and capture are separate powers', () => {
     const capture = ruleSetFrom({ B: CAPTURE_ONLY })
 
     // The same bishop, the same king, opposite verdicts.
-    expect(fromPiecesSpec('w:Bb3; b:Kg1', 'black', quiet).inCheck).toBe(false)
-    expect(fromPiecesSpec('w:Bb3; b:Kg1', 'black', capture).inCheck).toBe(true)
+    expect(fromPiecesSpec('w:Bb3; b:Kh1', 'black', quiet).inCheck).toBe(false)
+    expect(fromPiecesSpec('w:Bb3; b:Kh1', 'black', capture).inCheck).toBe(true)
   })
 
   it('§12.7 attack generation ignores the quiet right entirely', () => {
@@ -210,7 +210,7 @@ describe('a fully disabled piece removes moves and attacks together', () => {
 
   it('no piece gives check across the seam under standard chess', () => {
     // Each of these is check under the default rules; none is under `------`.
-    for (const spec of ['w:Bb3; b:Kg1', 'w:Na3; b:Kh5', 'w:Pa4; b:Kh5']) {
+    for (const spec of ['w:Bb3; b:Kh1', 'w:Na3; b:Kh5', 'w:Pa4; b:Kh5']) {
       expect(fromPiecesSpec(spec, 'black', RULES_STANDARD_CHESS).inCheck).toBe(false)
       expect(fromPiecesSpec(spec, 'black', RULES_ALL_ON).inCheck).toBe(true)
     }

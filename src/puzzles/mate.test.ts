@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { fromPiecesSpec } from '../game/setup'
 import { reduceMove } from '../game/reducer'
 import { allLegalMoves, gameStatus } from '../game/status'
+import { isInCheck } from '../game/attacks'
 import { algebraic } from '../game/coord'
 import { RULES_ALL_ON, RULES_STANDARD_CHESS, ruleSetOf } from '../game/rules'
 import { hasMateInOne, mateInTwoMoves, uniqueMateInTwo } from './mate'
@@ -89,33 +90,47 @@ describe('uniqueness', () => {
 })
 
 describe('the seam changes which mates exist at all', () => {
-  it('a lone bishop mates — and the same position is a dead draw in chess', () => {
-    // The draw-rules finding as a puzzle: K+B is mating material here
-    // (`prj-mgmt/epics/rules/draw-rules.md`). This is the marquee shape, so it is pinned.
-    const spec = 'w:Ka1,Bd4; b:Kh8'
+  it('a queen mates by covering a flight square through the seam', () => {
+    // Qa8–a1 is mate: the check arrives along an ordinary rank, and the seam takes away
+    // h2, the one flight square the white king does not cover — the queen's north-west
+    // diagonal wraps onto it. In chess there is no mate here at all.
+    //
+    // Replaced 2026-10-03. This test used to pin the marquee shape of the old crossing,
+    // `Ka1, Bd4 vs Kh8`, where a lone bishop mated because a crossing flipped its square
+    // colour. The revised crossing is colour-preserving, so that mate no longer exists and
+    // K+B is dead material again (`draw-rules.ts`). The *kind* of claim is unchanged: a
+    // mate the seam creates, pinned so a silent geometry change cannot pass.
+    const spec = 'w:Kf3,Qa8; b:Kg1'
 
     expect(hasMateInOne(at(spec, RULES_ALL_ON))).toBe(true)
-    expect(gameStatus(at(spec, RULES_STANDARD_CHESS))).toBe('draw-insufficient-material')
+    expect(gameStatus(at(spec, RULES_STANDARD_CHESS))).toBe('playing')
     expect(hasMateInOne(at(spec, RULES_STANDARD_CHESS))).toBe(false)
   })
 
-  it('...and it is the bishop\'s own flag that does it, not some other piece\'s', () => {
-    // Attack follows capture (§12.2): a bishop that cannot capture across cannot mate
-    // across. Switching the rook and queen on instead changes nothing.
-    const spec = 'w:Ka1,Bd4; b:Kh8'
+  it('...and it is the queen\'s own flag that does it, not some other piece\'s', () => {
+    // Attack follows capture (§12.2). Enumerated over all six single-flag rulesets: only
+    // Q gives the mate. The king's own crossing right does not help it defend h2, and no
+    // other piece is on the board.
+    const spec = 'w:Kf3,Qa8; b:Kg1'
 
-    expect(hasMateInOne(at(spec, ruleSetOf(['B'])))).toBe(true)
-    expect(hasMateInOne(at(spec, ruleSetOf(['R', 'Q'])))).toBe(false)
+    expect(hasMateInOne(at(spec, ruleSetOf(['Q'])))).toBe(true)
+    for (const flag of ['B', 'R', 'N', 'K', 'P'] as const) {
+      expect(hasMateInOne(at(spec, ruleSetOf([flag]))), `only ${flag}`).toBe(false)
+    }
   })
 
   it('a mate in two whose solution crosses the seam, and which chess cannot produce', () => {
-    // Mined 2026-09-25 and pinned: the kind of puzzle the whole exercise is for.
-    const spec = 'w:Ke6,Bd1,Bg8; b:Kf1,Nh8'
+    // Found 2026-10-03 under the revised crossing, and a better example than the one it
+    // replaces: the key move is the **king** stepping through the seam, `Ka4–h3`, which
+    // takes away the flight squares the queen does not cover. A puzzle whose answer is a
+    // king walking off one edge of the board and onto the other is exactly the kind of
+    // thing this library exists to contain.
+    const spec = 'w:Ka4,Qc5; b:Kh1'
     const mirror = at(spec, RULES_ALL_ON)
     const only = uniqueMateInTwo(mirror)
 
     expect(only).not.toBeNull()
-    expect(`${algebraic(only!.from)}${algebraic(only!.to)}`).toBe('g8c5')
+    expect(`${algebraic(only!.from)}${algebraic(only!.to)}`).toBe('a4h3')
     expect(only!.crossedSeam).toBe(true)
     // No faster mate, or the player's quicker answer would be marked wrong.
     expect(hasMateInOne(mirror)).toBe(false)
@@ -132,8 +147,12 @@ describe('what this solver does NOT decide', () => {
     // right — it answers exactly what it was asked — but a puzzle needs the extra filter,
     // and the engine's disagreement is what exposed it. Roughly a third of otherwise
     // usable candidates are removed by this.
-    const state = at('w:Ke4,Bc3,Be2; b:Ke1,Nc8', RULES_ALL_ON)
+    // Fixture replaced 2026-10-03 (the old one lost its mate with the crossing) and
+    // found the same way: by search, then checked for legality — the first two candidates
+    // the search produced had Black already in check, which is not a position.
+    const state = at('w:Kc1,Rg7,Rf3; b:Ke1', RULES_ALL_ON)
 
+    expect(isInCheck(state, 'black')).toBe(false)
     expect(uniqueMateInTwo(state)).not.toBeNull()
     expect(hasMateInOne(state)).toBe(true)
   })
@@ -152,10 +171,10 @@ describe('the engine agrees with the solver', () => {
   })
 
   it('and agrees on a seam mate, where it has no chess intuition to fall back on', () => {
-    const state = at('w:Ke6,Bd1,Bg8; b:Kf1,Nh8', RULES_ALL_ON)
+    const state = at('w:Ka4,Qc5; b:Kh1', RULES_ALL_ON)
     const found = search(state, { maxDepth: 3 as Depth })
 
     expect(movesToMate(found.score)).toBe(2)
-    expect(`${algebraic(found.move!.from)}${algebraic(found.move!.to)}`).toBe('g8c5')
+    expect(`${algebraic(found.move!.from)}${algebraic(found.move!.to)}`).toBe('a4h3')
   })
 })

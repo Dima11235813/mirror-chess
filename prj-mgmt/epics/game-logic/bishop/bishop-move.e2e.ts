@@ -17,7 +17,7 @@ test.describe('mirror-chess: bishop moves', () => {
     }
   })
 
-  test('Regular attack: Bc1 captures e3 and stops beyond (no f4,g5,h6)', async ({ page }) => {
+  test('Regular attack: Bc1 captures e3, and the seam reaches behind the blocker', async ({ page }) => {
     const spec = 'w:Bc1; b:Pe3'
     await page.goto(urlForSpec(spec, 'white'))
 
@@ -26,44 +26,49 @@ test.describe('mirror-chess: bishop moves', () => {
     for (const sq of ['d2', 'e3', 'b2', 'a3']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(1)
     }
-    for (const sq of ['f4', 'g5', 'h6', 'f1']) {
+    // The north-east ray stops on the capture, so f4 and h6 are gone.
+    for (const sq of ['f4', 'h6', 'f1']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(0)
     }
+    // But g5 is still offered — reached the *other* way, by the north-west ray crossing
+    // the seam at a3 and continuing h4, g5. Getting behind a blocker is the whole point of
+    // the seam, and under the old rank-preserving crossing this square was unreachable.
+    await expect(page.getByTestId(hintTestId('g5'))).toHaveCount(1)
   })
 
-  test('Mirror move: Bc1 portals left through a3 to h3,g4,f5,e6,d7,c8', async ({ page }) => {
+  test('Mirror move: Bc1 crosses left at a3 and continues h4,g5,f6,e7,d8', async ({ page }) => {
     const spec = 'w:Bc1'
     await page.goto(urlForSpec(spec, 'white'))
 
     await page.getByTestId(squareTestId('c1')).click()
 
-    for (const sq of ['h3', 'g4', 'f5', 'e6', 'd7', 'c8']) {
+    for (const sq of ['b2', 'a3', 'h4', 'g5', 'f6', 'e7', 'd8']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(1)
     }
-    // The hop preserves rank: leaving via a3 emerges on h3, never h4.
-    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(0)
+    // The crossing advances the rank, so the ray keeps c1's dark squares: h4, never h3.
+    await expect(page.getByTestId(hintTestId('h3'))).toHaveCount(0)
   })
 
-  test('Mirror move: Bc1 portals right through h6 to a6,b7', async ({ page }) => {
+  test('Mirror move: Bc1 crosses right at h6 and continues a7,b8', async ({ page }) => {
     const spec = 'w:Bc1'
     await page.goto(urlForSpec(spec, 'white'))
 
     await page.getByTestId(squareTestId('c1')).click()
 
-    for (const sq of ['a6', 'b7']) {
+    for (const sq of ['a7', 'b8']) {
       await expect(page.getByTestId(hintTestId(sq))).toHaveCount(1)
     }
-    // a7 is the cylinder-wrap answer — the seam hop must not advance the rank.
-    await expect(page.getByTestId(hintTestId('a7'))).toHaveCount(0)
+    // a6 was the old rank-preserving answer, and it is the wrong square colour.
+    await expect(page.getByTestId(hintTestId('a6'))).toHaveCount(0)
   })
 
-  test('Mirror attack: Bc1 captures an enemy on the far side of the seam and stops there', async ({ page }) => {
-    const spec = 'w:Bc1; b:Na6'
+  test('Mirror attack: Bc1 captures an enemy past the seam and stops there', async ({ page }) => {
+    const spec = 'w:Bc1; b:Na7'
     await page.goto(urlForSpec(spec, 'white'))
 
     await page.getByTestId(squareTestId('c1')).click()
 
-    await expect(page.getByTestId(hintTestId('a6'))).toHaveCount(1)
-    await expect(page.getByTestId(hintTestId('b7'))).toHaveCount(0)
+    await expect(page.getByTestId(hintTestId('a7'))).toHaveCount(1)
+    await expect(page.getByTestId(hintTestId('b8'))).toHaveCount(0)
   })
 })

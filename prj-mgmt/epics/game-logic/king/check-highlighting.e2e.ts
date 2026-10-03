@@ -18,8 +18,8 @@ test.describe('mirror-chess: check highlighting and hint semantics', () => {
 
     await page.getByTestId(squareTestId('c1')).click()
 
-    // h3 is reached through the seam; d2 is an ordinary diagonal step.
-    await expect(page.getByTestId(hintTestId('h3'))).toHaveClass(new RegExp(SquareHintClass.Mirror))
+    // h4 is reached through the seam (c1 → b2, a3 | h4); d2 is an ordinary diagonal step.
+    await expect(page.getByTestId(hintTestId('h4'))).toHaveClass(new RegExp(SquareHintClass.Mirror))
     await expect(page.getByTestId(hintTestId('d2'))).not.toHaveClass(new RegExp(SquareHintClass.Mirror))
   })
 
@@ -28,8 +28,8 @@ test.describe('mirror-chess: check highlighting and hint semantics', () => {
 
     await page.getByTestId(squareTestId('c1')).click()
 
-    await expect(page.getByTestId(squareTestId('h3')))
-      .toHaveAttribute('aria-label', 'h3, empty, legal mirror move through the seam')
+    await expect(page.getByTestId(squareTestId('h4')))
+      .toHaveAttribute('aria-label', 'h4, empty, legal mirror move through the seam')
     await expect(page.getByTestId(squareTestId('d2')))
       .toHaveAttribute('aria-label', 'd2, empty, legal move')
   })
@@ -55,16 +55,22 @@ test.describe('mirror-chess: check highlighting and hint semantics', () => {
       .toHaveAttribute('aria-label', 'e8, black rook, giving check')
   })
 
-  test('the checking line is marked, and for a portal check shows the whole journey', async ({ page }) => {
-    // Bb3 leaves via a2, re-enters on h2 and hits the king on g1.
-    await page.goto(urlForSpec('w:Bb3; b:Kg1', 'black'))
+  test('the checking line is marked, and for a seam check shows the whole journey', async ({ page }) => {
+    // Bb3 runs a4 | h5, g6, f7 and hits the king on e8 — the whole journey marked, which is
+    // what lets a player see where a check from the far side of the board came from.
+    //
+    // Not f7, which is the obvious choice and wrong: f7 is *also* on b3's ordinary
+    // north-east diagonal, so the check arrives by c4, d5, e6 and the seam plays no part.
+    // Dedupe keeps the standard route (spec §4), and a fixture that reads naturally can
+    // still be testing the opposite of what its name says.
+    await page.goto(urlForSpec('w:Bb3; b:Ke8', 'black'))
 
-    for (const sq of ['a2', 'h2']) {
+    for (const sq of ['a4', 'h5', 'g6', 'f7']) {
       await expect(page.getByTestId(squareTestId(sq))).toHaveClass(new RegExp(SquareStateClass.CheckPath))
       await expect(page.getByTestId(squareTestId(sq)))
         .toHaveAttribute('aria-label', `${sq}, empty, on the checking line`)
     }
-    await expect(page.getByTestId(squareTestId('g1'))).toHaveClass(new RegExp(SquareStateClass.Check))
+    await expect(page.getByTestId(squareTestId('e8'))).toHaveClass(new RegExp(SquareStateClass.Check))
     await expect(page.getByTestId(squareTestId('b3'))).toHaveClass(new RegExp(SquareStateClass.Checker))
   })
 

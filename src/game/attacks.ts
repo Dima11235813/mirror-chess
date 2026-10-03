@@ -1,12 +1,12 @@
 import type { Board, Color, Coord, Position } from './types'
 import { portalCaptures } from './rules'
-import { insideBoard, mirrorFile, sameCoord, toIndex } from './coord'
+import { sameCoord, toIndex } from './coord'
 import {
   KING_DELTAS,
   KNIGHT_DELTAS,
-  portalMouth,
   slideDirectionsFor,
   stepAcrossSeam,
+  walkRay,
   type Direction,
 } from './rays'
 
@@ -24,8 +24,12 @@ import {
  * - sliders attack along their rays — **including through the seam** — stopping at
  *   and including the first occupied square.
  *
- * The §4 portal preconditions are unchanged: the edge square must be reached with a
- * clear path and be empty.
+ * **What does the mirror seam change about this?** Nothing that lives in this file. A ray
+ * that crosses the seam is just a longer ray (spec §4, `walkRay`), so there is no
+ * precondition to check here and no second walk to keep in step with the first — which is
+ * what the 2026-10-03 revision removed. The only seam-aware decision left is *whether* a
+ * piece may cross, and that is `portalCaptures`: **attack follows capture** (§12.2), so a
+ * piece that may not capture across the seam does not give check across it either.
  */
 
 /**
@@ -58,14 +62,7 @@ export function attacksFrom(pos: Position, from: Coord): Coord[] {
 
   const out: Coord[] = []
   for (const [df, dr] of dirs) {
-    walkAttackRay(board, out, from, from.f + df, from.r + dr, df, dr)
-
-    // Portal extension — spec §4, and §10.1 for its use in attacks.
-    if (!crosses || df === 0) continue
-    const edge = portalMouth(board, from, df, dr)
-    if (!edge) continue
-    const entry = mirrorFile(edge)
-    walkAttackRay(board, out, from, entry.f, entry.r, df, dr)
+    for (const { to } of walkRay(board, from, df, dr, crosses)) out.push(to)
   }
   return out
 }
@@ -83,62 +80,6 @@ function stepAttacks(from: Coord, deltas: readonly Direction[], crosses: boolean
     if (!stepped) continue
     if (stepped.wrapped && !crosses) continue
     out.push(stepped.to)
-  }
-  return out
-}
-
-/**
- * Walk a slider ray from `(f, r)`, collecting squares until it leaves the board or
- * meets a piece. The blocking square **is** attacked (a defended piece is defended),
- * and the ray's own origin terminates it so a portal ray cannot loop.
- */
-function walkAttackRay(
-  board: Board,
-  out: Coord[],
-  origin: Coord,
-  startF: number,
-  startR: number,
-  df: number,
-  dr: number,
-): void {
-  let f = startF
-  let r = startR
-  while (insideBoard({ f, r })) {
-    const to: Coord = { f, r }
-    if (sameCoord(to, origin)) return
-    out.push(to)
-    if (board[toIndex(to)]) return
-    f += df
-    r += dr
-  }
-}
-
-/** Collect a slider ray as its own array — {@link walkAttackRay} without the accumulator. */
-function collectRay(
-  board: Board,
-  origin: Coord,
-  startF: number,
-  startR: number,
-  df: number,
-  dr: number,
-): Coord[] {
-  const out: Coord[] = []
-  walkAttackRay(board, out, origin, startF, startR, df, dr)
-  return out
-}
-
-/** The prefix of a portal ray: origin (exclusive) up to the portal mouth (inclusive). */
-function approachToMouth(from: Coord, edge: Coord, df: number, dr: number): Coord[] {
-  const out: Coord[] = []
-  if (sameCoord(edge, from)) return out // the piece stands on its own portal mouth
-  let f = from.f + df
-  let r = from.r + dr
-  while (insideBoard({ f, r })) {
-    const square: Coord = { f, r }
-    out.push(square)
-    if (sameCoord(square, edge)) return out
-    f += df
-    r += dr
   }
   return out
 }
@@ -196,15 +137,10 @@ export function checkPath(pos: Position, attacker: Coord, king: Coord): Coord[] 
 
   const crosses = portalCaptures(pos.rules, piece.kind)
   for (const [df, dr] of dirs) {
-    const standard = upToTarget(collectRay(board, attacker, attacker.f + df, attacker.r + dr, df, dr), king)
-    if (standard) return standard
-
-    if (!crosses || df === 0) continue
-    const edge = portalMouth(board, attacker, df, dr)
-    if (!edge) continue
-    const entry = mirrorFile(edge)
-    const farSide = upToTarget(collectRay(board, attacker, entry.f, entry.r, df, dr), king)
-    if (farSide) return [...approachToMouth(attacker, edge, df, dr), ...farSide]
+    // One walk gives the whole journey, approach and far side together — which is why
+    // this function no longer has to stitch two halves around a portal mouth.
+    const path = upToTarget(walkRay(board, attacker, df, dr, crosses).map(step => step.to), king)
+    if (path) return path
   }
   return []
 }

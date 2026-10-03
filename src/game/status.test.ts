@@ -88,12 +88,22 @@ describe('draws reported by gameStatus', () => {
   it('reports insufficient material, and reports it per ruleset', () => {
     expect(gameStatus(fromPiecesSpec('w:Ke1; b:Ke8', 'white'))).toBe('draw-insufficient-material')
 
-    // A lone bishop is a dead draw in chess and a live game once it can portal — the
-    // same board, two answers, which is why status needs the ruleset.
+    // A lone bishop is a dead draw under **every** ruleset, as in chess — re-enumerated
+    // 2026-10-03, when the revised crossing made the bishop colour-bound again. This test
+    // used to assert the opposite, and `draw-rules.test.ts` holds the enumeration.
     const loneBishop = 'w:Ke1,Bc1; b:Ke8'
     expect(gameStatus(fromPiecesSpec(loneBishop, 'white', RULES_STANDARD_CHESS)))
       .toBe('draw-insufficient-material')
-    expect(gameStatus(fromPiecesSpec(loneBishop, 'white'))).toBe('playing')
+    expect(gameStatus(fromPiecesSpec(loneBishop, 'white'))).toBe('draw-insufficient-material')
+
+    // Status still needs the ruleset — just not for *this* rule. The seam decides mates:
+    // Qa1 covers g1's flight square h2 by wrapping, so the same board is mate or not
+    // depending on the flags (`search.test.ts` searches the position one move earlier).
+    const seamMate = 'w:Kf3,Qa1; b:Kg1'
+    expect(gameStatus(fromPiecesSpec(seamMate, 'black'))).toBe('checkmate')
+    // In chess it is check and nothing more: the king walks to h2, which no white piece
+    // covers without the seam. One board, one side to move, two different game states.
+    expect(gameStatus(fromPiecesSpec(seamMate, 'black', RULES_STANDARD_CHESS))).toBe('check')
   })
 
   it('reports the fifty-move rule once the clock is full', () => {

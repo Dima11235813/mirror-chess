@@ -138,34 +138,60 @@ looks like it settles something.
 
 ---
 
-## 4. The board is not a cylinder — except for the steppers
+## 4. With every flag on, the board **is** a cylinder — re-measured 2026-10-03
 
-Checked because it would have been worth a lot: 8-fold file-rotation symmetry would shrink
-any tablebase eightfold and constrain a learned evaluation. Rotating **every** file by `k`
-and comparing legal-move sets:
+> **Reversed by the crossing revision.** This section used to read "the board is not a
+> cylinder — except for the steppers", and the `[decision]` it flagged at the end — *should
+> the slider crossing be cylindrical?* — has since been **taken**, by the owner, for a
+> different reason: a diagonal must continue as a diagonal
+> ([`../rules/diagonal-crossing.md`](../rules/diagonal-crossing.md)). The old measurements
+> are kept below the new ones, because the *contrast* is the useful part.
 
-| Material | all-on | sliders only | all-off |
+Checked because it is worth a lot: 8-fold file-rotation symmetry shrinks any tablebase
+eightfold and constrains a learned evaluation. Rotating **every** file by `k` and comparing
+legal-move sets, 60 random placements per row:
+
+| Material | all-on | sliders only | all-off (chess) |
 | --- | --- | --- | --- |
 | kings + knights | **holds, k = 1..7** | breaks | breaks |
 | kings + knights + pawns | **holds, k = 1..7** | breaks | breaks |
-| anything with B/R/Q | breaks | breaks | breaks |
+| king + bishop vs king + pawn | **holds, k = 1..7** | breaks | breaks |
+| king + rook vs king + pawn | **holds, k = 1..7** | breaks | breaks |
+| king + queen vs king + pawn | **holds, k = 1..7** | breaks | breaks |
+| full material, both sides | **holds, k = 1..7** | breaks | breaks |
 | *file mirror, for comparison* | holds | holds | holds |
 
-This follows from the spec and is worth stating plainly because the two crossings are
-easily assumed to be the same one. **Steppers wrap the file** (§11), which is cylinder
-adjacency. **Sliders hop at equal rank** (§4) — and §4 explicitly calls the cylinder wrap
-wrong: a bishop leaving `a4` emerges at `h4`, not `h5`, losing a rank step the cylinder
-would keep.
+**Under the all-on ruleset there is now one crossing and it is a file wrap** (spec §4 and
+§11 are the same rule), so every piece sees a board whose files are a cycle. Rotation is a
+symmetry of the whole move generator, not just of the steppers. It breaks under *mixed*
+rulesets exactly as it should: if some pieces wrap and others do not, the a/h files are
+distinguishable, and the generator can tell them apart.
 
-Consequences:
+> **What it used to say, and why.** "Steppers wrap the file (§11), which is cylinder
+> adjacency. **Sliders hop at equal rank** (§4) — and §4 explicitly calls the cylinder wrap
+> wrong: a bishop leaving `a4` emerges at `h4`, not `h5`, losing a rank step the cylinder
+> would keep." Measured, correct, and now false: `h5` is the answer, and the rank step the
+> cylinder keeps is exactly what a continuing diagonal needs.
 
-- Symmetry reduction available to tablebases or a learned PST is **2×** (file mirror) in
-  general, **8×** for stepper-only material.
-- A learned evaluation may be constrained by file mirroring, never by rotation.
-- **A flagged `[decision]` for later:** making the slider crossing cylindrical is a
-  candidate *alternative mechanic*, not a flag — the kind of change
-  [`variant-study.md`](./variant-study.md) §6 anticipates if draw rates come out too high.
-  It is a spec change and must not be implemented without an owner decision.
+Consequences, and the first is the valuable one:
+
+- **Symmetry reduction is 8× for the all-on ruleset**, for any material — not 2×, and not
+  only for stepper-only endings. That applies to a tablebase, to a transposition table's
+  position class, and to anything learned.
+- **A piece-square table under all-on may depend on rank only.** Any file-dependent term
+  is *provably* wrong there, by symmetry, and no amount of self-play will teach it a
+  correct one. This is a hard constraint on
+  [`../engine/evaluation.md`](../engine/evaluation.md) rather than a hypothesis to test —
+  and it is stronger than the old "piece-square tables are near-meaningless", which was an
+  observation about the edge not being a wall.
+- **It holds per ruleset, not in general.** The study covers 64 rulesets; only those where
+  every piece crosses are rotation-symmetric. An optimisation keyed on this must be keyed
+  on the ruleset too, which is precisely the transposition-table trap
+  `epics/engine/research/` predicted.
+- **Caveat: castling is the one file-absolute rule** (spec §13.3 — `e1`, `a1`, `h1` are
+  named squares). These measurements use analysis positions, so expect the symmetry to hold
+  only once both sides' castling rights are gone. Worth checking before anything is keyed
+  on it.
 
 ---
 

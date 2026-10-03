@@ -201,7 +201,10 @@ variant (as AlphaZero did) or by measuring and reporting a per-variant strength 
   as an experimental extension; the 11-slot token format is unchanged and still parses
   every ruleset ever minted. → [`../rules/adjacent-kings.md`](../rules/adjacent-kings.md)
 - **[decision, later] Is the slider crossing the right mechanic?** Steppers wrap the file
-  (a cylinder); sliders hop at equal rank and lose a rank step, so the board is *not* a
+  (a cylinder); and since 2026-10-03 **sliders wrap the same way**, so with every flag on
+  the board *is* a cylinder and file rotation is an 8× symmetry — re-measured in
+  [`readiness-probe.md`](./readiness-probe.md) §4. ~~sliders hop at equal rank and lose a
+  rank step, so the board is *not* a
   cylinder. Making sliders cylindrical is an alternative **mechanic**, not a flag — the
   kind of change §6 of [`variant-study.md`](./variant-study.md) anticipates if draw rates
   come out too high. Measured in [`readiness-probe.md`](./readiness-probe.md) §4; needs an

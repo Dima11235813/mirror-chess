@@ -54,9 +54,25 @@ Two rules learned the hard way:
 
 ## 3. The epics
 
-### `rules/` — what the game is  ✅ complete, with one question reopened
+### `rules/` — what the game is  ✅ complete, and revised once
 The spec plus the stories that built it. **All the rules are implemented**, and with every
 portal flag off the engine reproduces published chess perft counts exactly.
+
+**Changed 2026-10-03 — the seam crossing was reversed, so read this before any older
+document in this tree.** A crossing now **continues the ray**: the file wraps and the rank
+advances as the direction dictates, so a bishop leaving `a4` emerges on `h5`, square colour
+is preserved, and sliders and steppers share **one** crossing rule. It used to hop to `h4`
+at the same rank. Reported by the owner from a phone, measured, and migrated in six
+milestones — [`diagonal-crossing.md`](./epics/rules/diagonal-crossing.md) is the whole
+story, including everything it reversed:
+
+| Was recorded as true | Now |
+| --- | --- |
+| A lone bishop mates a bare king | **No** — insufficient material is chess's rule again, re-enumerated |
+| A seam hop flips square colour | **No** — bishops are colour-bound, as in chess |
+| The board is not a cylinder | **It is one**, with every flag on: rotation symmetry holds for all material |
+| A bishop forbids castling from the far corner | **Still yes** — but the square moved from `f1` to `g1` |
+| The committed puzzle set | **255 of 285 lost their mate**; re-mined, and the miner gained a fifth criterion |
 
 **Changed 2026-09-22 — read this before anything else in `rules/`.** The spec gained a
 governing principle (§2.1): **the movement space expands; the rules stay the same**, so a
@@ -68,7 +84,7 @@ Notation was adopted the same day (§8.5, the `*` seam tag).
 
 | | |
 | --- | --- |
-| [`mirror-portal-spec.md`](./epics/rules/mirror-portal-spec.md) | **The authority.** §4 sliders, §10 legality, §11 steppers, §12 quiet/capture split, §13 special moves |
+| [`mirror-portal-spec.md`](./epics/rules/mirror-portal-spec.md) | **The authority.** §4 sliders, §10 legality, §11 steppers, §12 quiet/capture split, §13 special moves. §4/§5/§6/§7/§11.1 **revised 2026-10-03**, with the old wording struck through in place — those passages are the most instructive part of the file |
 | [`reconcile-core-to-spec.md`](./epics/rules/reconcile-core-to-spec.md) | ✅ deleted five contradictory notions of "mirror" |
 | [`legality-layer.md`](./epics/rules/legality-layer.md) | ✅ check, pins, mate, stalemate |
 | [`stepper-portal.md`](./epics/rules/stepper-portal.md) | ✅ knight/king/pawn cross by wrapping the file |
@@ -78,7 +94,7 @@ Notation was adopted the same day (§8.5, the `*` seam tag).
 | [`adjacent-kings.md`](./epics/rules/adjacent-kings.md) | ✅ a piece attacks exactly where it can move — `isStandardRuleSet`, the 64 rulesets, the invariant as a property test, and [11 e2e tests](./epics/rules/adjacent-kings.e2e.ts). **The generator needed no change**: the rule was already obeyed, only unclassified |
 | [`piece-capabilities.md`](./epics/rules/piece-capabilities.md) | ✅ the capability matrix: [40 e2e tests](./epics/rules/piece-capabilities.e2e.ts), six pieces × move / seam move / capture / seam capture, each with a flag-off control. Found the rook and queen almost untested |
 | [`move-capture-split.md`](./epics/rules/move-capture-split.md) | ⚠️ superseded as the default (2026-09-22); kept, and still the best account of why move and attack must be generated separately |
-| [`diagonal-crossing.md`](./epics/rules/diagonal-crossing.md) | ⚠️ **open and blocking**: a diagonal crossing should continue the diagonal and preserve square colour. Reverses §4 — and with it "a lone bishop mates", "bishops are not colour-bound" and the board's geometry |
+| [`diagonal-crossing.md`](./epics/rules/diagonal-crossing.md) | ✅ **the 2026-10-03 revision**: a diagonal crossing continues the diagonal and preserves square colour. Spec, code, enumerations, puzzles and tests migrated; **read §6's milestones for what each one reversed**, and §9 for what it adds to CLAUDE.md |
 | [`task-e2e-parallelism.md`](./epics/rules/task-e2e-parallelism.md) | 🔧 open housekeeping: `page.goto` flakiness; use `--workers=1` |
 | [`task-lint-does-not-run.md`](./epics/rules/task-lint-does-not-run.md) | 🔧 open housekeeping: **ESLint has never run in this repo** |
 
@@ -168,7 +184,38 @@ ruleset trap before either was hit.
 
 ---
 
-## 5. How to add work
+## 5. Where memory lives — and why it is not in this folder
+
+Work is tracked here. **Cross-session memory is not**, and the distinction matters enough
+to state in the map.
+
+Persistent memory lives in Claude's per-project store (`~/.claude/projects/<repo>/memory/`,
+indexed by a `MEMORY.md` that is loaded at the start of every session). It is **outside the
+repository on purpose**: it holds what is true *about* the project rather than *in* it —
+owner decisions and preferences, measured facts that contradict the obvious, and the
+**hand-off** that tells the next session where we left off and what to read first.
+
+| Question | Where it is answered |
+| --- | --- |
+| What state is this work in? | the `prj-mgmt` story, in its status banner |
+| Why is it built this way? | the story, or an ADR |
+| What did we decide, and what does the owner prefer? | memory |
+| Where were we, and what is next? | the **hand-off** memory, named first in `MEMORY.md` |
+
+Two consequences worth knowing:
+
+- **A new clone has the repo but not the memory.** Anything a stranger must know to work
+  here belongs in `CLAUDE.md` or in a story, not only in memory.
+- **A memory that contradicts the repo is a bug.** Memories record what was true when
+  written; the code and its tests are the only surface that can disprove itself. When they
+  disagree, the repo wins and the memory gets rewritten.
+
+`CLAUDE.md` §13 is the full strategy, and the `consolidate-session` skill is the routine
+that keeps all of this current.
+
+---
+
+## 6. How to add work
 
 1. Put the story next to its epic, named for the behaviour, with a status banner.
 2. Give it a **Summary** ("As a … I want … so that …"), **Acceptance Criteria** as

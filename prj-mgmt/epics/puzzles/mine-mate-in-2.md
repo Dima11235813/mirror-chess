@@ -1,8 +1,19 @@
 # Story — Mine mate-in-2 puzzles that chess cannot produce
 
-> **Status: DONE (2026-09-25).** Part of the [puzzles epic](./README.md).
-> `src/puzzles/mate.ts` (solver), `mine.ts` (criteria and generation),
-> `scripts/mine-puzzles.ts` (CLI), and a committed set at `puzzles/mate-in-2.v1.json`.
+> **Status: DONE (2026-09-25); the set was re-mined and the criteria gained a fifth on
+> 2026-10-03.** Part of the [puzzles epic](./README.md). `src/puzzles/mate.ts` (solver),
+> `mine.ts` (criteria and generation), `scripts/mine-puzzles.ts` (CLI), and a committed set
+> at `puzzles/puzzles.v3.json`.
+>
+> **What the crossing revision did to this story** —
+> [`../rules/diagonal-crossing.md`](../rules/diagonal-crossing.md) M4, and it is the
+> harshest test the mining machinery has had:
+>
+> - **255 of 285 shipped puzzles lost their forced mate** and were removed. Only 30 survive.
+> - The **material sets were re-measured and re-chosen**: `K+B vs K`, the marquee shape,
+>   became *dead material*, and `K+B+B vs K+N`, the densest source, now yields nothing.
+> - A **fifth criterion** was added, and it is a defect this story shipped twice:
+>   `blackAlreadyInCheck`. See §2.
 
 ## Summary
 
@@ -14,8 +25,10 @@ does not wait on the evaluation work.
 
 - [x] An exhaustive mate solver built **only** on the rules layer, so puzzles are as
       trustworthy as the perft counts and inherit no engine bugs.
-- [x] Four criteria, each enforced and each tested: legal and live, exactly one solution,
-      no faster mate, not a mate in chess.
+- [x] ~~Four criteria~~ **Five** criteria, each enforced and each tested: legal and live,
+      **the side not to move is not in check** (added 2026-10-03, §2), exactly one solution,
+      no faster mate, and the chess differential — which since 2026-09-26 is a *label* rather
+      than a rejection.
 - [x] Mining is **seeded and reproducible** — same seed, same puzzles, byte for byte.
 - [x] Pawns are never placed on ranks 1 or 8: an illegal position is not a hard puzzle.
 - [x] Every puzzle in a mined batch is re-proved from its record: the solution is replayed
@@ -27,6 +40,32 @@ does not wait on the evaluation work.
 - [x] A committed puzzle set, with the seed that produced it.
 
 ## 2. What we learned
+
+### 42% of both shipped sets were illegal positions — found 2026-10-03
+
+A candidate was rejected if the game was already over, but **nothing asked whether the side
+*not* to move was in check** — a position no legal previous move could have produced. Two
+kings standing next to each other passes every other criterion, and the solver will happily
+prove a mate in it.
+
+Measured across both sets: **121 of 285** in the pre-revision set and **100 of 238** in the
+first re-mine — about 42% each time, so this is a long-standing defect and not something the
+crossing revision caused. Rook-heavy material makes it worse (a loose rook checks a lone
+king from a long way off), which is why the new material list made it impossible to miss.
+
+How it was found is the part worth keeping: **by reading one record closely enough to
+notice two kings touching**, while picking a fixture for a component test. Not by a test.
+Four criteria, a schema, a re-proof of the shipped artifact and forty-odd tests all agreed
+with each other, because every one of them asked about the *mate* and none asked whether
+the position was a position.
+
+So the guard now exists in both places it can fail: `evaluateCandidate` rejects the
+candidate, and `puzzle-set.test.ts` rejects the **artifact** — because a set can also arrive
+hand-edited, or from an older miner.
+
+> **The general shape:** a generator and its validator written by the same author in the
+> same sitting share the same blind spot. `src/game/*` is the oracle for move *legality*;
+> nothing was the oracle for *position* legality, and the criteria never thought to ask.
 
 **The engine disagreeing with the solver found a real defect — in the criteria, not the
 code.** The first mined fixture, `Ke4,Bc3,Be2 / Ke1,Nc8`, was a unique mate in two *and* a

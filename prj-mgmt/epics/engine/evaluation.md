@@ -60,13 +60,19 @@ ones outright:
 | --- | --- |
 | Edge squares are bad for pieces | **False.** A knight attacks 8 squares from `a4`, same as `d4`. A bishop attacks 15 vs 17. |
 | Bishops are colour-bound | **False.** Every seam hop flips square colour; one bishop reaches all 64 squares. |
-| The bishop pair is worth ~half a pawn | **Probably worthless** — a single bishop already covers both colours. |
+| The bishop pair is worth ~half a pawn | **Open again (2026-10-03).** This row read "probably worthless — a single bishop already covers both colours", which was true of the crossing of the time. The revised crossing preserves square colour, so bishops are colour-bound as in chess and the chess value is a reasonable prior. What *is* measured: a bishop gains **4 squares** from the seam on `b3` (13 against a chess bishop's 9) and **none at all** on `d4`, so the gift is uneven — see `../rules/diagonal-crossing.md` M3. |
 | Opposite-coloured bishops are drawish | **False** — there is no such thing as an opposite-coloured bishop. |
 | A rank can be shielded by one blocker | **False.** Ranks are cycles; a rook attacks along them in both directions. |
 | The corner is the safest square for a king | **Suspect, possibly inverted.** Corners cannot be walled off on their rank. |
 | `P=1, N=3, B=3, R=5, Q=9` | Unknown. Bishops and knights both gain; by how much, relative to rooks, is exactly what we do not know. |
 
-**Piece-square tables and the bishop pair are the two terms to be most suspicious of.**
+**Piece-square tables and the bishop pair are the two terms to be most suspicious of** —
+and as of 2026-10-03 one of them is settled by proof rather than suspicion. With every flag
+on, **file-rotation symmetry holds for all material** (`../balance/readiness-probe.md` §4),
+so under that ruleset a piece-square table **may depend on rank only**: any file-dependent
+term is wrong by symmetry, and no amount of self-play can teach a correct one. That is a
+constraint, not a hypothesis. It holds per ruleset, so a mixed ruleset — where some pieces
+cross and others do not — can tell the files apart and gets no such guarantee.
 Carrying them over would actively mislead the engine.
 
 ## 2. Approach: measure, then encode

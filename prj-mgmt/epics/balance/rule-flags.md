@@ -14,7 +14,7 @@ becomes a decision I can revisit rather than something baked into the move gener
 ### The flags themselves
 
 ```ts
-/** Which pieces cross the seam. Sliders cross by transit (§4), steppers by wrap (§11). */
+/** Which pieces cross the seam. One crossing rule: the file wraps (§4 sliders, §11 steppers). */
 export interface RuleSet {
   readonly portal: Readonly<Record<Kind, boolean>>
 }

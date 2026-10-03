@@ -59,40 +59,42 @@ describe('§10.3 a move may not leave your own king attacked', () => {
 })
 
 describe('§10.3 check delivered through the seam', () => {
-  // A white bishop on b3 portals via a2 → h2 → g1, so it checks a king on g1
-  // without any standard diagonal reaching it.
-  const spec = 'w:Bb3; b:Kg1'
+  // A white bishop on b3 runs a4 | h5, g6, f7, e8 (spec §5.1 as revised), so it checks a
+  // king on g6 with no standard diagonal reaching it.
+  const spec = 'w:Bb3; b:Kg6'
 
   it('is detected as check', () => {
     expect(fromPiecesSpec(spec, 'black').inCheck).toBe(true)
   })
 
-  it('restricts the king to squares off the portal ray', () => {
+  it('restricts the king to squares off the crossed ray', () => {
     const s = fromPiecesSpec(spec, 'black')
 
-    expect(destinations(s, 'g1')).toEqual(sorted(['f1', 'h1', 'f2', 'g2']))
-    // h2 lies on the portal ray, g1 is the checked square itself.
-    expect(destinations(s, 'g1')).not.toContain('h2')
+    // f7 and h5 are the ray's neighbours of g6 and stay attacked; everything else is a
+    // dark square, which a bishop on light b3 can never reach (spec §7).
+    expect(destinations(s, 'g6')).toEqual(sorted(['f5', 'f6', 'g5', 'g7', 'h6', 'h7']))
+    expect(destinations(s, 'g6')).not.toContain('h5')
+    expect(destinations(s, 'g6')).not.toContain('f7')
   })
 
-  it('can be blocked by occupying the portal mouth on the near side', () => {
-    // Rd2 → a2 fills the edge square, so the ray can no longer pass through it (§4).
-    const s = fromPiecesSpec('w:Kg1,Rd2; b:Bb3', 'white')
+  it('can be blocked on the near side of the seam', () => {
+    // Ra5 → a4 occupies the ray's last square before the crossing.
+    const s = fromPiecesSpec('w:Kg6,Ra5; b:Bb3', 'white')
 
-    expect(destinations(s, 'd2')).toContain('a2')
+    expect(destinations(s, 'a5')).toContain('a4')
   })
 
-  it('can be blocked by interposing on the far side of the seam', () => {
-    const s = fromPiecesSpec('w:Kg1,Rd2; b:Bb3', 'white')
+  it('can be blocked by interposing past the seam', () => {
+    const s = fromPiecesSpec('w:Kg6,Ra5; b:Bb3', 'white')
 
-    expect(destinations(s, 'd2')).toContain('h2')
+    expect(destinations(s, 'a5')).toContain('h5')
   })
 
   it('offers only moves that actually resolve it', () => {
-    const s = fromPiecesSpec('w:Kg1,Rd2; b:Bb3', 'white')
+    const s = fromPiecesSpec('w:Kg6,Ra5; b:Bb3', 'white')
 
-    // Every rook move that neither fills a2 nor interposes on h2 is filtered out.
-    expect(destinations(s, 'd2')).toEqual(sorted(['a2', 'h2']))
+    // Every rook move that neither fills a4 nor interposes on h5 is filtered out.
+    expect(destinations(s, 'a5')).toEqual(sorted(['a4', 'h5']))
   })
 })
 
@@ -178,11 +180,16 @@ describe('§2.1 a king may not cross the seam into a square the enemy controls',
     expect(destinations(s, 'g1')).not.toContain('h1')
   })
 
-  it('may not step onto the seam square when a bishop attacks it through the seam', () => {
-    // Black bishop on b3 attacks h4 via the a4 portal mouth (spec §5.1).
-    const s = fromPiecesSpec('w:Kg4; b:Kd8,Bb3', 'white')
+  it('may not cross the seam onto a square a bishop attacks through the seam', () => {
+    // Black bishop on b3 runs a4 | h5 (spec §5.1), so h5 is attacked from the far side.
+    // The white king on a5 crosses the seam westward — onto h5, which it may not do.
+    const s = fromPiecesSpec('w:Ka5; b:Kd8,Bb3', 'white')
 
-    expect(destinations(s, 'g4')).not.toContain('h4')
+    expect(destinations(s, 'a5')).not.toContain('h5')
+    // ...while h6 and h4 are dark, unreachable by a light bishop, and therefore still
+    // offered. Asserted so a fixture that rendered no crossings at all could not pass.
+    expect(destinations(s, 'a5')).toContain('h6')
+    expect(destinations(s, 'a5')).toContain('h4')
   })
 
   it('may not step onto a square a rook attacks through the seam', () => {

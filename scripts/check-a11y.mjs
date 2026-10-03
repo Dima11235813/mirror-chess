@@ -122,9 +122,12 @@ try {
   check(moved.includes('♙'), 'keyboard: a whole move completes without a mouse')
 
   // The reveal is the product's payoff; it must be announced, not merely rendered.
-  await page.goto(`${BASE}/?mode=puzzles&puzzle=1b53rpm`)
-  await page.locator('[data-testid="square-f8"]').click()
-  await page.locator('[data-testid="square-c4"]').click()
+  // `0lehvlg` is `Ba1-d6*` in the committed set — the same puzzle the component tests and
+  // `puzzle-screen.e2e.ts` pin, so a re-mine breaks all three together and the failures
+  // name the same reason.
+  await page.goto(`${BASE}/?mode=puzzles&puzzle=0lehvlg`)
+  await page.locator('[data-testid="square-a1"]').click()
+  await page.locator('[data-testid="square-d6"]').click()
   await page.waitForTimeout(200)
   const revealLive = await page.getAttribute('[data-testid="puzzle-reveal"]', 'aria-live')
   check(revealLive === 'polite', 'puzzles: the reveal is announced', revealLive ?? 'none')

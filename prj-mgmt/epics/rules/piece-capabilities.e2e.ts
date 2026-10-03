@@ -73,10 +73,11 @@ const PIECES: readonly Capability[] = [
   {
     piece: 'bishop',
     glyph: '♗',
-    // Ray (-1,+1) from c1 reaches the empty edge a3, hops to h3, keeps sliding (§5.1).
-    move: { spec: 'w:Ke1,Bc1,Ph2; b:Ke8,Ph7', from: 'c1', ordinary: 'd2', seam: 'h3' },
+    // Ray (-1,+1) from c1 runs b2, a3 and wraps onto h4, keeping c1's square colour and
+    // then sliding on as g5, f6, e7, d8 (§5.2, revised 2026-10-03 — it used to reach h3).
+    move: { spec: 'w:Ke1,Bc1,Ph2; b:Ke8,Ph7', from: 'c1', ordinary: 'd2', seam: 'h4' },
     captureOrdinary: { spec: 'w:Ke1,Bc1,Ph2; b:Ke8,Ne3,Ph7', from: 'c1', victim: 'e3' },
-    captureSeam: { spec: 'w:Ke1,Bc1,Ph2; b:Ke8,Nh3,Ph7', from: 'c1', victim: 'h3' },
+    captureSeam: { spec: 'w:Ke1,Bc1,Ph2; b:Ke8,Nh4,Ph7', from: 'c1', victim: 'h4' },
   },
   {
     piece: 'rook',
@@ -197,7 +198,9 @@ test.describe('mirror-chess: what each piece can do (the capability matrix)', ()
 test.describe('mirror-chess: every piece gives check through the seam', () => {
   const CHECKS: ReadonlyArray<readonly [string, string, string]> = [
     // [piece, spec, the square the checking piece stands on]
-    ['bishop', 'w:Ke1,Bb3,Ph2; b:Kd8,Ph7', 'b3'],
+    // Bb3 runs a4 | h5, g6, f7, e8 — so it checks a king on e8 through the seam. (Under
+    // the old crossing the same bishop checked d8, a square of the other colour.)
+    ['bishop', 'w:Ke1,Bb3,Ph2; b:Ke8,Ph7', 'b3'],
     ['rook', 'w:Ke1,Ra4,Pc4; b:Kh4,Ph7', 'a4'],
     ['queen', 'w:Ke1,Qa4,Pc4; b:Kh4,Ph7', 'a4'],
     ['knight', 'w:Ke1,Na3,Ph2; b:Kh5,Ph7', 'a3'],

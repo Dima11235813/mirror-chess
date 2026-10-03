@@ -114,8 +114,10 @@ test.describe('mirror-chess: special moves (spec §13)', () => {
   })
 
   test('§13.3 THE SEAM CHANGE: a bishop forbids castling from the far corner', async ({ page }) => {
-    // Ba3's down-left ray steps through the seam and continues h3, g2, f1 — covering a
-    // square the king would cross. The same position is fine under ordinary chess.
+    // Ba3's south-west ray wraps the seam on its first step and continues h2, g1 —
+    // covering the square the king lands on. The same position is fine under ordinary
+    // chess. (Re-measured 2026-10-03: the covered square moved from f1 to g1, and the
+    // claim survived — see `diagonal-crossing.md` M3, where it was expected not to.)
     const spec = 'w:Ke1,Rh1; b:Ke8,Ba3'
 
     await page.goto(urlForSpec(spec, 'white', TOKEN_STANDARD_CHESS))

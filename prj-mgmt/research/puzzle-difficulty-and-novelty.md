@@ -135,8 +135,9 @@ them today.
 | Live in chess, but no forced mate exists | 156 | the seam creates the *mate* |
 | Live in chess and some mate exists | 0 | rejected by the gate, as intended |
 
-Those 5 are the showcase puzzles — a lone bishop mating where chess would call it a dead
-draw — and nothing in the format distinguishes them.
+Those 5 are the showcase puzzles — ~~a lone bishop mating where chess would call it a dead
+draw~~ (see the addendum at the end: that mate no longer exists) — and nothing in the format
+distinguishes them.
 
 ## 4. Proposed design
 
@@ -197,3 +198,25 @@ data, not as knowledge.
 - [Quality Diversity: A New Frontier for Evolutionary Computation](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2016.00040/full)
 - [Six dubious ways to estimate the difficulty of a chess puzzle (slides — unread)](https://www.mimuw.edu.pl/media/uploads/seminars/six-dubious-ways-to-estimate-the-difficulty-of-a-chess-puzzle-presentat_K3mc0po.pdf)
 - [Estimating the Puzzlingness of Chess Puzzles (unread)](https://www.researchgate.net/publication/388088295_Estimating_the_Puzzlingness_of_Chess_Puzzles)
+
+---
+
+## Addendum, 2026-10-03 — the crossing revision moved the examples, not the method
+
+The seam crossing was revised so that a diagonal continues as a diagonal
+([`../epics/rules/diagonal-crossing.md`](../epics/rules/diagonal-crossing.md)), and every
+*example* in this document that turns on a lone bishop mating is now wrong — that mate no
+longer exists, and `K+B vs K` is dead material again.
+
+**Nothing about the method changed**, which is the useful observation. Difficulty is still
+measured from transparent features rather than predicted; novelty is still k-NN over a
+behavioural descriptor; the chess differential is still the thing that makes a puzzle
+*ours*. What changed is where chess-impossibility comes from: it used to come from a bishop
+reaching the other square colour, and now it comes from **rank-wrapping rooks and queens**
+and from steppers crossing — neither of which the revision touched.
+
+The measured cost: mate yield per mined candidate fell by roughly an order of magnitude, and
+the material sets had to be re-chosen by measurement
+([`../epics/puzzles/mine-mate-in-2.md`](../epics/puzzles/mine-mate-in-2.md)). A research
+note whose *conclusions* survive while all its *illustrations* break is the good case — it
+means the conclusions were about the method.

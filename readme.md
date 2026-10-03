@@ -1,16 +1,24 @@
 # Mirror Chess
 
-A chess variant on a standard 8×8 board with an added **mirror portal**: the `a`-file
-and the `h`-file are linked at equal rank (`a4 ↔ h4`), so the board has no left or
-right edge. Every piece crosses, in one of two ways:
+A chess variant on a standard 8×8 board with an added **mirror portal**: the `a`-file and
+the `h`-file are linked, so the board has no left or right edge. **One rule covers every
+piece: the file wraps `a ↔ h`, and the rank does whatever the move was already doing.**
 
-- **Sliders** (bishop, rook, queen) pass *through* the seam: a ray that reaches an
-  empty edge square hops across at the same rank and keeps sliding on the far side.
-  A bishop on `b3` reaches `h4, g5, f6, e7, d8`.
-- **Steppers** (knight, king, pawn) *land* across it: the file of the destination
-  wraps while the rank is whatever the move dictates. A knight on `a3` keeps all
-  eight of its L-moves — `h5, g4, g2, h1` among them. Pawn captures wrap; pawn
-  pushes do not.
+- **Sliders** (bishop, rook, queen) keep going: a ray that leaves the board across an edge
+  re-enters on the other side and **continues in the same direction**. A bishop on `b3`
+  reaches `a4` and carries on `h5, g6, f7, e8`.
+- **Steppers** (knight, king, pawn) land across it by the same arithmetic. A knight on `a3`
+  keeps all eight of its L-moves — `h5, g4, g2, h1` among them. Pawn captures wrap; pawn
+  pushes do not, having no file component.
+- **A diagonal stays a diagonal, so square colour is preserved.** A wrapping step changes
+  the file by ±7, which has the same parity as ±1, and bishops are therefore colour-bound
+  exactly as in chess. A ray is at most 7 squares long — also exactly as in chess.
+
+> **Revised 2026-10-03.** Until then a slider *hopped* the seam at equal rank (`a4 → h4`),
+> which flipped a bishop's square colour. That was wrong, and reversing it also reversed
+> several things this file used to claim —
+> [`diagonal-crossing.md`](./prj-mgmt/epics/rules/diagonal-crossing.md) has the migration
+> and the measurements.
 
 The long-term vision is a polished, projectable variant that can be rendered multiple
 ways (2D board, later a 3D / "tri-board" projection) and played by people against
@@ -51,19 +59,21 @@ prototype. The vision is what the reboot is organizing toward.
   check from the far side of the board can be traced back to its source. Every visual
   cue has a screen-reader counterpart in the square's label.
 - **Pure game core** in `src/game/*`: standard chess move generation for all pieces,
-  plus the **mirror portal for every piece**, derived from the rules spec — sliders
-  by transit, steppers by wrapping the file.
+  plus the **mirror portal for every piece**, derived from the rules spec — one crossing
+  rule, applied to a slider's ray and to a stepper's jump.
 - **Full legality**: check detection, self-check filtering (so pins and
   check-resolution work), checkmate and stalemate. Attacks travel through the seam,
   so a bishop can give check — or mate — from the far side of the board.
 - **Games end**: draws by threefold repetition, the fifty-move rule and insufficient
-  material, each announced by name. Insufficient material is decided *per ruleset*,
-  because the seam changes the answer — see [Known issues](#known-issues) and
-  `src/game/draw-rules.ts`.
+  material, each announced by name. Insufficient material turns out to be **exactly
+  chess's rule** — re-enumerated over every placement and every ruleset on 2026-10-03,
+  after the crossing revision made bishops colour-bound again. It had been the one chess
+  rule the seam changed; now it is the one it provably does not (`src/game/draw-rules.ts`).
 - **All the rules**: promotion (with a picker offering all four pieces), castling, and
   en passant. Two of the three are untouched by the seam; **en passant is not** — a pawn
   on `a5` can take one that just played `h7–h5`, landing on `h6`. Castling needed no new
-  rule, but a bishop can forbid it from the opposite corner of the board.
+  rule, but a bishop can forbid it from the opposite corner of the board — `Ba3` covers
+  `g1` by wrapping the seam on its first step.
 - **Checked against published chess.** With every portal flag off this *is* chess, so the
   standard perft suite applies: start position to depth 5 (4,865,609), Kiwipete to depth 4
   (4,085,603), Positions 3–5. All match. `src/game/fen.ts` reads FEN, which is how those
@@ -73,8 +83,9 @@ prototype. The vision is what the reboot is organizing toward.
   over a deliberately geometry-free evaluation. It runs on a **Web Worker**, so the page
   never freezes while it thinks, and it announces its progress to screen readers.
   It wins a hanging queen, declines a poisoned capture, prefers mate to material, finds a
-  two-move back-rank tactic on its gentlest setting, and finds the king-and-bishop mate that
-  exists *only* because of the seam.
+  two-move back-rank tactic on its gentlest setting, and finds a mate that exists *only*
+  because of the seam — `Qa8–a1`, where the queen's wrapped diagonal covers the one flight
+  square the king would otherwise reach.
   → **[A guided tour of the engine](./docs/engine/README.md)**, which explains how a chess
   engine works using this one as the text, and ends each section with *what the mirror seam
   changes here*. Plus a [glossary](./docs/engine/glossary.md).
@@ -213,16 +224,18 @@ Resolved by the rules-first reboot: the mirror rule now has a single specificati
   flag, an engine plays all 64 combinations against itself, and the best-balanced one
   becomes the default. See the
   [balance epic](./prj-mgmt/epics/balance/README.md).
-- **A bishop is mating material here.** Not a defect — a finding, and one that
-  overturned an assumption inherited from chess. `Ka1, Bd4` mates a lone `Kh8`: the
-  bishop checks along `d4–h8` while its other diagonal steps through the seam onto
-  `h7` and continues to `g8`, covering both flight squares. So "king and bishop versus
-  king" is a draw only when the bishop cannot capture across the seam, and
-  same-coloured bishops stop being a draw as soon as a bishop can cross at all, since
-  crossing flips its square colour. Both gates are proved by enumerating every
-  placement under every relevant flag setting in `src/game/draw-rules.test.ts`.
-- **Notation.** SAN cannot express a portal move; the spec proposes a tag
-  (`Bb3–h4*`) but nothing implements it.
+- **A bishop *was* mating material here, and is not any more.** Worth keeping as a
+  cautionary note rather than deleting. Until 2026-10-03 `Ka1, Bd4` mated a lone `Kh8`,
+  because a crossing preserved rank and so flipped the bishop's square colour, letting one
+  bishop reach all 64 squares. The revised crossing continues the diagonal and preserves
+  colour, and re-running the same exhaustive enumeration found **no mate under any of the
+  64 rulesets**. The lesson is not that the measurement was sloppy — it was exhaustive and
+  correct about the rule of the time. **Record the rule a measurement was taken under,
+  next to the number**, and keep enumerations as runnable tests: re-measuring this cost one
+  `npm run test` (`src/game/draw-rules.test.ts`).
+- **Notation.** SAN cannot express a portal move; the spec adopts a tag (`Bb3–h5*`,
+  spec §8.5) but nothing implements it. The format survived the crossing revision
+  untouched, because it marks *that* a ray crossed rather than naming the geometry.
 - **Unrelated component debt.** `SavedGamesList.spec.ts` fails the test-naming
   validator and, with the Ionic input/button specs, accounts for the failing
   integration tests. None of it touches `src/game/*`.

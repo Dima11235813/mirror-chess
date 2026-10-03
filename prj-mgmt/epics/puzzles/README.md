@@ -30,7 +30,10 @@ engine work proceeds.
 
 Game-like positions are a bad source, and the reason is a property of the game: the seam
 makes kings hard to corner, so mates are rare in a crowded middlegame. The seam's own
-mating patterns live in sparse endgames — where **a lone bishop mates**, which chess cannot
+mating patterns live in sparse endgames — where ~~**a lone bishop mates**~~ **a king walks
+off one edge of the board and onto the other** (2026-10-03: the lone-bishop mate went away
+with the crossing revision; the showcase shape now is a seam-crossing *king* move, and
+`K+B vs K` is dead material), which chess cannot
 do at all. Yield by material, 300 placements each:
 
 | Material | Mates | Not a mate in chess |

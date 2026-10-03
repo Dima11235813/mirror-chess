@@ -14,7 +14,7 @@
  */
 import { spreadOrder } from './diversity'
 import type { Puzzle, PuzzleSet } from './types'
-import data from '../../puzzles/puzzles.v2.json'
+import data from '../../puzzles/puzzles.v3.json'
 
 /** The committed set. Typed on the way in, so a drifted file fails here rather than later. */
 const SET = data as unknown as PuzzleSet

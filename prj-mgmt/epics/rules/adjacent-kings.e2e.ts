@@ -72,13 +72,16 @@ test.describe('mirror-chess: a piece attacks where it moves (spec §2.1)', () =>
   })
 
   test('a bishop forbids the squares it attacks through the seam', async ({ page }) => {
-    // Black bishop on b3 reaches h4 via the a4 portal mouth and keeps sliding — g5, f6,
-    // e7 (§5.1). It guards two of this king's squares from the far corner of the board.
+    // Black bishop on b3 crosses at a4 and continues h5, g6, f7, e8 (§5.1, revised
+    // 2026-10-03), guarding this king's h5 from the far corner of the board. Only h5: the
+    // king's other neighbours are dark squares, which a bishop on light b3 cannot reach —
+    // which is itself the revision, since the old crossing flipped colour and took g5 too.
     await page.goto(urlForSpec('w:Kg4,Pd2; b:Kd8,Bb3', 'white', TOKEN_ALL_ON))
     await select(page, 'g4')
 
-    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(0)
-    await expect(page.getByTestId(hintTestId('g5'))).toHaveCount(0)
+    await expect(page.getByTestId(hintTestId('h5'))).toHaveCount(0)
+    await expect(page.getByTestId(hintTestId('h4'))).toHaveCount(1)
+    await expect(page.getByTestId(hintTestId('g5'))).toHaveCount(1)
     await expect(page.getByTestId(hintTestId('g3'))).toHaveCount(1)
   })
 

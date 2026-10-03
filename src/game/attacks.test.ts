@@ -99,40 +99,54 @@ describe('§10.1 sliders attack along their rays, blocker included', () => {
 })
 
 describe('§10.1 portal rays attack', () => {
-  it('a bishop on b3 attacks the far side of both seams', () => {
+  it('a bishop on b3 attacks through both seams, along its own diagonals', () => {
     const b = boardOf('w:Bb3')
     const attacked = attacks(b, 'b3')
 
-    for (const sq of ['h4', 'g5', 'f6', 'e7', 'd8', 'h2', 'g1']) expect(attacked).toContain(sq)
-    // The cylinder-wrap answer must not appear here either.
-    expect(attacked).not.toContain('h5')
+    // Spec §5.1 as revised: the ray continues, so it keeps b3's light squares.
+    for (const sq of ['h5', 'g6', 'f7', 'e8', 'h1']) expect(attacked).toContain(sq)
+    // The rank-preserving hop removed on 2026-10-03 produced these dark squares instead.
+    for (const sq of ['h4', 'g5', 'f6', 'e7', 'd8', 'h2', 'g1']) expect(attacked).not.toContain(sq)
   })
 
-  it('a king on a portal square is in check', () => {
+  it('a king on the square just past the seam is in check', () => {
+    const b = boardOf('w:Bb3; b:Kh5')
+
+    expect(isInCheck(b, 'black')).toBe(true)
+  })
+
+  it('a king further along the crossed ray is in check', () => {
+    const b = boardOf('w:Bb3; b:Ke8')
+
+    expect(isInCheck(b, 'black')).toBe(true)
+  })
+
+  it('a king on the square the OLD crossing attacked is not in check', () => {
+    // h4 is dark and b3 is light; after the revision no bishop ray connects them. Kept as
+    // a test because this exact position used to be check, and a silent revert would make
+    // it check again.
     const b = boardOf('w:Bb3; b:Kh4')
 
-    expect(isInCheck(b, 'black')).toBe(true)
+    expect(isInCheck(b, 'black')).toBe(false)
   })
 
-  it('a king behind the seam on a further portal square is in check', () => {
-    const b = boardOf('w:Bb3; b:Kg1')
-
-    expect(isInCheck(b, 'black')).toBe(true)
-  })
-
-  it('an enemy on the edge square is an ordinary attack that stops the ray', () => {
-    // The king sits on the portal mouth itself: attacked normally, no portal past it.
+  it('an enemy at the seam is an ordinary attack that stops the ray', () => {
+    // The king sits on the last square before the crossing: attacked normally, and
+    // nothing continues past it.
     const b = boardOf('w:Bb3; b:Ka4')
 
     expect(isInCheck(b, 'black')).toBe(true)
     expect(attacks(b, 'b3')).toContain('a4')
-    expect(attacks(b, 'b3')).not.toContain('h4')
+    expect(attacks(b, 'b3')).not.toContain('h5')
   })
 
-  it('a blocker before the seam removes the portal attack', () => {
-    const b = boardOf('w:Bb3,Pa4; b:Kh4')
+  it('a blocker before the seam removes the attack past it', () => {
+    // The king stands on g6, further along the blocked ray. Not h5: a white pawn on a4
+    // attacks h5 through the seam itself (spec 11.6), so that fixture would be check
+    // from the blocker rather than from the bishop.
+    const b = boardOf('w:Bb3,Pa4; b:Kg6')
 
-    expect(attacks(b, 'b3')).not.toContain('h4')
+    expect(attacks(b, 'b3')).not.toContain('g6')
     expect(isInCheck(b, 'black')).toBe(false)
   })
 })
@@ -181,7 +195,7 @@ describe('checkingPieces — who is giving check', () => {
   })
 
   it('names a checker that attacks through the seam', () => {
-    expect(checkingPieces(boardOf('w:Bb3; b:Kg1'), 'black').map(algebraic)).toEqual(['b3'])
+    expect(checkingPieces(boardOf('w:Bb3; b:Kh1'), 'black').map(algebraic)).toEqual(['b3'])
   })
 
   it('is empty for a side with no king', () => {
@@ -206,8 +220,9 @@ describe('checkPath — where the check comes from', () => {
   })
 
   it('shows the whole journey across the seam, approach and far side', () => {
-    // Bb3 leaves via a2, re-enters on h2 and continues to g1.
-    expect(pathOf('w:Bb3; b:Kg1', 'b3', 'g1')).toEqual(['a2', 'h2', 'g1'])
+    // Bb3 steps to a2 and the ray wraps onto h1, which is where the king stands. One
+    // walk gives the whole journey, which is why checkPath no longer stitches two halves.
+    expect(pathOf('w:Bb3; b:Kh1', 'b3', 'h1')).toEqual(['a2', 'h1'])
   })
 
   it('includes the far side only when the attacker stands on its own portal mouth', () => {

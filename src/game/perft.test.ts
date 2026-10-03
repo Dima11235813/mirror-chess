@@ -2,6 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { initialPosition, fromPiecesSpec } from './setup'
 import { perft, perftDivide, moveKey } from './perft'
 import { allLegalMoves } from './status'
+import { legalMovesFor } from './moves'
+import { reduceMove } from './reducer'
+import { isInCheck } from './attacks'
+import { algebraic, parseAlgebraic } from './coord'
 import { parseFen } from './fen'
 import {
   RULES_ALL_ON,
@@ -114,10 +118,28 @@ describe('perft: the mirror variants', () => {
    * they are **regression baselines**, pinned the day the generator was verified
    * against published chess above. A change here means move generation changed;
    * if that was not intended, it is a bug.
+   *
+   * **Re-baselined 2026-10-03** for the revised crossing (spec §4: the ray continues, so
+   * a diagonal keeps its colour). Deliberately regenerated and recorded, never adjusted
+   * to match — the published chess counts above are the only externally verified numbers
+   * here, and they did **not** move, which is what makes a re-baseline safe to accept.
+   *
+   * | ruleset | before (rank-preserving hop) | after (the ray continues) |
+   * | --- | --- | --- |
+   * | sliders only | 20, 400, 9 690, 230 114 | 20, 392, 9 000, 203 214 |
+   * | all on | 20, 400, 9 852, 238 060 | 20, 392, 9 162, 211 036 |
+   *
+   * Depth 2 falls **below chess's 400**, which looks wrong and is not. Four White pawn
+   * moves open a wrapped diagonal that pins a Black pawn to its king: after `1.c3` the
+   * queen on `d1` runs `c2, b3, a4 | h5, g6, f7`, so `f7` cannot move; after `1.g3` the
+   * bishop on `f1` runs `g2, h3 | a4, b5, c6, d7`, so `d7` cannot move. Four moves × two
+   * lost replies = the eight. The seam does not only *add* moves — through a pin it takes
+   * them away, on move two, in a way chess cannot. Measured, not reasoned:
+   * `diagonal-crossing.md` §6 (M2).
    */
   const BASELINES: readonly (readonly [token: string, depths: readonly number[]])[] = [
-    [TOKEN_SLIDERS_ONLY, [20, 400, 9_690, 230_114]],
-    [TOKEN_ALL_ON, [20, 400, 9_852, 238_060]],
+    [TOKEN_SLIDERS_ONLY, [20, 392, 9_000, 203_214]],
+    [TOKEN_ALL_ON, [20, 392, 9_162, 211_036]],
   ]
 
   const RULES_BY_TOKEN = {
@@ -140,6 +162,32 @@ describe('perft: the mirror variants', () => {
     expect(standard).toBeLessThan(sliders)
     expect(sliders).toBeLessThan(all)
   }, 60_000)
+
+  it('the seam pins a pawn to its king on move two, which is where the 8 missing replies went', () => {
+    // The behavioural form of the depth-2 re-baseline above. A perft count would catch a
+    // regression here; it would not tell anyone what broke, and this is too good a
+    // property of the variant to leave encoded only as the number 392.
+    for (const [opening, pinner, pinned] of [
+      ['c2', 'c3', 'f7'], // queen d1: c2, b3, a4 | h5, g6, f7
+      ['g2', 'g3', 'd7'], // bishop f1: g2, h3 | a4, b5, c6, d7
+    ] as const) {
+      const s = initialPosition(RULES_SLIDERS_ONLY)
+      const push = allLegalMoves(s, 'white')
+        .find(m => algebraic(m.from) === opening && algebraic(m.to) === pinner)
+
+      expect(push, `${opening}${pinner} should be legal`).toBeDefined()
+      const after = reduceMove(s, push!)
+
+      expect(isInCheck(after, 'black')).toBe(false) // a pin, not a check
+      expect(legalMovesFor(after, parseAlgebraic(pinned))).toEqual([])
+      // …and with the seam closed the same pawn moves freely, so this is the seam's doing.
+      const chess = initialPosition(RULES_STANDARD_CHESS)
+      const chessAfter = reduceMove(chess, allLegalMoves(chess, 'white')
+        .find(m => algebraic(m.from) === opening && algebraic(m.to) === pinner)!)
+
+      expect(legalMovesFor(chessAfter, parseAlgebraic(pinned))).toHaveLength(2)
+    }
+  })
 
   it('the opening position offers no portal move under any ruleset', () => {
     // Every wrapped destination is occupied by an own pawn, or is an empty square a
@@ -165,7 +213,7 @@ describe('perftDivide', () => {
     const s = fromPiecesSpec('w:Bb3; b:Kd8', 'white', RULES_ALL_ON)
     const keys = [...perftDivide(s, 1).keys()]
 
-    expect(keys).toContain('b3h4*') // through the seam
+    expect(keys).toContain('b3h5*') // through the seam (spec §5.1, revised 2026-10-03)
     expect(keys).toContain('b3c4') // an ordinary diagonal step
   })
 

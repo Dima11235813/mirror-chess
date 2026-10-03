@@ -69,7 +69,7 @@ Two implementation notes that are easy to get wrong and expensive to discover la
   proposition is that the edge of the board is a wall — the thing we are deleting. It is
   not merely unsuitable, it is an optimisation *against* our rules.
 - **0x88** (chess.js). Rejected for the same class of reason. Its `from - to` delta
-  tables assume a ray is a straight line in linear index space; `a4 ↔ h4` is already a
+  tables assume a ray is a straight line in linear index space; a wrapping file is already a
   legal delta, so same-line and direction tests misclassify.
 - **Bitboards with magic multipliers.** Deferred, not rejected — see the amended
   Alternatives section of ADR 0003. They need an ordered path with first-blocker

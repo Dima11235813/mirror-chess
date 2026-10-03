@@ -25,11 +25,17 @@ const baseFeatures: DifficultyFeatures = {
 
 describe('measuring the features', () => {
   it('calls a check what it is, and a quiet move what it is', () => {
-    // Bf8-c4 takes a knight and gives check; Bc3-d4 does neither.
-    const state = at('w:Ke1,Bf8,Bc3; b:Kg8,Nc4,Ph7')
+    // Bc3xg7 takes a knight and checks the king behind it; Bc3-d4 does neither, because
+    // that same knight blocks the diagonal. Fixture replaced 2026-10-03: the old one used
+    // Bf8-c4, a move between squares of *different* colours, which only existed while a
+    // crossing flipped square colour (spec §7).
+    const state = at('w:Ke1,Bc3; b:Kh8,Ng7,Ph6')
 
-    expect(measureDifficulty(state, moveIn(state, 'f8', 'c4'), 2).keyMoveQuiet).toBe(false)
-    expect(measureDifficulty(state, moveIn(state, 'c3', 'd4'), 2).keyMoveQuiet).toBe(true)
+    expect(measureDifficulty(state, moveIn(state, 'c3', 'g7'), 2).keyMoveQuiet).toBe(false)
+    // Bc3-b4 is the quiet one. Not Bc3-d4, which looks quiet and is not: d4's north-west
+    // ray runs c5, b6, a7 and wraps onto h8, so it checks the king from behind. A worked
+    // example of why these fixtures get verified against the engine rather than eyeballed.
+    expect(measureDifficulty(state, moveIn(state, 'c3', 'b4'), 2).keyMoveQuiet).toBe(true)
   })
 
   it('counts the forcing moves a player would look at first', () => {
@@ -42,14 +48,19 @@ describe('measuring the features', () => {
   })
 
   it('counts the defences the move leaves, which is what makes a two-mover real', () => {
-    // Two positions, verified against the engine: Be5-g7 leaves five replies, while
-    // Bf8xc4 leaves none at all — it is mate on the spot. A move that ends the game is
-    // not a mate-in-2 key move, and the count is how the miner and the band can tell.
+    // Two positions, verified against the engine: Be5-g7 leaves seven replies, while
+    // Qa8-a1 leaves none at all — it is mate on the spot (`search.test.ts` searches that
+    // same position). A move that ends the game is not a mate-in-2 key move, and the count
+    // is how the miner and the band can tell.
+    //
+    // Both numbers moved on 2026-10-03: the reply count because the seam no longer offers
+    // the black king colour-flipped escapes, and the mate because the old fixture's mating
+    // move no longer exists.
     const withReplies = at('w:Kc7,Bf7,Be5; b:Ka7,Ng1')
-    const mateAtOnce = at('w:Ke1,Bf8,Bc3; b:Kg8,Nc4,Ph7')
+    const mateAtOnce = at('w:Kf3,Qa8; b:Kg1')
 
-    expect(measureDifficulty(withReplies, moveIn(withReplies, 'e5', 'g7'), 2).defences).toBe(5)
-    expect(measureDifficulty(mateAtOnce, moveIn(mateAtOnce, 'f8', 'c4'), 2).defences).toBe(0)
+    expect(measureDifficulty(withReplies, moveIn(withReplies, 'e5', 'g7'), 2).defences).toBe(7)
+    expect(measureDifficulty(mateAtOnce, moveIn(mateAtOnce, 'a8', 'a1'), 2).defences).toBe(0)
   })
 
   it('measures how far the piece travelled', () => {
@@ -62,7 +73,9 @@ describe('measuring the features', () => {
   it('records whether the move crossed the seam', () => {
     const state = at('w:Ke1,Bc1; b:Kh8,Ph7')
 
-    expect(measureDifficulty(state, moveIn(state, 'c1', 'h3'), 2).crossedSeam).toBe(true)
+    // c1 crosses to h4 via b2, a3 (spec §5.2). It used to cross to h3, a square of the
+    // opposite colour, which is exactly the bug the 2026-10-03 revision fixed.
+    expect(measureDifficulty(state, moveIn(state, 'c1', 'h4'), 2).crossedSeam).toBe(true)
     expect(measureDifficulty(state, moveIn(state, 'c1', 'd2'), 2).crossedSeam).toBe(false)
   })
 })

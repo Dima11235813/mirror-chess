@@ -40,6 +40,7 @@
  * real question open — *does the seam matter here at all?* — which is the appeal.
  */
 import { fromPiecesSpec } from '../game/setup'
+import { isInCheck } from '../game/attacks'
 import { toFen } from '../game/fen'
 import { gameStatus, isGameOver } from '../game/status'
 import { algebraic } from '../game/coord'
@@ -78,16 +79,33 @@ export function materialLabel(set: MaterialSet): string {
 /**
  * The sets worth mining, with their measured mate yields.
  *
- * Chosen by measurement, not taste: `K+B vs K` is the marquee shape because a lone bishop
- * cannot mate in chess at all, and `K+B+B vs K+N` was the densest source of mates in two
- * (10% of placements, 30 of 31 of them chess-impossible).
+ * **Chosen by measurement, not taste — and re-measured 2026-10-03**, when the revised seam
+ * crossing (spec §4) made a bishop colour-bound again. The previous list was measured under
+ * the old crossing and every one of its premises inverted, which is worth keeping visible:
+ *
+ * | shape | old rule | new rule (150 placements, mate in two) |
+ * | --- | --- | --- |
+ * | `K+B vs K` | the marquee shape — a lone bishop mated, which chess cannot do | **dead material.** 150 of 150 placements are already drawn (`draw-rules.ts`) |
+ * | `K+B+B vs K+N` | densest source, 10% of placements, 30 of 31 chess-impossible | **0 kept** |
+ * | `K+B+N vs K` | kept | 0 kept |
+ * | `K+R+R vs K` | not tried | **8 kept** — the densest now |
+ * | `K+Q vs K` | kept | 2 kept, **both chess-impossible, one with a seam solution** |
+ * | `K+R+N vs K` | not tried | 2 kept |
+ * | `K+B+B vs K` | not tried | 1 kept, chess-impossible — opposite colours still mate |
+ * | `K+R+B vs K+P` | kept | 1 kept |
+ * | `K+R vs K`, `K+N+N vs K`, `K+Q vs K+P`, `K+R vs K+P` | not tried | 0 kept |
+ *
+ * The shape of the answer changed with the rule: chess-impossibility used to come from a
+ * bishop reaching the *other square colour*, and now comes from **rank-wrapping rooks and
+ * queens** and from steppers crossing — neither of which the revision touched. Yield fell
+ * by roughly an order of magnitude, so a set of a given size costs ten times the compute.
  */
 export const DEFAULT_MATERIAL: readonly MaterialSet[] = [
-  { white: ['K', 'B', 'B'], black: ['K', 'N'] },
-  { white: ['K', 'B', 'N'], black: ['K'] },
+  { white: ['K', 'R', 'R'], black: ['K'] },
   { white: ['K', 'Q'], black: ['K'] },
+  { white: ['K', 'R', 'N'], black: ['K'] },
+  { white: ['K', 'B', 'B'], black: ['K'] },
   { white: ['K', 'R', 'B'], black: ['K', 'P'] },
-  { white: ['K', 'B'], black: ['K'] },
 ]
 
 /**
@@ -173,12 +191,23 @@ function puzzleId(fen: string, ruleset: RuleSetToken): string {
  * outlived the meaning. The accounting identity is therefore:
  *
  * ```
- * candidates = illegalOrOver + notUniqueMate + fasterMateExists + kept
+ * candidates = illegalOrOver + blackAlreadyInCheck + notUniqueMate + fasterMateExists + kept
  * ```
  */
 export interface MineStats {
   candidates: number
   illegalOrOver: number
+  /**
+   * Rejected because the side **not** to move is already in check — a position that
+   * cannot arise in a game, since the previous move would have been illegal.
+   *
+   * **Added 2026-10-03, and it should have been here from the start.** The first two sets
+   * this miner shipped contained these: 121 of 285 in `puzzles.v2.json` and 100 of 238 in
+   * the first v3 mine, both about 42%. Nothing caught them, because every other criterion
+   * is about the *mate* and `isGameOver` only asks about the side to move. Found while
+   * reading one candidate closely enough to notice two kings standing next to each other.
+   */
+  blackAlreadyInCheck: number
   notUniqueMate: number
   fasterMateExists: number
   /** A tally over the kept puzzles, not a rejection — see the note above. */
@@ -188,7 +217,15 @@ export interface MineStats {
 
 /** A zeroed tally, for a caller that aggregates several runs. */
 export function emptyStats(): MineStats {
-  return { candidates: 0, illegalOrOver: 0, notUniqueMate: 0, fasterMateExists: 0, keptAlsoMateInChess: 0, kept: 0 }
+  return {
+    candidates: 0,
+    illegalOrOver: 0,
+    blackAlreadyInCheck: 0,
+    notUniqueMate: 0,
+    fasterMateExists: 0,
+    keptAlsoMateInChess: 0,
+    kept: 0,
+  }
 }
 
 /**
@@ -213,6 +250,11 @@ export function evaluateCandidate(
   stats.candidates++
   const state: GameState = fromPiecesSpec(spec, 'white', rulesOf(ruleset))
   if (isGameOver(gameStatus(state))) { stats.illegalOrOver++; return null }
+
+  // The side **not** to move may not be in check: no legal previous move could have left
+  // the board that way, so it is not a position, whatever the solver proves about it. A
+  // player who sees two kings touching stops trusting the rest of the set, and is right to.
+  if (isInCheck(state, 'black')) { stats.blackAlreadyInCheck++; return null }
 
   // Proving a mate in three costs ~100x proving a mate in two, and the expensive case is
   // the common one — there usually is no mate. The engine finds mates fast with alpha-beta

@@ -15,16 +15,9 @@ import {
  * Solving a puzzle, against the **real committed set**.
  * Story: [`puzzle-screen.md`](./puzzle-screen.md).
  *
- * The integration tests drive the component with two pinned puzzles; these drive the
- * shipped app with `puzzles/mate-in-2.v1.json`, so a set regenerated with different
- * criteria — or a screen that loads the wrong file — fails here.
- *
- * **Puzzle 2** of the committed set is `5Bk1/8/8/6K1/2n5/2B5/8/8 w`, solved by `f8-c4*`: the
- * bishop slides right through `h6`, wraps to `a6` and returns along `b5` to take the
- * knight. It is pinned in `src/puzzles/mate.test.ts` too, so if the set changes, the
- * failure names the reason rather than just breaking this test. Tests that depend on that
- * position open it by index rather than assuming it comes first — it does not, and
- * assuming it did cost three red tests.
+ * The integration tests drive the component with pinned puzzles; these drive the shipped
+ * app with `puzzles/puzzles.v3.json`, so a set regenerated with different criteria — or a
+ * screen that loads the wrong file — fails here.
  */
 
 /**
@@ -33,10 +26,19 @@ import {
  * Indexes were the first attempt and cost three red runs: the library is re-mined whenever
  * a criterion changes, and every index shifts. An id is derived from the position and the
  * ruleset, so it survives a re-mine — which is also why a bug report should carry one.
- * `1b53rpm` is `5Bk1/8/8/6K1/2n5/2B5/8/8 w`, solved by `f8-c4*`, and pinned in
- * `src/puzzles/mate.test.ts` too.
+ *
+ * `0lehvlg` is `8/6Rp/8/8/8/1K6/8/B6k w`, solved by `a1-d6*`: the bishop's north-west ray
+ * leaves the board at `a1`, re-enters on `h2`, and runs up `g3, f4, e5` to `d6`. It is also
+ * the `SEAM_PUZZLE` of `PuzzleScreen.mocks.ts`, so a set change breaks the component tests
+ * next to this one and the failure names the reason.
+ *
+ * Re-pinned 2026-10-03: the previous id `1b53rpm` was a bishop *capture* across the seam,
+ * and no such puzzle exists any more — there are **no seam captures at all** in the 248
+ * puzzles mined under the revised crossing, because a colour-preserving ray through sparse
+ * material rarely meets anything. The "mirror capture" cue is covered instead by the
+ * hand-built fixtures in `../rules/piece-capabilities.e2e.ts`.
  */
-const SEAM_PUZZLE_URL = '/?mode=puzzles&puzzle=1b53rpm'
+const SEAM_PUZZLE_URL = '/?mode=puzzles&puzzle=0lehvlg'
 
 const play = async (page: import('@playwright/test').Page, from: string, to: string) => {
   await page.getByTestId(squareTestId(from)).click()
@@ -77,30 +79,34 @@ test.describe('mirror-chess: solving a puzzle', () => {
 
   test('the seam solution is accepted, and the route is revealed after', async ({ page }) => {
     await page.goto(SEAM_PUZZLE_URL)
-    await play(page, 'f8', 'c4')
+    await play(page, 'a1', 'd6')
 
     await expect(page.getByTestId(PUZZLE_VERDICT_TESTID)).toContainText('Solved')
     const reveal = page.getByTestId(PUZZLE_REVEAL_TESTID)
-    await expect(reveal).toContainText('f8-c4*')
+    await expect(reveal).toContainText('a1-d6*')
     await expect(reveal).toContainText('crosses the seam')
     await expect(reveal).toContainText('Impossible in chess')
     // The journey through the seam, which is the part a player cannot reconstruct.
-    await expect(reveal).toContainText('h6')
+    await expect(reveal).toContainText('h2')
+    // ...and the piece is actually on the destination, which only a screenshot caught the
+    // first time this screen shipped.
+    await expect(page.getByTestId(squareTestId('d6'))).toContainText('♗')
+    await expect(page.getByTestId(squareTestId('a1'))).not.toContainText('♗')
   })
 
   test('a wrong move is refused and the position is kept', async ({ page }) => {
     await page.goto(SEAM_PUZZLE_URL)
-    await play(page, 'c3', 'd4')
+    await play(page, 'g7', 'g8')
 
     await expect(page.getByTestId(PUZZLE_VERDICT_TESTID)).toContainText('Not the move')
     await expect(page.getByTestId(PUZZLE_REVEAL_TESTID)).toHaveCount(0)
-    await expect(page.getByTestId(squareTestId('c3'))).toContainText('♗')
+    await expect(page.getByTestId(squareTestId('g7'))).toContainText('♖')
   })
 
   test('next moves on, and the new puzzle hides its own answer', async ({ page }) => {
     await page.goto(SEAM_PUZZLE_URL)
     const before = await page.getByTestId(PUZZLE_PROMPT_TESTID).textContent()
-    await play(page, 'f8', 'c4')
+    await play(page, 'a1', 'd6')
     await page.getByTestId(PUZZLE_NEXT_TESTID).click()
 
     await expect(page.getByTestId(PUZZLE_PROMPT_TESTID)).not.toHaveText(before ?? '')
@@ -113,9 +119,9 @@ test.describe('mirror-chess: solving a puzzle', () => {
 
     // The durable form: an id keeps pointing at the same puzzle across a re-mine.
     await page.goto(SEAM_PUZZLE_URL)
-    await page.getByTestId(squareTestId('f8')).click()
-    await expect(page.getByTestId(squareTestId('c4'))).toHaveAttribute(
-      'aria-label', /legal mirror capture through the seam$/,
+    await page.getByTestId(squareTestId('a1')).click()
+    await expect(page.getByTestId(squareTestId('d6'))).toHaveAttribute(
+      'aria-label', /legal mirror move through the seam$/,
     )
   })
 
@@ -132,11 +138,11 @@ test.describe('mirror-chess: solving a puzzle', () => {
     // The puzzle screen reuses BoardView unchanged, so the cues a player relies on in a
     // game are the same ones here — including the hollow ring for a seam destination.
     await page.goto(SEAM_PUZZLE_URL)
-    await page.getByTestId(squareTestId('f8')).click()
+    await page.getByTestId(squareTestId('a1')).click()
 
-    await expect(page.getByTestId(squareTestId('c4'))).toHaveAttribute(
+    await expect(page.getByTestId(squareTestId('d6'))).toHaveAttribute(
       'aria-label',
-      /legal mirror capture through the seam$/,
+      /legal mirror move through the seam$/,
     )
   })
 })

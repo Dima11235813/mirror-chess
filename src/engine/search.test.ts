@@ -193,14 +193,23 @@ describe('finding mate', () => {
   }, 60_000)
 
   it('finds a mate that exists ONLY because of the seam', () => {
-    // The headline from `draw-rules.ts`: Bd4 checks along d4–h8 while its other diagonal
-    // steps through the seam onto h7 and continues to g8. King and bishop mate alone —
-    // which is impossible in chess, so a chess engine would never look for it.
-    const s = fromPiecesSpec('w:Ka1,Bc3; b:Kh8', 'white', RULES_ALL_ON)
+    // `Qa8–a1` is mate because the queen's north-west diagonal wraps the seam onto h2,
+    // the one flight square the white king does not cover. The check itself arrives along
+    // an ordinary rank; it is the *flight square* the seam takes away, which is why a
+    // chess engine would not see it. Enumerated: this is the only mate in the position
+    // under the mirror rules, and in chess there is none at all.
+    //
+    // Replaced 2026-10-03. The old fixture was `Ka1, Bc3` vs `Kh8` — king and bishop
+    // mating alone — which the revised crossing abolished (`draw-rules.ts`).
+    const s = fromPiecesSpec('w:Kf3,Qa8; b:Kg1', 'white', RULES_ALL_ON)
     const result = search(s, { maxDepth: d(2) })
 
     expect(isMateScore(result.score)).toBe(true)
-    expect(result.move && moveKey(result.move)).toBe('c3d4')
+    expect(result.move && moveKey(result.move)).toBe('a8a1')
+
+    // ...and with the seam closed, the same position has no mate for the engine to find.
+    const chess = fromPiecesSpec('w:Kf3,Qa8; b:Kg1', 'white', RULES_STANDARD_CHESS)
+    expect(isMateScore(search(chess, { maxDepth: d(2) }).score)).toBe(false)
   }, 60_000)
 
   it('...and does not find it once the bishop cannot cross', () => {

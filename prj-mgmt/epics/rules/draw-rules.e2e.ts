@@ -28,15 +28,23 @@ test.describe('mirror-chess: draw rules', () => {
     await expect(page.getByTestId(squareTestId('e1'))).toContainText('♔')
   })
 
-  test('a lone bishop draws in chess but is a live game once it crosses the seam', async ({ page }) => {
-    // The same board, two answers. Under chess rules the bishop can never mate; under the
-    // mirror rules it can, because its ray continues through the seam onto the squares a
-    // king would flee to. See `src/game/draw-rules.ts`.
-    await page.goto(urlForSpec('w:Ke1,Bc1; b:Ke8', 'white', TOKEN_STANDARD_CHESS))
-    await expect(page.getByTestId(GAME_STATUS_TESTID)).toHaveText('Draw — insufficient material')
+  test('a lone bishop draws under every ruleset, as it does in chess', async ({ page }) => {
+    // **Inverted 2026-10-03.** This test used to assert the opposite — the same board, two
+    // answers — because a crossing flipped the bishop's square colour and let it mate
+    // alone. The revised crossing preserves colour, the mate was re-enumerated out of
+    // existence, and insufficient material is chess's rule again
+    // (`src/game/draw-rules.ts`, `../rules/diagonal-crossing.md` M3).
+    for (const ruleset of [TOKEN_STANDARD_CHESS, undefined]) {
+      await page.goto(urlForSpec('w:Ke1,Bc1; b:Ke8', 'white', ruleset))
+      await expect(page.getByTestId(GAME_STATUS_TESTID)).toHaveText('Draw — insufficient material')
+    }
 
-    await page.goto(urlForSpec('w:Ke1,Bc1; b:Ke8', 'white'))
-    await expect(page.getByTestId(GAME_STATUS_TESTID)).toHaveText('Turn: white')
+    // The control, so this cannot pass by the board simply refusing to render: add a pawn
+    // and the same position is a live game under both rulesets.
+    for (const ruleset of [TOKEN_STANDARD_CHESS, undefined]) {
+      await page.goto(urlForSpec('w:Ke1,Bc1,Pb2; b:Ke8', 'white', ruleset))
+      await expect(page.getByTestId(GAME_STATUS_TESTID)).toHaveText('Turn: white')
+    }
   })
 
   test('the fifty-move rule is announced when the clock runs out', async ({ page }) => {

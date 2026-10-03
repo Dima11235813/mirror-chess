@@ -29,7 +29,8 @@ asks in `epics/game-logic/king/check-king.md` — those are a separate UI story.
 - [x] Knight and king attack their whole step set regardless of occupancy.
 - [x] Sliders attack along their rays, stopping at — and including — the first
       occupied square.
-- [x] **Portal rays attack.** A bishop on `b3` attacks `h4, g5, f6, e7, d8, h2, g1`,
+- [x] **Portal rays attack.** A bishop on `b3` attacks `h5, g6, f7, e8` and `h1`
+      (squares revised 2026-10-03 with the crossing; the criterion is unchanged),
       so a king on any of them is in check.
 - [x] The §4 portal preconditions hold for attacks: the edge square must be reachable
       with a clear path and be empty; an enemy on the edge square is an ordinary

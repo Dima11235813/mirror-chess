@@ -81,16 +81,24 @@ describe('§13.1 promotion', () => {
     expect(legalMovesFor(s, at('a7')).filter(m => m.crossedSeam)).toEqual([])
   })
 
-  it('under-promoting to a bishop is a real choice here — the bishop can mate alone', () => {
-    // Spec §13.1: a bishop that captures across the seam is mating material by itself,
-    // so this promotion is not the curiosity it is in chess.
+  it('a promoted bishop attacks through the seam immediately', () => {
+    // Spec §13.1. The claim this test used to make — that under-promotion to a bishop is
+    // special here because a lone bishop mates — was true under the pre-2026-10-03
+    // crossing and is not any more (`draw-rules.ts`). What survives is the geometry: the
+    // new bishop's south-west ray runs a7 | h6, g5, f4, e3, d2, c1, so it attacks the far
+    // side of the board from the move it appears on.
     const s = fromPiecesSpec('w:Ka1,Pb7; b:Kh8', 'white', RULES_ALL_ON)
     const promoted = play(s, 'b7', 'b8', 'B')
 
     expect(pieceAt(promoted, 'b8')).toEqual({ kind: 'B', color: 'white' })
-    // ...and it attacks through the seam, which is what makes it dangerous: the down-left
-    // diagonal reaches a7, steps through, and continues h7, g6, f5…
-    expect(attacksFrom(promoted, at('b8')).map(algebraic)).toContain('h7')
+    const attacked = attacksFrom(promoted, at('b8')).map(algebraic)
+    expect(attacked).toContain('h6')
+    // Both diagonals cross: the south-east ray runs c7, d6, e5, f4, g3, h2 | a1.
+    expect(attacked).toContain('a1')
+    // ...and every square it attacks is b8's own colour (spec §7).
+    for (const square of attacked) {
+      expect((at(square).f + at(square).r) % 2, square).toBe((at('b8').f + at('b8').r) % 2)
+    }
   })
 })
 
@@ -229,17 +237,22 @@ describe('§13.3 castling', () => {
   })
 
   it('THE SEAM CHANGE: a bishop forbids castling from the far side of the board', () => {
-    // Ba3's down-left ray steps through the seam at a3 and continues h3, g2, f1 — so it
-    // attacks a square on White's kingside king path from the queenside edge. In ordinary
-    // chess that bishop attacks nothing on the first rank past c1, and the castle stands.
+    // Ba3's south-west ray wraps the seam on its first step and continues h2, g1 — so a
+    // bishop on the queenside edge attacks a square of White's kingside king path. In
+    // ordinary chess it attacks nothing on the first rank past c1, and the castle stands.
+    //
+    // **Re-measured 2026-10-03** (`diagonal-crossing.md` M3). The claim survives the new
+    // crossing; the square moved, from f1 to g1. It was listed as *expected to become
+    // rook-only* before the measurement — wrongly, which is why the milestone says to
+    // enumerate rather than reason.
     const spec = 'w:Ke1,Rh1; b:Ke8,Ba3'
 
     const chess = fromPiecesSpec(spec, 'white', RULES_STANDARD_CHESS)
-    expect(isSquareAttacked(chess, at('f1'), 'black')).toBe(false)
+    expect(isSquareAttacked(chess, at('g1'), 'black')).toBe(false)
     expect(destinations(legalMovesFor(chess, at('e1')).filter(m => m.flag === 'castleKing'))).toEqual(['g1'])
 
     const mirror = fromPiecesSpec(spec, 'white', RULES_ALL_ON)
-    expect(attacksFrom(mirror, at('a3')).map(algebraic)).toContain('f1')
+    expect(attacksFrom(mirror, at('a3')).map(algebraic)).toContain('g1')
     expect(legalMovesFor(mirror, at('e1')).filter(m => m.flag === 'castleKing')).toEqual([])
   })
 

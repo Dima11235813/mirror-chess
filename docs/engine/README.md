@@ -79,14 +79,24 @@ Pins, check evasion and the rule that you cannot castle out of check all fall ou
 rather than being written separately. That is worth noticing: a surprising amount of chess
 is *emergent* from "you may not leave your king attacked".
 
-**What the seam changes here — this is where it all lives.** There are two different
-crossings, and conflating them is the single biggest trap in this codebase:
+**What the seam changes here — this is where it all lives.** There is **one** crossing, and
+it is three lines of arithmetic: the file wraps `a ↔ h`, the rank advances as the move
+already said, and ranks never wrap.
 
-- **Sliders cross by transit** (spec §4). A bishop's ray reaches an empty edge square,
-  hops *horizontally* to the mirrored file at the **same rank**, and keeps going in the
-  same direction. A bishop leaving `a4` emerges at `h4`, not `h5`.
-- **Steppers cross by wrapping the file** (spec §11). A knight on `a3` reaches
-  `h5, g4, g2, h1` — its file wraps, its rank is whatever its own L-shape says.
+- **Sliders** walk that step repeatedly (spec §4, `walkRay`). A bishop leaving `a4` emerges
+  on `h5` and continues `g6, f7, e8` — the diagonal keeps going, so **square colour is
+  preserved** and a bishop is colour-bound exactly as in chess.
+- **Steppers** take it once (spec §11). A knight on `a3` reaches `h5, g4, g2, h1` — its
+  file wraps, its rank is whatever its own L-shape says.
+
+> **This section used to say the opposite, and that is worth reading.** Until 2026-10-03 it
+> opened *"There are two different crossings, and conflating them is the single biggest trap
+> in this codebase"*, because a slider hopped the seam at **equal rank** (`a4 → h4`) while a
+> stepper wrapped the file. The owner reported the inconsistency after playing on a phone;
+> the two crossings collapsed into one, and the warning not to conflate them went with it.
+> A rule that needs a prohibition to keep it from collapsing into a simpler one usually
+> should collapse — see
+> [`diagonal-crossing.md`](../../prj-mgmt/epics/rules/diagonal-crossing.md).
 
 And each piece holds **two independent rights**: may it *move* across the seam, and may it
 *capture* across it? Six pieces × two rights is a family of games, not one game — which is

@@ -8,6 +8,14 @@
 >
 > **It also overturned one of its own acceptance criteria** — see
 > [What the enumeration found](#what-the-enumeration-found).
+>
+> ⚠️ **Re-measured 2026-10-03, and the overturned criterion was overturned back.** The seam
+> crossing was revised ([`diagonal-crossing.md`](./diagonal-crossing.md)) so that a diagonal
+> continues as a diagonal, which makes a bishop colour-bound again. Re-running this story's
+> own enumerations gave **no mate for K+B vs K under any of the 16 bishop/king flag
+> settings**, and none for same-coloured bishops either. Insufficient material is now
+> **exactly chess's rule, flag-independent**. The sections below are kept as written, with
+> the new answers marked — the contrast is the most useful thing in this file.
 
 ## Summary
 
@@ -73,10 +81,12 @@ list is a separate thing.
 - [x] **50-move rule**: 100 halfmoves with no pawn move and no capture is a draw; the
       clock resets correctly on both — including on a capture made *across the seam*.
 - [x] **Insufficient material** is a draw for the cases that survive the seam. The
-      criterion as originally written was **wrong**, and the enumeration is what caught
-      it — see below. What ships is: K vs K always; K+N vs K always; K+B vs K only when
-      the bishop cannot capture across the seam; K+B vs K+B on one colour only when the
-      bishop cannot cross at all.
+      criterion as originally written was **wrong**, the enumeration caught it, and then
+      on 2026-10-03 the crossing changed and the same enumeration put it back — see below.
+      ~~What ships is: K vs K always; K+N vs K always; K+B vs K only when the bishop cannot
+      capture across the seam; K+B vs K+B on one colour only when the bishop cannot cross
+      at all.~~ **What ships now:** K vs K, K+N vs K, K+B vs K and K+B vs K+B on one colour
+      are *all* dead positions under **every** ruleset. `draw-rules.ts` reads no rule flags.
 - [x] `gameStatus` reports these alongside checkmate and stalemate, and the footer
       announces each distinctly (`Draw — threefold repetition`, `Draw — fifty-move rule`,
       `Draw — insufficient material`). Checkmate is decided **first**, so a mate on the
@@ -97,19 +107,26 @@ The story assumed the chess answers and flagged only the same-coloured-bishops c
 mirror-sensitive. Enumerating every placement of each material under every relevant flag
 setting showed the assumption was too narrow:
 
-| Material | Dead position when | Changed from chess? |
-| --- | --- | --- |
-| K vs K | always | no |
-| K+N vs K | always — a knight that wraps the seam still cannot mate | no |
-| K+B vs K | `!portalCaptures(B)` | **yes** |
-| K+B vs K+B, one colour | `!portalEnabled(B)` | **yes** |
+| Material | Dead position when (2026-08) | Dead position when (**2026-10-03**) | Changed from chess? |
+| --- | --- | --- | --- |
+| K vs K | always | always | no |
+| K+N vs K | always — a knight that wraps the seam still cannot mate | always | no |
+| K+B vs K | `!portalCaptures(B)` | **always** | no, again |
+| K+B vs K+B, one colour | `!portalEnabled(B)` | **always** | no, again |
 
-**A lone bishop mates.** `White Ka1, Bd4 — Black Kh8, Black to move` is checkmate. The
-bishop checks along the ordinary `d4–h8` diagonal; its *other* diagonal runs `c5, b6, a7`,
-steps through the seam onto `h7` and continues to `g8`, covering both flight squares. No
-second attacker is involved. "King and minor piece cannot mate" is simply false here.
+**A lone bishop mated — and no longer does.** `White Ka1, Bd4 — Black Kh8, Black to move`
+was checkmate: the bishop checked along the ordinary `d4–h8` diagonal while its *other*
+diagonal ran `c5, b6, a7`, stepped through the seam onto `h7` and continued to `g8`,
+covering both flight squares. Under the revised crossing that second diagonal runs
+`c5, b6, a7 | h8` instead — onto the king's own square — and `g8` and `h7` are the opposite
+colour from `d4`, which a colour-bound bishop can never attack. The king walks out; the
+position is a check with three flight squares, one of which is `a8`, reached by the king
+crossing the seam itself. `draw-rules.test.ts` keeps it, inverted, as the clearest single
+illustration of the change.
 
-**The two bishop rows need different gates**, which is the subtle part:
+~~**The two bishop rows need different gates**~~ — **both gates are gone (2026-10-03).**
+The reasoning below was correct about the old crossing and is worth keeping, because it is
+a good example of a *sound* argument resting on a geometric fact that later moved:
 
 - Row three asks *can this bishop mate?* Mate needs check, and check through the seam
   needs the capture right (spec §12.2, attack follows capture) — so `portalCaptures`. A
@@ -120,16 +137,26 @@ second attacker is involved. "King and minor piece cannot mate" is simply false 
   opposite-coloured bishops mate even in chess. So the gate is the wider `portalEnabled`.
   Measuring row four the way row three is measured would answer the wrong question.
 
+Both premises fail now: a crossing preserves square colour (spec §7), so a bishop neither
+reaches the other colour nor mates alone, and `portal*` does not appear in `draw-rules.ts`
+at all.
+
 **Both kings must be on the board.** This engine deliberately supports partial positions
 with no king (spec §10.2), and an early version adjudicated `w:Na3` as a drawn game —
 blanking the board for most single-piece test fixtures in the repo. Guarded and tested.
 
 ### Consequence for the study
 
-The [balance epic](../balance/README.md) should expect **fewer draws than chess** in the
+~~The [balance epic](../balance/README.md) should expect **fewer draws than chess** in the
 flag combinations where the bishop crosses, since a material balance that is dead in chess
-is still playable here. That cuts against the expectation recorded above that the mirror
-would *raise* the draw rate; both effects are real and only the study will say which wins.
+is still playable here.~~
+
+**Withdrawn 2026-10-03.** That prediction rested entirely on the lone-bishop mate, and the
+mate is gone. The counter-prediction stands alone again: **kings that wrap the seam are hard
+to corner, so expect *more* draws than chess**, with no measured effect pulling the other
+way. The study (`../balance/variant-study.md`) now has one directional hypothesis instead of
+two competing ones — which is a weaker, more falsifiable position to be in, and better than
+a balance of two effects where one was an artifact.
 
 ## Test plan — as built
 

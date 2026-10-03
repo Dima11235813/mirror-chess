@@ -1,8 +1,19 @@
 # Bishop – Mirror Move (portal)
 
-> Rewritten against [the Mirror Portal spec](../../rules/mirror-portal-spec.md) §4–§5.2.
-> The previous version of this story described a *same-rank file mirror*
-> (`b3 → g3`). That rule was never confirmed and is **not** the mirror mechanic.
+> **Status: SUPERSEDED twice, and kept as a record of both.**
+>
+> 1. The original version described a *same-rank file mirror* (`b3 → g3`), which was never
+>    confirmed and never the mechanic.
+> 2. It was then rewritten against spec §4–§5.2 as a **rank-preserving hop** — the criteria
+>    below, including "the seam hop does not change rank: leaving via `a4` emerges on `h4`,
+>    never `h5`". **That was reversed on 2026-10-03.** A crossing continues the diagonal:
+>    `a4` leads to `h5`, and square colour is preserved.
+>
+> The live rules are [the spec](../../rules/mirror-portal-spec.md) §4; the migration is
+> [`diagonal-crossing.md`](../../rules/diagonal-crossing.md). Nothing below is current. It
+> is kept because this story is the clearest surviving record of a rule being written down
+> confidently, implemented, tested, and still being wrong — which is the thing this project
+> keeps learning.
 
 ## Summary
 

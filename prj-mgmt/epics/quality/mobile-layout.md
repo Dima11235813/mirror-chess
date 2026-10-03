@@ -76,16 +76,26 @@ No Mirror Chess board at http://localhost:5173 — the page there is titled "Maz
 A check that fails for an environment reason should say which, or the next person debugs
 the wrong thing.
 
-## 6. Cosmetic follow-ups, seen in the screenshot and not fixed
-
-Neither affects usability; both were visible once the board fitted.
+## 6. Cosmetic follow-ups, seen in the screenshot
 
 - **A tall dead gap** between the board and the status line on a phone: `.app` is a grid
   with a `1fr` middle row, so the footer is pushed to the bottom of a tall viewport.
-- **File labels overlap the rank-1 pieces.** The `A`–`H` labels are drawn inside the
-  bottom row of squares, so they sit under the white pieces.
+  **Still open**, and still harmless.
+- [x] **File labels overlap the rank-1 pieces.** ✅ **Fixed 2026-10-03.** Filed as cosmetic,
+  and it stopped being cosmetic the moment a puzzle put its key piece on `a1`: the bishop a
+  player has to find was drawn underneath a letter `A` of the same weight. Seen in a
+  screenshot again, not in a test.
 
-## 5. Notes for whoever picks this up
+  The fix keeps the labels inside the squares — moving them outside would cost the board
+  its square aspect at 320px, which is the constraint this whole story exists to protect —
+  and makes them **recede** instead: `opacity: 0.55`, `z-index: 0`, and `z-index: 1` on the
+  glyph so a piece always wins. Verified by screenshot at 390px.
+
+  > The general version, worth more than the fix: **"cosmetic" is a judgement about the
+  > content that happened to be on screen when you looked.** This one was judged against
+  > the opening position, where rank 1 is a row of pieces a player already knows.
+
+## 7. Notes for whoever picks this up
 
 - `--cell: min(10vw, 56px)` is sound; resist changing it first. The sizing is not the bug.
 - Check the footer and `.moveMessage` too — both were measured at 454px and will re-centre
