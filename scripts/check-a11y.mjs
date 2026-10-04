@@ -20,7 +20,10 @@
  */
 import { chromium } from '@playwright/test'
 
-const BASE = process.env.A11Y_BASE ?? 'http://localhost:5173'
+// 4173 is `npm run preview`'s port and `playwright.config.ts`'s default. Deliberately not
+// 5173: another project on this machine serves that, and this script spent 30 seconds
+// looking for a chessboard inside it before the guard below was added.
+const BASE = process.env.A11Y_BASE ?? 'http://localhost:4173'
 const failures = []
 const notes = []
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --strictPort --port 5173",
+    "preview": "vite preview --strictPort --port 4173",
     "prepreview": "npm run build",
     "test": "vitest run --config vitest.unit.config.ts",
     "check:layers": "node scripts/check-layer-boundaries.js",
