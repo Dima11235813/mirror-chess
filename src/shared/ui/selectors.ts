@@ -77,3 +77,17 @@ export const IMPORT_MESSAGE_TESTID = 'import-message'
 
 /** A square on the route the solution travelled, marked only after solving. */
 export const ROUTE_CLASS = 'route'
+
+/*
+ * Watch mode — two engines playing, with their reasoning on screen.
+ * Story: `prj-mgmt/epics/balance/watch-a-game.md`.
+ */
+export const WATCH_SCREEN_TESTID = 'watch-screen'
+export const WATCH_MODE_TESTID = 'watch-mode'
+export const WATCH_PLAY_TESTID = 'watch-play'
+export const WATCH_STEP_TESTID = 'watch-step'
+export const WATCH_RESET_TESTID = 'watch-reset'
+export const WATCH_STATUS_TESTID = 'watch-status'
+export const WATCH_LOG_TESTID = 'watch-log'
+/** The indifference gauge: how many moves the evaluation cannot tell apart. */
+export const WATCH_GAUGE_TESTID = 'watch-gauge'

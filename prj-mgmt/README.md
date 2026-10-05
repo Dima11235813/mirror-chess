@@ -136,6 +136,7 @@ throughput and onto evaluation.
 | [`readiness-probe.md`](./epics/balance/readiness-probe.md) | ✅ the measurements: 18 of 18 self-play games were repetition draws; the screen is affordable today; the board is not a cylinder |
 | [`self-play-harness.md`](./epics/balance/self-play-harness.md) | 📋 after evaluation — carries the data contract |
 | [`analysis-project.md`](./epics/balance/analysis-project.md) | 📋 the Python analysis and tuning layer |
+| [`watch-a-game.md`](./epics/balance/watch-a-game.md) | ✅ **watch two engines play one game**, with the engine's reasoning and the indifference gauge (`?mode=watch`). The instrument for the evaluation work |
 | [`lab-view.md`](./epics/balance/lab-view.md) | 📋 many games from above — the second validation surface |
 | [`search-engine.md`](./epics/balance/search-engine.md) | 📋 throughput, target **5–10×**, needed for confirmation not screening |
 | [`variant-study.md`](./epics/balance/variant-study.md) | 📋 the experiment: **64 cells, full factorial**, staged |

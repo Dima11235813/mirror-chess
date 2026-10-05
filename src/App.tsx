@@ -6,6 +6,7 @@ import { SaveGameButton } from '@components/SaveGameButton'
 import { SavedGamesList } from '@components/SavedGamesList'
 import { ThemeToggle } from '@components/ionic/ThemeToggle'
 import { PuzzleScreen } from '@components/PuzzleScreen/PuzzleScreen'
+import { SelfPlayScreen } from '@components/SelfPlayScreen/SelfPlayScreen'
 import { indexOfPuzzleId, puzzlesInPlayOrder } from '@/puzzles/set'
 import { reduceMove } from '@game/reducer'
 import { fromPiecesSpec, initialPosition } from '@game/setup'
@@ -15,7 +16,7 @@ import { gameStatus } from '@game/status'
 import type { Color, GameState, Move } from '@game/types'
 import { IonButton, IonHeader, IonTitle, IonToolbar } from '@ionic/react'
 import { deleteSavedGame, isValidGameName, listSavedGames, loadSavedGame, renameSavedGame, saveGame } from '@shared/persistence'
-import { GAME_STATUS_TESTID, PUZZLE_MODE_TESTID } from '@shared/ui/selectors'
+import { GAME_STATUS_TESTID, PUZZLE_MODE_TESTID, WATCH_MODE_TESTID } from '@shared/ui/selectors'
 import { describeStatus } from '@shared/ui/status-text'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -63,13 +64,19 @@ function difficultyFromUrl(): DifficultyId {
 }
 
 /**
- * Which screen to open, from `?mode=puzzles`.
+ * Which screen to open, from `?mode=`.
  *
  * A URL parameter and a header toggle, for the same reason `?board=` exists: a specific
  * situation should be reachable by a link, in a test or a bug report.
+ *
+ * `watch` is two engines playing each other — the game in progress is left untouched, as
+ * puzzle mode leaves it (`prj-mgmt/epics/balance/watch-a-game.md`).
  */
-function puzzleModeFromUrl(): boolean {
-  return new URL(window.location.href).searchParams.get('mode') === 'puzzles'
+type Screen = 'game' | 'puzzles' | 'watch'
+
+function screenFromUrl(): Screen {
+  const mode = new URL(window.location.href).searchParams.get('mode')
+  return mode === 'puzzles' || mode === 'watch' ? mode : 'game'
 }
 
 /**
@@ -89,7 +96,8 @@ function puzzleIndexFromUrl(): number {
 }
 
 export default function App() {
-  const [puzzleMode, setPuzzleMode] = useState<boolean>(() => puzzleModeFromUrl())
+  const [screen, setScreen] = useState<Screen>(() => screenFromUrl())
+  const puzzleMode = screen === 'puzzles'
   const [state, setState] = useState<GameState>(() => loadStateFromUrl())
   const [moveCount, setMoveCount] = useState<number>(0)
   const [savesVersion, setSavesVersion] = useState<number>(0)
@@ -149,13 +157,26 @@ export default function App() {
         <IonToolbar>
           <IonTitle>Mirror Chess v0.1</IonTitle>
           <div className="actions">
-            <IonButton data-testid={PUZZLE_MODE_TESTID} onClick={() => setPuzzleMode(p => !p)}>
+            <IonButton
+              data-testid={PUZZLE_MODE_TESTID}
+              onClick={() => setScreen(s => (s === 'puzzles' ? 'game' : 'puzzles'))}
+            >
               {puzzleMode ? 'Play a game' : 'Puzzles'}
             </IonButton>
-            {/* Reset and Save act on the game, which is not what is on screen in puzzle
-                mode — a button that silently applies to something hidden is a trap. */}
-            {!puzzleMode && <IonButton onClick={onReset}>Reset</IonButton>}
-            {!puzzleMode && <SaveGameButton disabled={!canSave} onClick={onSave} />}
+            <IonButton
+              data-testid={WATCH_MODE_TESTID}
+              onClick={() => setScreen(s => (s === 'watch' ? 'game' : 'watch'))}
+            >
+              {screen === 'watch' ? 'Play a game' : 'Watch'}
+            </IonButton>
+            {/* Reset and Save act on the game, which is not what is on screen in puzzle or
+                watch mode — a button that silently applies to something hidden is a trap.
+                Caught in a screenshot on 2026-10-04: watch mode shipped them visible,
+                because the condition was written as "not puzzles" rather than "is game". A
+                boolean that means "the other screen" stops being true the moment there are
+                three screens. */}
+            {screen === 'game' && <IonButton onClick={onReset}>Reset</IonButton>}
+            {screen === 'game' && <SaveGameButton disabled={!canSave} onClick={onSave} />}
             <ThemeToggle />
           </div>
         </IonToolbar>
@@ -166,8 +187,12 @@ export default function App() {
         with a different goal, and a position from the mined set has nothing to do with the
         game in progress. Switching back leaves that game untouched.
       */}
-      {puzzleMode ? (
+      {screen === 'puzzles' ? (
         <PuzzleScreen puzzles={puzzlesInPlayOrder()} startIndex={puzzleIndexFromUrl()} />
+      ) : screen === 'watch' ? (
+        /* Both sides play the ruleset the URL carries, at one strength: an uneven match
+           would measure the handicap rather than the game (`self-play-harness.md` §1). */
+        <SelfPlayScreen rules={state.rules} difficulty={difficulty} />
       ) : (
         <>
           <BoardView state={state} status={status} onMove={onMove} locked={boardLocked} />

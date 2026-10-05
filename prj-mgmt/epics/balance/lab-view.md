@@ -7,6 +7,10 @@
 > for the record format. The owner chose the play-against-it surface first
 > ([`../board-interactions/rules-picker.md`](../board-interactions/rules-picker.md)).
 
+> **Related, and already built:** [`watch-a-game.md`](./watch-a-game.md) is the *single*
+> game watched move by move, with the engine's reasoning on screen. This story is the view
+> from above, over many games; that one is the microscope.
+
 ## Summary
 
 As the owner, I want to launch many games across rulesets and see the result from above, so

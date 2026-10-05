@@ -619,3 +619,66 @@ ion-toggle {
 @media (max-width: 480px) {
   .puzzle-reveal { max-width: 100%; margin: 0 0.5rem; }
 }
+
+/*
+ * Watch mode — two engines playing, with the engine's reasoning beside the board.
+ * Story: prj-mgmt/epics/balance/watch-a-game.md
+ *
+ * `min-width: 0` on the section for the reason the header needed it: a long move log must
+ * never set the page's minimum width and push the board off a phone screen
+ * (prj-mgmt/epics/quality/mobile-layout.md).
+ */
+.selfPlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.selfPlayTitle {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.selfPlayGauge {
+  margin: 0;
+  text-align: center;
+  max-width: 44ch;
+}
+
+.selfPlayHint { color: var(--text-secondary); font-style: italic; }
+
+/*
+ * Its own class, deliberately not the header's `.actions`. Sharing that class gave these
+ * buttons the right layout and also made "the header's Reset" unselectable in a test,
+ * since both rows then matched the same locator — and it would have quietly inherited any
+ * future header-specific rule.
+ */
+.selfPlayControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 4px 0;
+}
+
+.selfPlayLog {
+  list-style: decimal inside;
+  margin: 0 0 16px;
+  padding: 0 8px;
+  max-height: 30vh;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 44ch;
+  min-width: 0;
+}
+
+.selfPlayLog li { padding: 1px 0; }
+.selfPlayMove { font-weight: 600; color: var(--text-primary); }
+.selfPlayScore { font-variant-numeric: tabular-nums; }
