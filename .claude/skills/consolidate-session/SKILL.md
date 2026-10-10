@@ -179,4 +179,9 @@ When that happens, consolidation is not enough on its own. The shape that worked
 4. **Keep the external oracle fixed.** All-flags-off perft did not move, which is what made
    the change safe to attempt at all. Find the equivalent before starting.
 5. **Supersede in place, everywhere.** Spec, stories, memories, doc comments, readme.
+   **Grep for the claim's own words across the whole repo, `src/` included** — not just the
+   files you expect to be wrong. The 2026-10-03 crossing revision updated the spec, four
+   stories, two memories, the readme and `eval.ts`, and still left `PromotionPicker.tsx`
+   telling players that a lone bishop mates. It survived six days because the sweep grepped
+   `prj-mgmt/` and `docs/` but not the components.
 6. Only then consolidate the *process* lessons, with this skill.

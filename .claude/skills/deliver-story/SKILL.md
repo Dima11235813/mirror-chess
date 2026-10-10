@@ -4,7 +4,8 @@ description: >
   Run a Mirror Chess prj-mgmt item (story / task / bug) through the delivery harness:
   plan → implement → QA → review, pausing for owner review at each gate. Use when the
   owner says to "deliver", "pick up", or "run the harness on" a specific prj-mgmt item.
-  Does not commit — use the `ship` skill for that, only when asked.
+  Commits the finished work itself once it is green (CLAUDE.md §3); use the `ship` skill
+  only when a pull request is wanted.
 ---
 
 # Deliver a story through the harness
@@ -56,8 +57,10 @@ directly — and say which you are doing, so nobody is surprised.
 ## Gate 4 — Owner review & hand-off
 9. Present a concise final summary: what changed, test/QA/review status, and how to
    inspect the diff. Tick the story's acceptance checkboxes if met.
-10. **Do not commit or push.** Offer the `ship` skill as the next step, only if the
-    owner wants it.
+10. **Commit it** — branch → `dev` → `main` → push, once QA is green and review is
+    approved (CLAUDE.md §3, changed 2026-10-10; this step used to read *"Do not commit or
+    push"*). Report the commit. Offer the `ship` skill only if a **pull request** is
+    wanted rather than delivery.
 
 ## Rules of engagement
 - **Rules-first:** if any agent hits an unspecified rule, stop and get an owner

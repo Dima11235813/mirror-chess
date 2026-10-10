@@ -1,20 +1,26 @@
 ---
 name: ship
 description: >
-  Branch, commit, and open a PR for a completed Mirror Chess change. Use ONLY when the
-  owner explicitly asks to commit / ship / open a PR. Creates a feature branch off
-  `dev`, makes one conventional commit, and opens a PR into `dev` using the repo
-  template.
+  Branch, commit, and open a PR for a completed Mirror Chess change. Use when a PR is
+  wanted — for a change that needs discussion rather than delivery, or when the owner
+  asks for one. Routine delivery no longer needs this skill or permission: since
+  2026-10-10 verified work is committed and pushed through to `main` as a matter of
+  course (CLAUDE.md §3).
 ---
 
 # Ship a change
 
-Run only when the owner explicitly asks. **Never commit to `main`.**
+> **Changed 2026-10-10.** Committing no longer needs asking, and `main` is no longer
+> off-limits (CLAUDE.md §3). This skill is now for the case where a **pull request** is
+> what is wanted — a change that should be discussed, reviewed or landed by someone else —
+> rather than for permission to commit. For ordinary delivery, just commit: branch → `dev`
+> → `main` → push, once it is green.
 
 ## Preconditions (verify, don't assume)
 - QA passed and review is APPROVE (or the owner explicitly waived it). If not, say so
   and stop.
-- `npm run build` and `npm run test` are green — re-run if unsure.
+- `npm run build` and `npm run test` are green — re-run if unsure. **The gate is now "is
+  it green?" rather than "did they say yes?", which makes this list the whole safeguard.**
 
 ## Steps
 1. `git status` / `git diff` — confirm the change is exactly what the owner expects;

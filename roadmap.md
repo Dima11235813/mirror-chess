@@ -165,6 +165,19 @@ any code — do not guess (that is what broke the first build).
 > linear weights**, with neural evaluation deferred behind an explicit trigger. And the
 > **Python analysis project** is approved, on the condition that it never implements a rule.
 
+> **Added 2026-10-10 — the interface is now the weak point.** The owner played on a phone
+> and reported that the functionality is good and the *presentation* is not: the board
+> jumps between moves, controls fall below the fold, and a laptop shows a small board in a
+> large empty window. Three items, and they are ahead of the engine work for anyone whose
+> next session is a short one, because they are small, visible and independent of the
+> evaluation:
+>
+> | | Work | Why |
+> | --- | --- | --- |
+> | A | [Layout shift](./prj-mgmt/epics/quality/layout-shift.md) | 🐞 A bug, with screenshots. Conditional text above the board moves it several times a second |
+> | B | [Responsive + a11y pass](./prj-mgmt/epics/quality/responsive-design-pass.md) | The same surfaces, done properly, across phone / laptop / desktop |
+> | C | [Step through history](./prj-mgmt/epics/board-interactions/history/step-through-history.md) | Review earlier positions and return to the present — needs a move history, which `undo-move.md` and `move-log.md` also want |
+
 **The rules are done.** A complete game can be played and scored correctly, so nothing
 here is on the critical path to *playing*. The main line is now **the engine**, in the
 section below; these two are the small things it will eventually want.

@@ -161,12 +161,49 @@ the matching skill/agent (§5); for small changes, do the phase inline.
 
 ## Branching & commits
 
-- Default branch: `main`. Active integration branch: `dev`. **Do not commit
-  directly to `main`.** Branch feature work off `dev`:
+> **Changed 2026-10-10 by the owner: _"you can commit going forward, lets update the
+> constitution to allow for that."_** The rule used to read *"Never commit or push unless
+> the user asks"* and *"Do not commit directly to `main`"*. Both are struck through below.
+> They had been overridden by explicit request in every session that produced shippable
+> work, which is the signal that a rule has been overtaken by practice rather than being
+> respected.
+
+- Default branch: `main`. Active integration branch: `dev`. Branch feature work off `dev`:
   `feat/<epic>-<short-slug>`, `fix/<slug>`, `chore/<slug>`.
 - One logical change per commit; imperative subject; body explains *why*.
-- **Never commit or push unless the user asks.** When they do, open a PR into `dev`
-  using `PULL_REQUEST_TEMPLATE.md`.
+- **Commit and push without asking, at each completed unit of work**, through to `main`:
+  branch → commit → fast-forward `dev` → fast-forward `main` → push all three. A session
+  may produce two or three such commits.
+- ~~**Never commit or push unless the user asks.**~~ ~~**Do not commit directly to
+  `main`.**~~ Superseded 2026-10-10.
+
+### The gate moved; it did not disappear
+
+What used to be *"did they say yes?"* is now **"is it green?"**. Before any commit:
+
+- `npm run test` and the integration tier, at their documented baselines;
+- `npm run build`, `check:layers`, `check:docs`, `check:naming`;
+- `PERFT_DEEP=1 npm run test` if move generation, `applyMoveToBoard` or castling /
+  en-passant bookkeeping was touched;
+- the e2e suite for anything user-facing, and **a screenshot looked at** for anything
+  visual.
+
+**Commit only work you have verified.** The permission is to stop asking, not to stop
+checking — and it cuts the other way too: a red tree is now *more* important to say out
+loud, because nobody is reviewing a diff before it lands.
+
+### Still ask first
+
+- **Force-push, history rewriting, branch deletion, reverting someone else's commit.**
+- **Committing with a known failure**, including a new one in the documented
+  integration baseline. Say so and stop.
+- Anything that leaves the repository: a release, a tag, a published package, changing
+  repository settings or visibility.
+- A commit the owner has said they want to look at first — that instruction outranks this
+  section for as long as the work it names is in flight.
+
+Open a PR instead of merging when the change wants discussion rather than delivery; the
+`ship` skill still does that with `PULL_REQUEST_TEMPLATE.md`.
 
 ---
 
@@ -395,6 +432,12 @@ for the difference between "it passes" and "it can fail". Then put it back.
 that suite were illegal positions: one left White in check from a bishop attacking `e1`
 *through the seam*, the other let White capture a king. Both looked obviously fine.
 
+**An assertion about an empty square is an assertion about a *piece*.** `expect(square)
+.toBe('')` has now failed three times on squares that are empty, because the board draws
+its file and rank labels inside the edge squares — so `b1` reads as `"B"` whether or not
+anything stands there. Decoration shares the element with the content. Assert on the glyph
+range (`\u2654-\u265F`), as `SelfPlayScreen.spec.tsx` does with its `pieceOn` helper.
+
 ### Look at the thing
 
 Assertions encode what you thought to check. A screen has a dimension they do not reach.
@@ -408,6 +451,18 @@ screenshot caught it in seconds.
 So for anything with a UI, take a screenshot and **look at it** before calling it done.
 Then add the assertion the screenshot just taught you (here: the piece is on the
 destination square, and gone from the origin).
+
+**A screenshot proves a layout. Two screenshots prove a transition.** The watch screen was
+screenshotted before it shipped and the screenshot was looked at — and it still shipped a
+layout shift that made the board jump several times a second, because the explanatory text
+above the board renders one line for some positions and three for others. A shift is not a
+property of a layout; it is a property of the *change between two layouts*, and one image
+cannot contain it. For anything that re-renders on a timer or on live data, capture at
+least two states and compare the **geometry**, not the pixels
+(`prj-mgmt/epics/quality/layout-shift.md`).
+
+The design rule that follows: **nothing above the primary content may be conditionally
+present or variably tall.** Reserve the space. The board is what a thumb is aiming at.
 
 ### When a test goes red, suspect the fixture first
 
@@ -473,7 +528,17 @@ Bump the pinned commit to update Serena.
 
 - ❌ Weaken TS strictness · introduce global/mutable state in `src/game/*` · encode
   rules in the UI · change public exports without tests · add deps without a decision.
-- ❌ Commit to `main`, or commit/push without being asked.
+- ❌ **Generalise a requested feature past what was asked.** Asked for "tap an enemy piece
+  to see its moves", the first cut previewed *anything you cannot play* — which reads
+  better and silently broke two deliberate guarantees: a drawn game must offer no hints on
+  your own king, and nor must a board locked while the engine thinks. The old e2e suite
+  caught it, which is the good case; the lesson is that **the wider rule was never the one
+  requested**, and the narrow one was both correct and smaller. Build what was asked, note
+  the generalisation, and let the owner ask for it.
+- ❌ ~~Commit to `main`, or commit/push without being asked.~~ **Superseded
+  2026-10-10** — committing through to `main` is now the default (§3). What remains
+  forbidden: force-pushing, rewriting history, and committing work you have not verified
+  green.
 - ❌ Implement a mirror rule that isn't in the spec. If the spec is silent, ask (§11).
 - ✅ New rules are composable and test-first · refactors preserve behavior (add
   characterization tests first) · the core stays pure and portable.
@@ -624,6 +689,23 @@ ago is noise in the one file guaranteed to be read.
 
 `consolidate-session` (§5) does this as its step 5, along with routing the session's other
 lessons. Running it is how the harness compounds instead of resetting.
+
+### The wake command
+
+The owner's half of this. After clearing a session they paste a short prompt that points
+at the hand-off rather than re-explaining the project — so the first thing a fresh context
+does is read what the last one left:
+
+```
+Read the Mirror Chess hand-off memory first, then the documents it names.
+Then pick up: <the one thing>.
+```
+
+Keep it to that shape. It works because the hand-off is current, which is the thing
+`consolidate-session` exists to guarantee; a wake command pointing at a stale hand-off is
+worse than none, because it is trusted. **Offer a fresh one at the end of every session**,
+naming that session's actual next step — a generic one makes the owner do the remembering,
+which is exactly the work this section is meant to remove.
 
 ### The principle
 

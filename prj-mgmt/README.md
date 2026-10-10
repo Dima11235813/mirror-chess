@@ -158,6 +158,15 @@ adopted** and are kept only as a record. Two files here are current:
 e2e files, which run.
 
 ### `quality/` — security, accessibility and robustness  🆕 2026-09-27
+
+**Three items queued 2026-10-10, all from the owner testing on a real phone.** The
+interface is the current weak point, not the rules or the engine:
+[`layout-shift.md`](./epics/quality/layout-shift.md) (🐞 the board jumps between moves —
+has the screenshots), [`responsive-design-pass.md`](./epics/quality/responsive-design-pass.md)
+(📋 desktop, laptop and mobile layout plus a11y beyond the board), and
+[`../epics/board-interactions/history/step-through-history.md`](./epics/board-interactions/history/step-through-history.md)
+(📋 review earlier positions, then return to the present).
+
 [`README.md`](./epics/quality/README.md) holds what a consolidation pass found: the
 findings that belong to no feature. **Production dependencies are clean and the board is
 keyboard-operable with contrast far above AA** — the gaps are structural (no headings
