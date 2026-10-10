@@ -123,14 +123,15 @@ native (Rust) engine without touching the rules' definition of truth.
 
 ```bash
 npm install
-npm run dev        # Vite dev server at http://localhost:5173
+npm run dev        # Vite dev server at http://localhost:41960
 ```
 
 ### Build
 
 ```bash
 npm run build      # tsc -b && vite build
-npm run preview    # serve the production build on :5173
+npm run preview    # serve the production build on :41961
+npm run preview:lan # ...and expose it on the LAN, to test on a phone
 ```
 
 ### Tests

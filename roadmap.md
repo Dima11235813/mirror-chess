@@ -8,7 +8,7 @@ research → plan → implement → QA → review → commit.
 
 ```
 npm i
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:41960
 npm run test         # unit (Vitest)
 npm run test:int     # integration (Vitest + Testing Library)
 npm run e2e -- --workers=1   # Playwright; see the parallelism task below

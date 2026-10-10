@@ -11,7 +11,7 @@
  * mistake twice, and the next pass starts from evidence instead of from scratch.
  *
  * Usage:
- *   npm run preview        # in another terminal
+ *   npm run preview        # in another terminal — serves 41961
  *   node scripts/check-a11y.mjs
  *
  * Exits non-zero when a check fails, so it can be wired into CI later. It deliberately
@@ -20,10 +20,11 @@
  */
 import { chromium } from '@playwright/test'
 
-// 4173 is `npm run preview`'s port and `playwright.config.ts`'s default. Deliberately not
-// 5173: another project on this machine serves that, and this script spent 30 seconds
-// looking for a chessboard inside it before the guard below was added.
-const BASE = process.env.A11Y_BASE ?? 'http://localhost:4173'
+// 41961 is `npm run preview`'s port, inside this project's claimed block 41960-41979
+// (`D:\GDrive\proj-mgmt\inventory\local-ports.md`). Deliberately not a framework default:
+// this script once spent 30 seconds looking for a chessboard inside another project's app
+// on 5173, before the guard below was added.
+const BASE = process.env.A11Y_BASE ?? 'http://localhost:41961'
 const failures = []
 const notes = []
 
@@ -93,15 +94,15 @@ try {
   const page = await browser.newPage({ viewport: { width: 900, height: 1000 } })
 
   // Fail fast and legibly if something else is serving this port. On this machine another
-  // project also uses 5173, and the first symptom was a 30-second timeout hunting for a
-  // chessboard in a maze app. Say what is actually there.
+  // project also served the default port we used, and the first symptom was a 30-second
+  // timeout hunting for a chessboard in a maze app. Say what is actually there.
   await page.goto(`${BASE}/`)
   const title = await page.title()
   const hasBoard = await page.locator('[data-testid="square-e2"]').count()
   if (!hasBoard) {
     console.error(`No Mirror Chess board at ${BASE} — the page there is titled "${title}".`)
-    console.error('Start it with:  npm run preview -- --port 4173')
-    console.error('and re-run with: A11Y_BASE=http://localhost:4173 npm run check:a11y')
+    console.error('Start it with:  npm run preview')
+    console.error('and re-run with: A11Y_BASE=http://localhost:41961 npm run check:a11y')
     process.exit(2)
   }
 

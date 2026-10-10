@@ -25,11 +25,24 @@ Exit non-zero means **wait**, not "proceed carefully".
 > it *slower*. Three real-time antivirus engines also inspect every file touch, so budget any
 > pass over `node_modules` or `.git` accordingly, and keep scratch on `C:` or `F:\ai\`.
 
-> **Action for this project.** You are running `vite preview` on **port 4173** bound `::`
-> — a framework default, with no claimed block. Please claim **41960–41979** in the
-> registry, move dev and preview servers there, and bind `127.0.0.1` unless LAN access
-> is deliberate. You are the workspace's cleanest codebase; being the last project on
-> framework defaults is out of character, and this is a two-line config change.
+> **Our block: 41960–41979**, claimed 2026-10-10, replacing `vite preview` on 4173 bound
+> `::` and earlier sightings on 5173.
+>
+> | Port | What | Bind |
+> | --- | --- | --- |
+> | **41960** | `npm run dev` | localhost |
+> | **41961** | `npm run preview` | localhost · `npm run preview:lan` adds `--host` for phone testing |
+> | **41962** | Playwright's preview (`npm run e2e`) | localhost |
+> | 41963–41979 | spare | |
+>
+> **41961 and 41962 are deliberately different.** A preview the owner is reading on a phone
+> and an e2e run must not compete for one server — and `reuseExistingServer` makes that
+> failure silent rather than loud. Nothing here starts on its own; this project claims no
+> long-running server.
+>
+> **LAN exposure is deliberate here and recorded in the registry**: the owner tests on a
+> phone, which is where every UI bug this month was found. Use `preview:lan` and hand them
+> the network URL — never `localhost`, which their phone cannot reach.
 
 ---
 

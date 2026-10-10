@@ -77,7 +77,15 @@ it as a regression.
 A check that fails for an **environment** reason must say which, or the next person debugs
 the wrong thing. Two that have bitten this repo, both on 2026-10-03:
 
-- **Port 5173 belongs to another project on this machine** ("Maze Lab"). Playwright and
+- **Ports are governed above this project.** `D:\GDrive\proj-mgmt\inventory\local-ports.md`
+  assigns mirror-chess **41960–41979**: dev 41960, preview 41961, Playwright 41962. Never a
+  framework default (3000, 4173, 4200, 5173, 8080) — they are shared by ~40 projects on this
+  machine, and the e2e suite once spent 30 seconds per test hunting for a chessboard inside
+  another project's app. Run the workspace preflight before a server or a heavy job:
+  `powershell -ExecutionPolicy Bypass -File D:\GDrive\proj-mgmt\inventory\scripts\preflight-resources.ps1 -Port 41962`
+  — a non-zero exit means **wait**, and "D: active time" is the one that bites.
+
+- **Historical, and the reason for the rule above: port 5173 belonged to another project** ("Maze Lab"). Playwright and
   `check:a11y` both reused it and spent 30 seconds per test hunting for a chessboard inside
   a maze app. The e2e config defaults to **4173** and honours `E2E_PORT`; `check:a11y`
   honours `A11Y_BASE` and prints the title of whatever page it found. If every test fails

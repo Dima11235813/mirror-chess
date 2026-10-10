@@ -46,7 +46,8 @@ We aim for a respectful, inclusive, and collaborative environment. Please be con
 # Run tests
  pnpm test
 ```
-Visit `http://localhost:5173` in your browser to play the game locally.
+Visit `http://localhost:41960` in your browser to play the game locally. (The port is not
+a framework default on purpose — see "Shared machine" in `CLAUDE.md`.)
 
 ### 3. Code Style & Best Practices
 - **Functional programming first:** keep logic pure, no side effects in `src/game/*`.
