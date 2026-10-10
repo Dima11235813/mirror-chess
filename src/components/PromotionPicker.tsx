@@ -28,10 +28,13 @@ const NAMES: Readonly<Record<PromotionKind, string>> = {
 /**
  * Ask which piece a promoting pawn becomes.
  *
- * All four are offered, always. Under-promotion is not a curiosity in this variant: a
- * bishop that may capture across the seam is **mating material on its own**
- * (`src/game/draw-rules.ts`), so promoting to a bishop can win a game that promoting to a
- * knight cannot. Offering only a queen would hide a real decision.
+ * All four are offered, always, as every chess interface should. The reason written here
+ * until 2026-10-03 — that a lone bishop is mating material in this variant, so
+ * under-promoting to one can win a game a knight cannot — **was true of the old seam
+ * crossing and is not any more**: a crossing now preserves square colour, bishops are
+ * colour-bound as in chess, and `draw-rules.ts` was re-enumerated to match
+ * (`prj-mgmt/epics/rules/diagonal-crossing.md`). What survives is smaller and still real:
+ * a promoted bishop attacks the far side of the board immediately, since its rays wrap.
  *
  * Render-only: it knows nothing about legality. The board has already established that
  * this move is legal in all four forms — a promotion is generated as four distinct moves

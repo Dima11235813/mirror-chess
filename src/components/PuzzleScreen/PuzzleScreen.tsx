@@ -43,7 +43,7 @@ import type { PuzzleScreenProps, SolveState } from './PuzzleScreen.types'
  * that makes the set worth playing at all: **with the seam closed, this position has no
  * forced mate.**
  */
-export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
+export function PuzzleScreen({ puzzles, startIndex = 0, autoSubmit = true }: PuzzleScreenProps) {
   const [index, setIndex] = useState(() => clamp(startIndex, puzzles.length))
   const [solveState, setSolveState] = useState<SolveState>('thinking')
   /**
@@ -112,7 +112,13 @@ export function PuzzleScreen({ puzzles, startIndex = 0 }: PuzzleScreenProps) {
         `BoardView` is reused unchanged: it already draws portal destinations, check paths
         and accessible names, and it asks the game core what is legal rather than deciding.
       */}
-      <BoardView state={shown} status={status} onMove={onMove} locked={solveState === 'solved'} />
+      <BoardView
+        state={shown}
+        status={status}
+        onMove={onMove}
+        locked={solveState === 'solved'}
+        autoSubmit={autoSubmit}
+      />
 
       <p role="status" aria-live="polite" data-testid={PUZZLE_VERDICT_TESTID}>
         {solveState === 'solved' && (

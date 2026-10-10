@@ -46,7 +46,31 @@ export enum SquareHintClass {
   Castle = 'castle',
   /** Destination where a pawn promotes */
   Promotion = 'promo',
+  /**
+   * A destination of a piece being **previewed** rather than played — an enemy piece, or
+   * any piece once the game is over. Added alongside the normal hint class, so a preview
+   * keeps its kind (capture, mirror, castle) while reading as "not yours to tap".
+   */
+  Preview = 'preview',
+  /** The destination of a move chosen but not yet submitted (auto-submit off). */
+  Held = 'held',
 }
+
+/*
+ * Confirming a move before it is played.
+ * Story: `prj-mgmt/epics/user-moves/move-piece/submit-move.md`.
+ */
+export const SUBMIT_BAR_TESTID = 'submit-bar'
+export const SUBMIT_MOVE_TESTID = 'submit-move'
+export const CANCEL_MOVE_TESTID = 'cancel-move'
+export const HELD_TESTID = 'held-destination'
+
+/** The settings dialog and its controls. */
+export const SETTINGS_OPEN_TESTID = 'settings-open'
+export const SETTINGS_DIALOG_TESTID = 'settings-dialog'
+export const SETTINGS_AUTOSUBMIT_TESTID = 'settings-autosubmit'
+export const SETTINGS_RESET_TESTID = 'settings-reset'
+export const SETTINGS_CLOSE_TESTID = 'settings-close'
 
 /** Opponent selection, strength, and the engine's live "thinking" region. */
 export const OPPONENT_SIDE_TESTID = 'opponent-side'

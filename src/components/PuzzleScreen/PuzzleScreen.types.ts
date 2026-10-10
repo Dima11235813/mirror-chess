@@ -6,6 +6,14 @@ export interface PuzzleScreenProps {
   readonly puzzles: readonly Puzzle[]
   /** Where to start, so a link can open one puzzle. Clamped into range. */
   readonly startIndex?: number
+  /**
+   * Commit a move as soon as a destination is chosen.
+   *
+   * Passed straight through to `BoardView`, which owns the holding and the Submit button.
+   * A puzzle is judged the instant a move arrives, so a mis-tap here costs the attempt —
+   * which is exactly why the preference applies on this screen too.
+   */
+  readonly autoSubmit?: boolean
 }
 
 /**

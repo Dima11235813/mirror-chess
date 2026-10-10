@@ -1,15 +1,20 @@
 import { useMemo, useState } from 'react'
-import type { Coord, GameState, Kind, Move, Piece, PromotionKind } from '@game/types'
+import type { Color, Coord, GameState, Kind, Move, Piece, PromotionKind } from '@game/types'
 import { algebraic, coordEq, sameCoord } from '@game/coord'
 import { legalMovesFor, pseudoLegalMovesFor } from '@game/moves'
 import { capturedSquare, isPromotion } from '@game/move'
 import { checkingPieces, checkPath, findKing } from '@game/attacks'
+import { IonButton } from '@ionic/react'
 import { PromotionPicker } from './PromotionPicker'
 import { isGameOver, type GameStatus } from '@game/status'
 import {
   MOVE_MESSAGE_TESTID,
   SquareHintClass,
   SquareStateClass,
+  SUBMIT_BAR_TESTID,
+  SUBMIT_MOVE_TESTID,
+  CANCEL_MOVE_TESTID,
+  HELD_TESTID,
   hintTestId,
   squareTestId,
 } from '@shared/ui/selectors'
@@ -33,10 +38,21 @@ export interface BoardViewProps {
    * for a position that never existed.
    */
   readonly locked?: boolean
+  /**
+   * Commit a move the moment a destination is chosen.
+   *
+   * `false` holds it instead and waits for an explicit Submit, which is what makes the
+   * board safe to use with a thumb (`submit-move.md`). The shell owns the preference; the
+   * board only obeys it.
+   */
+  readonly autoSubmit?: boolean
 }
 
 /** Message shown when a player picks a square their king's safety forbids. */
 const SELF_CHECK_MESSAGE = 'Not allowed: that move would leave your king in check.'
+
+/** Shown while a piece belonging to the other side has its moves on display. */
+const PREVIEW_MESSAGE = 'Showing what this piece could do — you cannot play it right now.'
 
 /**
  * The chess board.
@@ -52,19 +68,68 @@ interface PendingPromotion {
   readonly moves: readonly Move[]
 }
 
-export function BoardView({ state, status, onMove, locked = false }: BoardViewProps) {
+/**
+ * Whose piece is on `square`, if any.
+ *
+ * The board asks this to decide between three answers to a tap: play it, **preview** it,
+ * or do nothing.
+ *
+ * **Preview belongs to the colour, not to the board's state.** A piece of the side *not*
+ * to move is previewed — that is the feature, and it commits nothing. A piece of the side
+ * to move is never previewed, even when it cannot be played: a drawn game and a board
+ * locked while the engine thinks must both keep offering **nothing** for the piece a
+ * player might otherwise expect to move, which is what `draw-rules.e2e.ts` and
+ * `opponent.e2e.ts` have guarded since before previews existed. Generalising preview to
+ * "anything you cannot play" broke both of them, and the narrower rule is also the one
+ * that was asked for.
+ */
+function colourOn(state: GameState, square: Coord): Color | null {
+  return state.board[coordIndex(square)]?.color ?? null
+}
+
+/**
+ * The moves to show for a piece being **previewed** rather than played.
+ *
+ * Identical to `legalMovesFor` with one deliberate exception: **the en-passant square is
+ * cleared first.** That right belongs to the side to move, and it expires after a single
+ * move — so by the time it is genuinely this piece's turn, it is gone either way. Without
+ * this, previewing a black pawn on `d7` right after black played `e7-e5` offers `e6 e.p.`,
+ * which would capture black's own pawn. Measured with a probe before this was built, and
+ * it is the one place where "turn is deliberately not checked" (`moves.ts`) leaks.
+ */
+function previewMovesFor(state: GameState, square: Coord): readonly Move[] {
+  return legalMovesFor({ ...state, enPassant: null }, square)
+}
+
+export function BoardView({
+  state,
+  status,
+  onMove,
+  locked = false,
+  autoSubmit = true,
+}: BoardViewProps) {
   const [selected, setSelected] = useState<Coord | null>(null)
   const [message, setMessage] = useState<string>('')
   const [pending, setPending] = useState<PendingPromotion | null>(null)
+  /** A move chosen but not yet committed, when auto-submit is off. */
+  const [awaitingSubmit, setAwaitingSubmit] = useState<Move | null>(null)
 
-  // A finished game offers nothing. Checkmate and stalemate take care of themselves —
-  // there are no legal moves to show — but the three draws leave legal moves on the
-  // board, so without this the UI would hint at moves the reducer then refuses.
-  const over = isGameOver(status) || locked
-  const legal = useMemo(
-    () => (selected && !over ? legalMovesFor(state, selected) : []),
-    [state, selected, over],
-  )
+  // A finished game offers nothing *playable*. Checkmate and stalemate take care of
+  // themselves — there are no legal moves — but the three draws leave legal moves on the
+  // board, so without this the UI would hint at moves the reducer then refuses. It still
+  // previews: showing what a piece could do commits nothing.
+  const frozen = isGameOver(status) || locked
+  const selectedColour = selected ? colourOn(state, selected) : null
+  /** The other side's piece: show what it could do, but it is not yours to play. */
+  const previewing = selectedColour !== null && selectedColour !== state.turn
+  /** Your piece, on your turn, on a live board: the only case that produces a move. */
+  const playable = selectedColour === state.turn && !frozen
+
+  const legal = useMemo(() => {
+    if (!selected) return []
+    if (previewing) return previewMovesFor(state, selected)
+    return playable ? legalMovesFor(state, selected) : []
+  }, [state, selected, previewing, playable])
   const epCapturedSquares = useMemo(() => {
     const set = new Set<string>()
     for (const m of legal) {
@@ -80,19 +145,39 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
     onMove(m)
     setSelected(null)
     setPending(null)
+    setAwaitingSubmit(null)
+    setMessage('')
+  }
+
+  /** Commit now, or hold for an explicit Submit — the one place the preference is read. */
+  const choose = (m: Move) => {
+    if (autoSubmit) finish(m)
+    else {
+      setAwaitingSubmit(m)
+      setPending(null)
+      setMessage('')
+    }
+  }
+
+  const cancelPending = () => {
+    setAwaitingSubmit(null)
+    setSelected(null)
     setMessage('')
   }
 
   const clickSquare = (c: Coord) => {
-    if (over || pending) return
-    if (selected) {
+    // While a move waits to be submitted the board is read-only: the only two answers are
+    // Submit and Cancel. Letting a tap quietly re-target would make the button a lie.
+    if (pending || awaitingSubmit) return
+
+    if (selected && playable) {
       // A promotion arrives as four moves to the same square, so the destination alone
       // does not identify one — ask which piece before committing.
       const choices = legal.filter(m => sameCoord(m.to, c))
       const first = choices[0]
       if (first) {
         if (isPromotion(first)) setPending({ square: c, moves: choices })
-        else finish(first)
+        else choose(first)
         return
       }
       // The square was reachable by the piece's movement, but king safety forbids it.
@@ -101,14 +186,21 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
         return
       }
     }
-    setMessage('')
-    const piece = state.board[coordIndex(c)]
-    setSelected(piece && piece.color === state.turn ? c : null)
+
+    // Selecting. A piece that cannot be played is previewed rather than ignored — tapping
+    // an enemy knight to see where it could go is the question players actually ask. A
+    // tap on a previewed square just clears, because there is nothing to commit.
+    const colour = colourOn(state, c)
+    const next = colour ? c : null
+    setSelected(next)
+    setMessage(colour && colour !== state.turn ? PREVIEW_MESSAGE : '')
   }
 
   const choosePromotion = (kind: PromotionKind) => {
     const move = pending?.moves.find(m => m.promotion === kind)
-    if (move) finish(move)
+    // Even a promotion goes through `choose`: picking the piece says *which* move, not
+    // that it should be played, and with auto-submit off the player still gets the last word.
+    if (move) choose(move)
   }
 
   const selectedPiece = (selected ? state.board[coordIndex(selected)] : null) ?? null
@@ -124,6 +216,7 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
           const isSelected = !!selected && coordEq(selected, c)
           const moveToHere = legal.find(m => sameCoord(m.to, c))
           const hint = moveToHere ? hintKindOf(moveToHere) : null
+          const isHeld = !!awaitingSubmit && sameCoord(awaitingSubmit.to, c)
           const checkRole = check.roleOf(sq)
           const showEpCapOverlay = epCapturedSquares.has(sq)
 
@@ -132,7 +225,9 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
               key={i}
               className={squareClasses(isLight, isSelected, checkRole)}
               onClick={() => clickSquare(c)}
-              aria-label={describeSquare({ square: sq, piece, hint, checkRole, selected: isSelected })}
+              aria-label={describeSquare({
+                square: sq, piece, hint, checkRole, selected: isSelected, preview: previewing,
+              })}
               data-testid={squareTestId(sq)}
             >
               {showEpCapOverlay && (
@@ -142,7 +237,13 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
                 />
               )}
               <div className="glyph">{piece ? pieceToGlyph(piece) : ''}</div>
-              {hint && <div className={hintClassesFor(hint)} data-testid={hintTestId(sq)} />}
+              {hint && (
+                <div
+                  className={`${hintClassesFor(hint)}${previewing ? ` ${SquareHintClass.Preview}` : ''}`}
+                  data-testid={hintTestId(sq)}
+                />
+              )}
+              {isHeld && <div className={SquareHintClass.Held} data-testid={HELD_TESTID} />}
               {c.r === 0 && (
                 <span className="coordLabel file" aria-hidden="true">{fileLabel(c.f)}</span>
               )}
@@ -153,9 +254,35 @@ export function BoardView({ state, status, onMove, locked = false }: BoardViewPr
           )
         })}
       </div>
-      <p className="moveMessage" role="status" aria-live="polite" data-testid={MOVE_MESSAGE_TESTID}>
+      <p
+        className={`moveMessage${message === PREVIEW_MESSAGE ? ' info' : ''}`}
+        role="status"
+        aria-live="polite"
+        data-testid={MOVE_MESSAGE_TESTID}
+      >
         {message}
       </p>
+
+      {/*
+        Auto-submit off: the move is chosen but not played. The bar says *which* move, so
+        the player is confirming a thing rather than confirming blindly — and it is a live
+        region, because it appears in response to a tap (CLAUDE.md §7).
+      */}
+      {awaitingSubmit && (
+        <div className="submitBar" role="status" aria-live="polite" data-testid={SUBMIT_BAR_TESTID}>
+          <span className="submitBarMove">
+            {algebraic(awaitingSubmit.from)}–{algebraic(awaitingSubmit.to)}
+            {awaitingSubmit.crossedSeam ? '*' : ''}
+            {awaitingSubmit.promotion ? `=${awaitingSubmit.promotion}` : ''}
+          </span>
+          <IonButton size="small" data-testid={SUBMIT_MOVE_TESTID} onClick={() => finish(awaitingSubmit)}>
+            Submit move
+          </IonButton>
+          <IonButton size="small" fill="outline" data-testid={CANCEL_MOVE_TESTID} onClick={cancelPending}>
+            Cancel
+          </IonButton>
+        </div>
+      )}
       {pending && (
         <PromotionPicker
           square={algebraic(pending.square)}

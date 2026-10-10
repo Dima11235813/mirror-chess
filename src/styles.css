@@ -268,12 +268,23 @@ body, html, #root {
   background: rgba(249, 115, 22, 0.22);
 }
 
+/*
+ * The line under the board. It carries two kinds of text and they must not look alike:
+ * a **refusal** ("that would leave your king in check") is a warning, while a **preview**
+ * ("showing what this piece could do") is information. Both were red until a screenshot
+ * on 2026-10-09 showed the informational one looking like something had gone wrong.
+ */
 .moveMessage {
   min-height: 1.25rem;
   margin: 0 auto 4px;
   text-align: center;
   color: var(--danger-color);
   font-size: 0.9rem;
+}
+
+.moveMessage.info {
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .footer {
@@ -682,3 +693,98 @@ ion-toggle {
 .selfPlayLog li { padding: 1px 0; }
 .selfPlayMove { font-weight: 600; color: var(--text-primary); }
 .selfPlayScore { font-variant-numeric: tabular-nums; }
+
+/*
+ * Previewing a piece you cannot play — an enemy piece, or anything once the game is over.
+ * Story: prj-mgmt/epics/user-moves/move-piece/select-piece.md
+ *
+ * Greyed and hollow rather than a different shape: the marker still has to say *what kind*
+ * of move it is (capture, seam crossing, castle), so the kind keeps its own styling and
+ * this only drains the colour out of it. The accessible name changes too — "could move
+ * here" rather than "legal move" — because a visual-only distinction would tell a
+ * screen-reader user that an enemy's move is theirs to play.
+ */
+.hint.preview {
+  background: var(--text-secondary);
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.hint.preview.cap,
+.hint.preview.mirror {
+  border-color: var(--text-secondary);
+  background: transparent;
+  opacity: 0.45;
+}
+
+/* The destination of a move chosen but not yet submitted. */
+.held {
+  position: absolute;
+  inset: 6%;
+  border: 3px dashed var(--accent-color);
+  border-radius: 10%;
+  pointer-events: none;
+}
+
+.submitBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 4px 0 8px;
+}
+
+.submitBarMove {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The settings dialog. Shares `.promotionBackdrop` with the promotion picker on purpose:
+ * two modals that dim the page differently is a worse outcome than a shared class.
+ */
+.settingsDialog {
+  background: var(--surface-color, #fff);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: min(92vw, 340px);
+  max-width: 92vw;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.settingsTitle { margin: 0 0 12px; font-size: 1.1rem; }
+
+.settingsRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.settingsRow input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.settingsRow span { display: flex; flex-direction: column; gap: 2px; }
+.settingsRow small { color: var(--text-secondary); line-height: 1.35; }
+
+.settingsActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.settingsReset,
+.settingsClose {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--text-secondary);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.settingsClose { border-color: var(--accent-color); color: var(--accent-color); font-weight: 600; }

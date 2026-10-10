@@ -7,6 +7,8 @@ import { SavedGamesList } from '@components/SavedGamesList'
 import { ThemeToggle } from '@components/ionic/ThemeToggle'
 import { PuzzleScreen } from '@components/PuzzleScreen/PuzzleScreen'
 import { SelfPlayScreen } from '@components/SelfPlayScreen/SelfPlayScreen'
+import { SettingsDialog } from '@components/SettingsDialog'
+import { loadSettings, saveSettings, type Settings } from '@shared/settings'
 import { indexOfPuzzleId, puzzlesInPlayOrder } from '@/puzzles/set'
 import { reduceMove } from '@game/reducer'
 import { fromPiecesSpec, initialPosition } from '@game/setup'
@@ -16,7 +18,12 @@ import { gameStatus } from '@game/status'
 import type { Color, GameState, Move } from '@game/types'
 import { IonButton, IonHeader, IonTitle, IonToolbar } from '@ionic/react'
 import { deleteSavedGame, isValidGameName, listSavedGames, loadSavedGame, renameSavedGame, saveGame } from '@shared/persistence'
-import { GAME_STATUS_TESTID, PUZZLE_MODE_TESTID, WATCH_MODE_TESTID } from '@shared/ui/selectors'
+import {
+  GAME_STATUS_TESTID,
+  PUZZLE_MODE_TESTID,
+  WATCH_MODE_TESTID,
+  SETTINGS_OPEN_TESTID,
+} from '@shared/ui/selectors'
 import { describeStatus } from '@shared/ui/status-text'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -97,6 +104,19 @@ function puzzleIndexFromUrl(): number {
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>(() => screenFromUrl())
+  /*
+   * Settings are read once at startup and written on every change. Keeping them in the
+   * shell rather than in a context is deliberate while there is exactly one of them: the
+   * two screens that care are both rendered here, and a store would be ceremony around a
+   * boolean.
+   */
+  const [settings, setSettings] = useState<Settings>(() => loadSettings())
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const changeSettings = useCallback((next: Settings) => {
+    setSettings(next)
+    saveSettings(next)
+  }, [])
   const puzzleMode = screen === 'puzzles'
   const [state, setState] = useState<GameState>(() => loadStateFromUrl())
   const [moveCount, setMoveCount] = useState<number>(0)
@@ -150,6 +170,13 @@ export default function App() {
 
   return (
     <div className="app">
+      {settingsOpen && (
+        <SettingsDialog
+          settings={settings}
+          onChange={changeSettings}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
       {/* The document's only h1. `ion-title` below renders inside a shadow root with no
           heading role, so without this there is nothing to navigate by. */}
       <h1 className="visually-hidden">Mirror Chess</h1>
@@ -177,6 +204,14 @@ export default function App() {
                 three screens. */}
             {screen === 'game' && <IonButton onClick={onReset}>Reset</IonButton>}
             {screen === 'game' && <SaveGameButton disabled={!canSave} onClick={onSave} />}
+            <IonButton
+              fill="clear"
+              data-testid={SETTINGS_OPEN_TESTID}
+              aria-label="Settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <span aria-hidden="true">⚙</span>
+            </IonButton>
             <ThemeToggle />
           </div>
         </IonToolbar>
@@ -188,14 +223,24 @@ export default function App() {
         game in progress. Switching back leaves that game untouched.
       */}
       {screen === 'puzzles' ? (
-        <PuzzleScreen puzzles={puzzlesInPlayOrder()} startIndex={puzzleIndexFromUrl()} />
+        <PuzzleScreen
+          puzzles={puzzlesInPlayOrder()}
+          startIndex={puzzleIndexFromUrl()}
+          autoSubmit={settings.autoSubmit}
+        />
       ) : screen === 'watch' ? (
         /* Both sides play the ruleset the URL carries, at one strength: an uneven match
            would measure the handicap rather than the game (`self-play-harness.md` §1). */
         <SelfPlayScreen rules={state.rules} difficulty={difficulty} />
       ) : (
         <>
-          <BoardView state={state} status={status} onMove={onMove} locked={boardLocked} />
+          <BoardView
+            state={state}
+            status={status}
+            onMove={onMove}
+            locked={boardLocked}
+            autoSubmit={settings.autoSubmit}
+          />
           <footer className="footer">
             <p role="status" aria-live="polite" data-testid={GAME_STATUS_TESTID}>
               <strong>{describeStatus(status, state.turn)}</strong>

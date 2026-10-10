@@ -38,6 +38,15 @@ export interface SquarePresentation {
   readonly hint: SquareHintKind | null
   readonly checkRole: SquareCheckRole | null
   readonly selected: boolean
+  /**
+   * The hint belongs to a piece being **previewed** rather than played.
+   *
+   * Changes the words, not just the colour. A sighted player can see that a preview ring
+   * is grey; a screen-reader user is told "could move here" instead of "legal move", which
+   * is the difference between information and an invitation (CLAUDE.md §7: no
+   * visual-only cues).
+   */
+  readonly preview?: boolean
 }
 
 const PIECE_NAMES: Readonly<Record<Kind, string>> = {
@@ -104,8 +113,28 @@ export function describeSquare(p: SquarePresentation): string {
   const parts: string[] = [p.square, describeOccupant(p.piece)]
   if (p.selected) parts.push('selected')
   if (p.checkRole) parts.push(CHECK_DESCRIPTIONS[p.checkRole])
-  if (p.hint) parts.push(HINT_DESCRIPTIONS[p.hint])
+  if (p.hint) parts.push((p.preview ? PREVIEW_DESCRIPTIONS : HINT_DESCRIPTIONS)[p.hint])
   return parts.join(', ')
+}
+
+/**
+ * The same hints, described as something the piece **could** do rather than something you
+ * may do — so the announcement never invites a tap that will do nothing.
+ *
+ * Spelled out rather than derived from {@link HINT_DESCRIPTIONS} by string surgery. The
+ * first attempt did that and produced "could move", which is not a sentence; and a full
+ * `Record` makes the compiler insist that a new hint kind gets a preview wording instead
+ * of silently falling back to something grammatical-ish.
+ */
+const PREVIEW_DESCRIPTIONS: Readonly<Record<SquareHintKind, string>> = {
+  'move': 'could move here',
+  'capture': 'could capture here',
+  'mirror-move': 'could move here through the seam',
+  'mirror-capture': 'could capture here through the seam',
+  'en-passant': 'could capture en passant here',
+  'castle': 'could castle here',
+  'promotion': 'could move here, promoting',
+  'promotion-capture': 'could capture here, promoting',
 }
 
 function describeOccupant(piece: Piece | null): string {
