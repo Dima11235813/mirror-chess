@@ -1,6 +1,8 @@
 # Bug — the board jumps between moves, because the text above it changes height
 
-> **Status: BACKLOG — reported by the owner from a phone, 2026-10-10, with screenshots.**
+> **Status: DONE (2026-10-10).** Fixed, with a regression suite that was proved able to
+> fail: [`layout-shift.e2e.ts`](./layout-shift.e2e.ts). Two of the five things this story
+> suspected turned out to be false — see §6, which is the part worth reading.
 > Part of the [quality epic](./README.md). Caused by
 > [`../balance/watch-a-game.md`](../balance/watch-a-game.md), shipped the day before.
 > Fix alongside [`responsive-design-pass.md`](./responsive-design-pass.md), which covers
@@ -52,36 +54,94 @@ shift is not a property of a layout, it is a property of a **transition**.
 > re-renders on a timer or on live data, capture it in at least two states and compare the
 > geometry, not the pixels.
 
-## 4. What to do
+## 4. What was done
 
 The owner's instruction, 2026-10-10:
 
 > "We want to be intelligent, pre-allocate an area, and if that text overflows we can allow
 > a tap to view all of it on mobile. Same with the step count."
 
-So:
+- [x] **Reserve the space.** [`src/components/ReservedText/`](../../../src/components/ReservedText/ReservedText.tsx)
+      holds a fixed number of lines whatever is inside it. One custom property,
+      `--reserved-lines`, drives **both** the space held and the line the text is clamped
+      at, because a reserve in px beside a clamp in lines is a pair that drifts.
+- [x] **Clamp and expand.** Past the reserve the text clamps and a disclosure appears —
+      a real `<button>` with `aria-expanded` and `aria-controls`, so it works by touch and
+      by keyboard, and Escape closes it. Expanding **overlays** what follows rather than
+      reflowing it: text that expands by pushing the board down has only traded one shift
+      for a worse one.
+- [x] **The move log.** `height: 30vh`, not `max-height` — it used to grow a row at a time.
+- [x] **Audit of every other conditional block.** Three found, two fixed, one deliberately
+      left: see §5.
+- [x] **A regression test that can fail**, in
+      [`layout-shift.e2e.ts`](./layout-shift.e2e.ts) — and *proved* to fail, by restoring
+      the old geometry one rule at a time and watching each test go red.
 
-- [ ] **Reserve the space.** Give the gauge region a fixed height (or `min-height` in `ch`
-      / `lh` units) sized for its longest reasonable content, so the board never moves.
-      Prefer reserving over shortening: the sentence is the thing that makes the gauge
-      legible to someone who has not read the story.
-- [ ] **Clamp and expand.** When the text exceeds the reserved area, clamp it
-      (`-webkit-line-clamp`) and make the region tappable to reveal the rest — a disclosure,
-      not a tooltip, so it works by touch and by keyboard and is announced.
-- [ ] **Same treatment for the move log** ("the step count"): a fixed region, scrolling or
-      expandable, that does not resize the page as rows arrive.
-- [ ] **Audit every other conditional block above the board** for the same fault — the
-      game screen's `.moveMessage` already reserves `min-height: 1.25rem` for exactly this
-      reason, which is the pattern to copy, and the submit bar added on 2026-10-09 does
-      **not** reserve anything.
-- [ ] **A regression test that can fail.** Measure the board's bounding box across several
-      consecutive moves and assert it does not move. A single-state assertion cannot catch
-      this class of bug, and `check:a11y` is the natural home.
+### What the reserve is, and why the gauge needed more than one
 
-## 5. Notes
+The headline fix is not the reserve. It is that **the sentence is now always present**:
+`gaugeNote()` returns text in all three states rather than rendering only while moves are
+tied. Reserving space for a conditional block pads over the conditional; saying something
+in every state removes it. The reserve then handles the residual two-versus-three-line
+wrap.
+
+| Region | Lines held | Measured longest content |
+| --- | --- | --- |
+| Watch gauge | 3 | 3 lines at every width 320–900px |
+| Puzzle prompt | 2 | 2 lines, both extremes of the 248-puzzle set |
+| Board message | 2 | 2 lines at ≤390px, 1 at desktop widths |
+| Submit bar slot | 3rem | 35px bar, reserved only while confirm-before-move is on |
+
+## 5. The audit, including what was left alone
+
+- **Watch title** — was `Engine vs engine · ${describeStatus(…)}`, which wraps to two lines
+  on a phone for the longer statuses. Now a constant string: the status was already shown
+  in full in the live region below the board, so this was a **duplicate that changed
+  height**, which is strictly worse than no duplicate.
+- **Puzzle verdict and reveal** — below the board, and the reveal is the payoff for
+  solving. Reserving space for it would leave a permanent hole on every unsolved puzzle.
+  Deliberately left: the owner's rule is about what sits *above* the primary content.
+- **Saved-games list and opponent controls** — below everything; nothing moves when they
+  change.
+
+## 6. What this story got wrong
+
+Two of its own claims did not survive being measured, and both are more useful than the fix.
+
+**The puzzle screen was never shifting.** §5 suspected it. Across all 248 committed puzzles
+the prompt is 77–83 characters and renders as exactly two lines at every width from 320px
+up — the material and ruleset strings are far more uniform than they look. The reserve went
+in anyway, at **two** lines rather than the three originally written, because a third line
+is 21.6px of dead space above the board on every puzzle. *That* is what reserving by
+guesswork costs, and it is the argument for measuring first.
+
+**Three of the five regression tests passed against the unfixed app.** Written the obvious
+way — "the footer did not move" — they were green, and the bug was still there. `.app` has
+a `1fr` grid row that silently absorbs a block growing by 20px, and keeps absorbing until
+the page runs out of slack, at which point everything below moves at once.
+
+> **A layout shift measured downstream is measured through a shock absorber.** Assert the
+> height of the block that grew, not the position of something below it. The downstream
+> assertion is still worth making — it is the user-visible promise — but it cannot be the
+> only one, and on a desktop-sized viewport it will quietly pass forever.
+
+That is also the honest answer to "why did this reach a phone and not a desktop": the
+desktop had slack and the phone did not.
+
+**One test cannot currently fail**, and says so: the puzzle one, which guards a property
+that already holds. The watch-mode note test drives the text from the test rather than the
+engine, because no URL can put the engine in a position where its evaluation has a
+preference — reaching one takes minutes of real play, which is precisely why this went
+unnoticed until someone played on a phone.
+
+## 7. Notes
 
 - Both screenshots are in dark theme on a real phone, which is also where the header takes
   two rows and eats vertical space — see
   [`responsive-design-pass.md`](./responsive-design-pass.md) §1.
-- The same conditional-text pattern exists in `PuzzleScreen` (the verdict line changes
-  between one and two lines) and should be checked while the fix is fresh.
+- The disclosure control was first styled in `--accent-color`, which is 9.6:1 on the dark
+  background and **1.9:1 on the light one**. A light-theme screenshot caught it; it now
+  uses the text colour and keeps the underline.
+- The reserve means the disclosure is dormant in normal use — it appears when the text
+  genuinely exceeds its space, which on this screen takes a root font size around 26px.
+  That path is covered in a real browser rather than only in jsdom.

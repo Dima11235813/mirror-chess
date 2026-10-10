@@ -1,5 +1,38 @@
 # CLAUDE.md — Mirror Chess operating manual
 
+<!-- workspace-harness-pointer: see D:\GDrive\proj-mgmt\workspace-harness-adoption.md -->
+## Shared machine — workspace harness
+
+This project shares one machine with ~40 others. The workspace harness at
+[`D:\GDrive\AGENTS.md`](file:///D:/GDrive/AGENTS.md) **takes precedence over local convenience**:
+
+- **Ports** — claim a block in [`local-ports.md`](file:///D:/GDrive/proj-mgmt/inventory/local-ports.md)
+  before binding. Never use framework defaults (3000, 4173, 4200, 5173, 8080…).
+  Bind `127.0.0.1` unless LAN exposure is deliberate and recorded in the registry.
+- **Resources** — ceilings and pacing in [`local-resources.md`](file:///D:/GDrive/proj-mgmt/inventory/local-resources.md).
+  **Never drive a resource to 100%; a slower batch beats a burst.**
+
+Before any dev server, build, or job touching many files:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File D:\GDrive\proj-mgmt\inventory\scripts\preflight-resources.ps1 -Port <your-port>
+```
+
+Exit non-zero means **wait**, not "proceed carefully".
+
+> **Why.** On 2026-10-10 `D:` — a 7200 rpm HDD holding every project — ran at 94% active with
+> 41.6 ms response while delivering about **5% of its sequential capability**. Saturating it made
+> it *slower*. Three real-time antivirus engines also inspect every file touch, so budget any
+> pass over `node_modules` or `.git` accordingly, and keep scratch on `C:` or `F:\ai\`.
+
+> **Action for this project.** You are running `vite preview` on **port 4173** bound `::`
+> — a framework default, with no claimed block. Please claim **41960–41979** in the
+> registry, move dev and preview servers there, and bind `127.0.0.1` unless LAN access
+> is deliberate. You are the workspace's cleanest codebase; being the last project on
+> framework defaults is out of character, and this is a two-line config change.
+
+---
+
 Guidance for Claude Code (and human contributors) working in this repo. Read this
 first. It captures **how we work**, not just what the code is.
 
@@ -463,6 +496,15 @@ least two states and compare the **geometry**, not the pixels
 
 The design rule that follows: **nothing above the primary content may be conditionally
 present or variably tall.** Reserve the space. The board is what a thumb is aiming at.
+
+**And measure the block that grew, not something below it.** When that shift was fixed on
+2026-10-10, three of the five regression tests written for it passed against the *unfixed*
+app. They asserted the obvious thing — "the footer did not move" — and `.app` has a `1fr`
+grid row that absorbs a block growing by 20px, and keeps absorbing until the page runs out
+of slack, at which point everything below moves at once. A layout assertion taken
+downstream is taken through a shock absorber: it passes on a desktop forever and the bug
+still ships to a phone. Assert the **height of the thing that changed**; assert the
+downstream position too, because that is the user-visible promise, but never only that.
 
 ### When a test goes red, suspect the fixture first
 

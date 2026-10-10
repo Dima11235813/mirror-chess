@@ -96,6 +96,27 @@ export const PUZZLE_MODE_TESTID = 'puzzle-mode'
 /** The difficulty band — a coarse label, never a rating. See `src/puzzles/difficulty.ts`. */
 export const PUZZLE_BAND_TESTID = 'puzzle-band'
 
+/*
+ * A block of text that holds its height whatever it says, and the control that reveals
+ * the rest of it when it does not fit. Component: `src/components/ReservedText/`.
+ * Story: `prj-mgmt/epics/quality/layout-shift.md`.
+ */
+/**
+ * The space held for the submit bar while confirm-before-move is on.
+ *
+ * It carries a test id so a test can assert the one thing the fix actually guarantees:
+ * that this block is the same height whether or not a move is waiting. Measuring
+ * something further down the page instead proves nothing, because `.app` has a `1fr` grid
+ * row that absorbs a block growing by 35px and keeps absorbing until the page runs out of
+ * slack — at which point everything below moves at once. That is why the bug reached a
+ * phone and not a desktop (`prj-mgmt/epics/quality/layout-shift.md`).
+ */
+export const SUBMIT_BAR_SLOT_TESTID = 'submit-bar-slot'
+
+export const RESERVED_TEXT_CLASS = 'reservedText'
+export const RESERVED_TEXT_BODY_CLASS = 'reservedTextBody'
+export const RESERVED_TEXT_MORE_CLASS = 'reservedTextMore'
+
 /** What the last save-file import did — announced, not left to the console. */
 export const IMPORT_MESSAGE_TESTID = 'import-message'
 

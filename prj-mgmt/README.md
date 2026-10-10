@@ -161,8 +161,10 @@ e2e files, which run.
 
 **Three items queued 2026-10-10, all from the owner testing on a real phone.** The
 interface is the current weak point, not the rules or the engine:
-[`layout-shift.md`](./epics/quality/layout-shift.md) (🐞 the board jumps between moves —
-has the screenshots), [`responsive-design-pass.md`](./epics/quality/responsive-design-pass.md)
+[`layout-shift.md`](./epics/quality/layout-shift.md) (✅ **done 2026-10-10** — the board
+holds still; read its §6 for the two things the story itself got wrong, including three
+regression tests that passed against the unfixed app),
+[`responsive-design-pass.md`](./epics/quality/responsive-design-pass.md)
 (📋 desktop, laptop and mobile layout plus a11y beyond the board), and
 [`../epics/board-interactions/history/step-through-history.md`](./epics/board-interactions/history/step-through-history.md)
 (📋 review earlier positions, then return to the present).

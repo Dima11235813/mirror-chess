@@ -6,12 +6,14 @@ import { capturedSquare, isPromotion } from '@game/move'
 import { checkingPieces, checkPath, findKing } from '@game/attacks'
 import { IonButton } from '@ionic/react'
 import { PromotionPicker } from './PromotionPicker'
+import { ReservedText } from './ReservedText/ReservedText'
 import { isGameOver, type GameStatus } from '@game/status'
 import {
   MOVE_MESSAGE_TESTID,
   SquareHintClass,
   SquareStateClass,
   SUBMIT_BAR_TESTID,
+  SUBMIT_BAR_SLOT_TESTID,
   SUBMIT_MOVE_TESTID,
   CANCEL_MOVE_TESTID,
   HELD_TESTID,
@@ -254,33 +256,52 @@ export function BoardView({
           )
         })}
       </div>
-      <p
+      {/*
+        Two lines of space, held whether or not there is a message — both of the real
+        messages wrap to two lines on a phone, and the footer and the opponent controls
+        used to move every time a piece was tapped
+        (`prj-mgmt/epics/quality/layout-shift.md`).
+      */}
+      <ReservedText
+        lines={2}
+        live
+        as="p"
+        label="the board's message"
+        wrapperClassName="moveMessageSlot"
         className={`moveMessage${message === PREVIEW_MESSAGE ? ' info' : ''}`}
-        role="status"
-        aria-live="polite"
-        data-testid={MOVE_MESSAGE_TESTID}
+        testId={MOVE_MESSAGE_TESTID}
       >
         {message}
-      </p>
+      </ReservedText>
 
       {/*
         Auto-submit off: the move is chosen but not played. The bar says *which* move, so
         the player is confirming a thing rather than confirming blindly — and it is a live
         region, because it appears in response to a tap (CLAUDE.md §7).
+
+        The space is reserved whenever confirmation is **switched on**, not whenever a move
+        is waiting: the bar's arrival would otherwise push everything below the board down
+        on every single move. Keyed on the setting rather than the state because the
+        setting is the thing that does not change during play — and with auto-submit on
+        the bar can never appear, so there is nothing to hold space for.
       */}
-      {awaitingSubmit && (
-        <div className="submitBar" role="status" aria-live="polite" data-testid={SUBMIT_BAR_TESTID}>
-          <span className="submitBarMove">
-            {algebraic(awaitingSubmit.from)}–{algebraic(awaitingSubmit.to)}
-            {awaitingSubmit.crossedSeam ? '*' : ''}
-            {awaitingSubmit.promotion ? `=${awaitingSubmit.promotion}` : ''}
-          </span>
-          <IonButton size="small" data-testid={SUBMIT_MOVE_TESTID} onClick={() => finish(awaitingSubmit)}>
-            Submit move
-          </IonButton>
-          <IonButton size="small" fill="outline" data-testid={CANCEL_MOVE_TESTID} onClick={cancelPending}>
-            Cancel
-          </IonButton>
+      {!autoSubmit && (
+        <div className="submitBarSlot" data-testid={SUBMIT_BAR_SLOT_TESTID}>
+          {awaitingSubmit && (
+            <div className="submitBar" role="status" aria-live="polite" data-testid={SUBMIT_BAR_TESTID}>
+              <span className="submitBarMove">
+                {algebraic(awaitingSubmit.from)}–{algebraic(awaitingSubmit.to)}
+                {awaitingSubmit.crossedSeam ? '*' : ''}
+                {awaitingSubmit.promotion ? `=${awaitingSubmit.promotion}` : ''}
+              </span>
+              <IonButton size="small" data-testid={SUBMIT_MOVE_TESTID} onClick={() => finish(awaitingSubmit)}>
+                Submit move
+              </IonButton>
+              <IonButton size="small" fill="outline" data-testid={CANCEL_MOVE_TESTID} onClick={cancelPending}>
+                Cancel
+              </IonButton>
+            </div>
+          )}
         </div>
       )}
       {pending && (

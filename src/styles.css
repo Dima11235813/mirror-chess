@@ -268,15 +268,133 @@ body, html, #root {
   background: rgba(249, 115, 22, 0.22);
 }
 
+/* ---------- Reserved text regions ----------
+   A block that holds its height whatever is inside it.
+   Component: `src/components/ReservedText/`. Story: `prj-mgmt/epics/quality/layout-shift.md`.
+
+   `--reserved-lines` drives **both** the space held and the line at which the text is
+   clamped, which is the only way the two can be guaranteed to agree: a reserve written in
+   px beside a clamp written in lines is a pair that drifts the first time a font changes.
+   `line-height` is stated here rather than inherited for the same reason — the arithmetic
+   below is only true if this file owns both halves of it. */
+.reservedText {
+  position: relative;
+  min-height: calc(var(--reserved-lines, 1) * 1.35em);
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The reserve is on the text as well as the box around it: an empty `<p>` collapses to
+   zero, so measuring "the message line" would otherwise see 0px and then 39px even though
+   nothing on the page had moved. Both halves hold the same space, from the same number. */
+.reservedTextBody {
+  min-height: calc(var(--reserved-lines, 1) * 1.35em);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--reserved-lines, 1);
+  line-clamp: var(--reserved-lines, 1);
+  overflow: hidden;
+  line-height: 1.35;
+}
+
+/*
+ * Expanding OVERLAYS what follows; it does not push it down.
+ *
+ * The obvious implementation — drop the clamp and let the block grow — moves the board,
+ * which is the bug this component exists to prevent. So the reserve stays exactly as tall
+ * as it was and the full text floats above the content below it.
+ */
+.reservedText.expanded .reservedTextBody {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  /* Room on the right for the control, which moves to the top corner while open. */
+  padding: 6px 3.4em 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/*
+ * Absolutely positioned on purpose: a control that took part in layout would change the
+ * height of the one box whose job is to never change height — and since it is shown by a
+ * `ResizeObserver`, it could feed itself. 32px tall so a thumb can find it (WCAG 2.5.8),
+ * which costs nothing because it floats.
+ */
+.reservedTextMore {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  min-height: 32px;
+  padding: 2px 4px 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--bg-primary);
+  /*
+   * The text colour, not the accent. `--accent-color` (#2dd4bf) reads at 9.6:1 on the
+   * dark background and **1.9:1 on the light one** — all but invisible, and a screenshot
+   * in light theme is what caught it. The underline carries the affordance in both.
+   */
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/*
+ * A fade into the control, so the clamped line does not appear to end in the word "more".
+ * Without it a screenshot read `…the evaluation has no prefer more`, which is a sentence.
+ */
+.reservedTextMore::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2.5em;
+  width: 2.5em;
+  background: linear-gradient(to right, transparent, var(--bg-primary) 85%);
+  pointer-events: none;
+}
+
+/* While open the control belongs to the panel, not to the box the panel grew out of. */
+.reservedText.expanded .reservedTextMore {
+  top: 2px;
+  right: 2px;
+  bottom: auto;
+}
+
+.reservedText.expanded .reservedTextMore::before {
+  display: none;
+}
+
 /*
  * The line under the board. It carries two kinds of text and they must not look alike:
  * a **refusal** ("that would leave your king in check") is a warning, while a **preview**
  * ("showing what this piece could do") is information. Both were red until a screenshot
  * on 2026-10-09 showed the informational one looking like something had gone wrong.
+ *
+ * Two lines are reserved, not one. `min-height: 1.25rem` held a single line and both of
+ * the real messages wrap to two on a phone, so the footer and the opponent controls moved
+ * every time a piece was tapped. Capping the width at the board's width is what makes
+ * "two lines is enough" a statement rather than a hope: unconstrained, the same sentence
+ * takes one line on a desktop and three in a narrow window.
  */
-.moveMessage {
-  min-height: 1.25rem;
+.moveMessageSlot {
+  width: min(100%, calc(var(--cell) * 8));
   margin: 0 auto 4px;
+}
+
+.moveMessage {
   text-align: center;
   color: var(--danger-color);
   font-size: 0.9rem;
@@ -603,6 +721,17 @@ ion-toggle {
   font-size: 1rem;
 }
 
+/* The reserved box owns the spacing; the heading inside it sits flush, or the overlay the
+   "more" control opens would start half a line above the text it replaces. */
+.puzzlePromptSlot {
+  width: min(100%, 44ch);
+  margin: 0.5rem auto;
+}
+
+.puzzle-prompt .reservedTextBody {
+  margin: 0;
+}
+
 /* The metadata is secondary to the goal — smaller, but never colour-only, since the
    distinction is carried by size and position as well. */
 .puzzle-meta {
@@ -654,10 +783,18 @@ ion-toggle {
   text-align: center;
 }
 
+/*
+ * The gauge region: 44ch wide whatever it says, and three lines tall whatever it says.
+ * The width cap is on the reserved box rather than the text, because the box is what the
+ * "more" control is positioned against — see `.reservedTextMore`.
+ */
+.selfPlayGaugeSlot {
+  width: min(100%, 44ch);
+}
+
 .selfPlayGauge {
   margin: 0;
   text-align: center;
-  max-width: 44ch;
 }
 
 .selfPlayHint { color: var(--text-secondary); font-style: italic; }
@@ -678,15 +815,24 @@ ion-toggle {
   margin: 4px 0;
 }
 
+/*
+ * A fixed height, not a maximum.
+ *
+ * `max-height: 30vh` let the list grow a row at a time until it hit the cap, so the page
+ * got taller under the player's thumb on every move and the scroll position shifted with
+ * it — the owner's "same with the step count". A constant height means the page has its
+ * final shape from the first move; the cost is a patch of empty space below the controls
+ * at the start of a game, which is invisible and does not move.
+ */
 .selfPlayLog {
   list-style: decimal inside;
   margin: 0 0 16px;
   padding: 0 8px;
-  max-height: 30vh;
+  height: 30vh;
   overflow-y: auto;
   font-size: 0.85rem;
   color: var(--text-secondary);
-  max-width: 44ch;
+  width: min(100%, 44ch);
   min-width: 0;
 }
 
@@ -726,6 +872,16 @@ ion-toggle {
   pointer-events: none;
 }
 
+/*
+ * Space held for the submit bar while confirm-before-move is on, whether or not a move is
+ * currently waiting. Sized by its tallest arrangement: on a narrow screen the move text
+ * wraps above the two buttons, which is why this is 2.5rem and not one button's height.
+ */
+.submitBarSlot {
+  min-height: 3rem;
+  margin: 4px 0 8px;
+}
+
 .submitBar {
   display: flex;
   align-items: center;
@@ -733,7 +889,7 @@ ion-toggle {
   justify-content: center;
   gap: 8px;
   min-width: 0;
-  margin: 4px 0 8px;
+  margin: 0;
 }
 
 .submitBarMove {

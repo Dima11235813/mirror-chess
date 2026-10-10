@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IonButton } from '@ionic/react'
 import { BoardView } from '@components/BoardView'
+import { ReservedText } from '@components/ReservedText/ReservedText'
 import { initialPosition } from '@game/setup'
 import { reduceMove } from '@game/reducer'
 import { gameStatus, isGameOver } from '@game/status'
@@ -139,24 +140,37 @@ export function SelfPlayScreen(props: SelfPlayScreenProps) {
 
   return (
     <section className="selfPlay" data-testid={WATCH_SCREEN_TESTID}>
-      <h2 className="selfPlayTitle">
-        Engine vs engine · {describeStatus(status, state.turn)}
-      </h2>
+      {/*
+        A constant string. It used to read `Engine vs engine · ${describeStatus(…)}`, which
+        wrapped to two lines on a phone for the longer statuses and so moved the board —
+        and the status was already shown, unabbreviated, in the live region below the
+        board. A duplicate that changes height is worse than no duplicate.
+      */}
+      <h2 className="selfPlayTitle">Engine vs engine</h2>
 
       {/*
         The gauge, and the honest sentence under it. This screen's value today is that it
         does not dress up what it is showing: two engines that cannot tell quiet moves
-        apart. When the evaluation starts working, this number falls and the sentence goes.
+        apart. When the evaluation starts working, this number falls and the sentence
+        changes to say so.
+
+        The sentence is **always present**, which is the fix rather than the dressing: it
+        used to render only while moves were tied, and `indistinguishable` crosses that
+        threshold on most moves, so a three-line block above the board appeared and
+        disappeared several times a second. A reserve alone would have padded over a
+        conditional; stating both outcomes removes it.
       */}
-      <p className="selfPlayGauge" data-testid={WATCH_GAUGE_TESTID}>
+      <ReservedText
+        lines={3}
+        as="p"
+        label="the engine's note"
+        wrapperClassName="selfPlayGaugeSlot"
+        className="selfPlayGauge"
+        testId={WATCH_GAUGE_TESTID}
+      >
         <strong>{gauge}</strong>
-        {diagnostics.indistinguishable > 1 && (
-          <span className="selfPlayHint">
-            {' '}— the evaluation has no preference here, so the move is chosen by search
-            depth alone.
-          </span>
-        )}
-      </p>
+        <span className="selfPlayHint">{' '}{gaugeNote(diagnostics.legalMoves, diagnostics.indistinguishable)}</span>
+      </ReservedText>
 
       <BoardView state={state} status={status} onMove={() => {}} locked />
 
@@ -196,4 +210,29 @@ export function SelfPlayScreen(props: SelfPlayScreenProps) {
       </ol>
     </section>
   )
+}
+
+/**
+ * What the gauge's number means, in a sentence.
+ *
+ * **All three branches return text**, and that is the design rather than an oversight.
+ * The sentence used to appear only while the evaluation was indifferent, which is a
+ * condition that flips on most moves — so a block above the board grew and shrank several
+ * times a second and the board moved with it
+ * (`prj-mgmt/epics/quality/layout-shift.md`). Reserving space for a conditional block
+ * hides that; saying something in every state removes it, and the states are all worth
+ * saying out loud on a screen whose purpose is to be honest about the evaluation.
+ *
+ * They are deliberately close in length, because the reserved region is sized for the
+ * longest of them.
+ *
+ * @param legalMoves How many moves the side to move has.
+ * @param indistinguishable How many of them the evaluation scores identically.
+ */
+function gaugeNote(legalMoves: number, indistinguishable: number): string {
+  if (legalMoves === 0) return '— the game is over, so there is nothing left to choose between.'
+  if (indistinguishable > 1) {
+    return '— the evaluation has no preference here, so the move is chosen by search depth alone.'
+  }
+  return '— the evaluation singles one move out here, which is what it is supposed to do.'
 }

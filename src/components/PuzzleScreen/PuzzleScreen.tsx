@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { IonButton } from '@ionic/react'
 import { BoardView } from '@components/BoardView'
+import { ReservedText } from '@components/ReservedText/ReservedText'
 import { gameStatus } from '@game/status'
 import { reduceMove } from '@game/reducer'
 import { checkPath } from '@game/attacks'
@@ -97,14 +98,28 @@ export function PuzzleScreen({ puzzles, startIndex = 0, autoSubmit = true }: Puz
       <header className="puzzle-prompt">
         {/* A heading, not a paragraph: it is this section's title, and the document had no
             headings at all before — `ion-title` renders in a shadow root with no role, so
-            a screen reader had nothing to navigate by. */}
-        <h2 data-testid={PUZZLE_PROMPT_TESTID}>
+            a screen reader had nothing to navigate by.
+
+            Two lines, and the number is measured rather than chosen: across all 248
+            puzzles the longest prompt is 83 characters and the shortest 77, and both wrap
+            to exactly two lines at every width from 320px up. So this screen was **not**
+            shifting — the suspicion in `layout-shift.md` §5 was wrong — and the reserve is
+            here to keep it that way when the set is next re-mined with longer material
+            strings. A third line would be 21.6px of dead space above the board on every
+            puzzle, which is what reserving by guesswork costs. */}
+        <ReservedText
+          lines={2}
+          as="h2"
+          label="the puzzle's details"
+          wrapperClassName="puzzlePromptSlot"
+          testId={PUZZLE_PROMPT_TESTID}
+        >
           White to play. {GOAL_TEXT[puzzle.goal]}.{' '}
           <span className="puzzle-meta">
             Puzzle {index + 1} of {puzzles.length} · {puzzle.material} ·{' '}
             <span data-testid={PUZZLE_BAND_TESTID}>{puzzle.difficulty}</span> · rules {puzzle.ruleset}
           </span>
-        </h2>
+        </ReservedText>
       </header>
 
       {/*
